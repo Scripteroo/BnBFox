@@ -1,0 +1,135 @@
+//
+//  CalendarView.swift
+//  BnBFox
+//
+//  Created on 12/11/2025.
+//
+
+import SwiftUI
+
+struct CalendarView: View {
+    @StateObject private var viewModel = CalendarViewModel()
+    
+    var body: some View {
+        NavigationView {
+            ZStack {
+                Color(UIColor.systemGroupedBackground)
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // Header
+                    headerView
+                    
+                    // Calendar content
+                    if viewModel.isLoading && viewModel.bookings.isEmpty {
+                        Spacer()
+                        ProgressView("Loading bookings...")
+                        Spacer()
+                    } else if let errorMessage = viewModel.errorMessage {
+                        Spacer()
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 48))
+                                .foregroundColor(.orange)
+                            Text(errorMessage)
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.secondary)
+                            Button("Retry") {
+                                Task {
+                                    await viewModel.refreshData()
+                                }
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .padding()
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 20) {
+                                ForEach(viewModel.getMonthsToDisplay(), id: \.self) { month in
+                                    MonthView(
+                                        month: month,
+                                        bookings: viewModel.bookings
+                                    )
+                                }
+                            }
+                            .padding(.vertical, 16)
+                        }
+                    }
+                }
+            }
+            .navigationBarHidden(true)
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
+        .task {
+            await viewModel.loadBookings()
+        }
+    }
+    
+    private var headerView: some View {
+        VStack(spacing: 8) {
+            HStack {
+                // Menu button
+                Button(action: {
+                    // Menu action placeholder
+                }) {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.system(size: 20))
+                        .foregroundColor(.primary)
+                        .frame(width: 44, height: 44)
+                }
+                
+                Spacer()
+                
+                // Title and property selector
+                VStack(spacing: 2) {
+                    Text("Calendar")
+                        .font(.system(size: 18, weight: .semibold))
+                    PropertySelectorView(viewModel: viewModel)
+                }
+                
+                Spacer()
+                
+                // Refresh button
+                Button(action: {
+                    Task {
+                        await viewModel.refreshData()
+                    }
+                }) {
+                    Image(systemName: viewModel.isLoading ? "arrow.clockwise.circle.fill" : "arrow.clockwise")
+                        .font(.system(size: 20))
+                        .foregroundColor(.primary)
+                        .frame(width: 44, height: 44)
+                        .rotationEffect(.degrees(viewModel.isLoading ? 360 : 0))
+                        .animation(
+                            viewModel.isLoading ?
+                            Animation.linear(duration: 1).repeatForever(autoreverses: false) :
+                            .default,
+                            value: viewModel.isLoading
+                        )
+                }
+                
+                // Settings button
+                Button(action: {
+                    // Settings action placeholder
+                }) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 20))
+                        .foregroundColor(.primary)
+                        .frame(width: 44, height: 44)
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.top, 8)
+            
+            Divider()
+        }
+        .background(Color(UIColor.systemBackground))
+    }
+}
+
+struct CalendarView_Previews: PreviewProvider {
+    static var previews: some View {
+        CalendarView()
+    }
+}
