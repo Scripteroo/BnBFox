@@ -166,7 +166,7 @@ struct WeekSection: View {
         return bookings.filter { booking in
             booking.propertyId == property.id &&
             booking.startDate < dayAfterLast &&
-            booking.endDate > firstDate
+            booking.endDate >= firstDate
         }
     }
 }
