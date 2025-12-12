@@ -1,110 +1,97 @@
+//
+//  MonthView.swift
+//  BnBFox
+//
+//  Created on 12/11/2025.
+//
+
 import SwiftUI
 
 struct MonthView: View {
     let month: Date
     let bookings: [Booking]
-    let properties: [Property]
+    
+    private let daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"]
+    private let propertyService = PropertyService.shared
     
     var body: some View {
         VStack(spacing: 0) {
             // Month title
-            Text(month.formatted(.dateTime.month(.wide).year()))
-                .font(.title2)
-                .fontWeight(.bold)
-                .padding(.vertical, 8)
+            Text(month.monthName())
+                .font(.system(size: 18, weight: .bold))
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.vertical, 12)
             
-            // Day of week headers
+            // Day headers
             HStack(spacing: 0) {
-                ForEach(Array(["S", "M", "T", "W", "T", "F", "S"].enumerated()), id: \.offset) { index, day in
+                ForEach(Array(daysOfWeek.enumerated()), id: \.offset) { index, day in
                     Text(day)
-                        .font(.caption)
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity)
                 }
             }
-            .padding(.horizontal, 2)
             .padding(.bottom, 4)
             
-            // Weeks
-            let weeks = generateWeeks(for: month)
-            ForEach(Array(weeks.enumerated()), id: \.offset) { index, week in
+            // Calendar weeks
+            ForEach(Array(generateWeeks().enumerated()), id: \.offset) { weekIndex, week in
                 WeekSection(
                     week: week,
                     bookings: bookings,
                     currentMonth: month,
-                    properties: properties
+                    properties: propertyService.getAllProperties()
                 )
             }
         }
+        .padding(.horizontal, 8)
     }
     
-    private func generateWeeks(for month: Date) -> [[Date?]] {
+    private func generateWeeks() -> [[Date?]] {
         let calendar = Calendar.current
+        let startOfMonth = month.startOfMonth()
+        let firstWeekday = month.firstWeekdayOfMonth()
+        let daysInMonth = month.daysInMonth()
         
-        // Get the first day of the month
-        guard let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: month)) else {
-            return []
-        }
-        
-        // Get the weekday of the first day (0 = Sunday, 6 = Saturday)
-        let firstWeekday = calendar.component(.weekday, from: firstDayOfMonth) - 1
-        
-        // Get the number of days in the month
-        let range = calendar.range(of: .day, in: .month, for: month)!
-        let numDays = range.count
-        
-        // Calculate days from previous month to fill first week
-        var dates: [Date?] = []
-        
-        // Add dates from previous month
-        if firstWeekday > 0 {
-            if let prevMonthDate = calendar.date(byAdding: .month, value: -1, to: firstDayOfMonth),
-               let prevMonthDays = calendar.range(of: .day, in: .month, for: prevMonthDate) {
-                let prevMonthLastDay = prevMonthDays.count
-                for day in (prevMonthLastDay - firstWeekday + 1)...prevMonthLastDay {
-                    if let date = calendar.date(from: DateComponents(
-                        year: calendar.component(.year, from: prevMonthDate),
-                        month: calendar.component(.month, from: prevMonthDate),
-                        day: day
-                    )) {
-                        dates.append(date)
-                    }
-                }
-            }
-        }
-        
-        // Add dates from current month
-        for day in 1...numDays {
-            if let date = calendar.date(from: DateComponents(
-                year: calendar.component(.year, from: month),
-                month: calendar.component(.month, from: month),
-                day: day
-            )) {
-                dates.append(date)
-            }
-        }
-        
-        // Add dates from next month to complete the last week
-        let remainingDays = (7 - (dates.count % 7)) % 7
-        if remainingDays > 0 {
-            if let nextMonthDate = calendar.date(byAdding: .month, value: 1, to: firstDayOfMonth) {
-                for day in 1...remainingDays {
-                    if let date = calendar.date(from: DateComponents(
-                        year: calendar.component(.year, from: nextMonthDate),
-                        month: calendar.component(.month, from: nextMonthDate),
-                        day: day
-                    )) {
-                        dates.append(date)
-                    }
-                }
-            }
-        }
-        
-        // Split into weeks
         var weeks: [[Date?]] = []
-        for i in stride(from: 0, to: dates.count, by: 7) {
-            let week = Array(dates[i..<min(i + 7, dates.count)])
-            weeks.append(week)
+        var currentWeek: [Date?] = []
+        
+        // Add dates from previous month before the first day
+        if firstWeekday > 1 {
+            let daysToAdd = firstWeekday - 1
+            for dayOffset in (1...daysToAdd).reversed() {
+                if let prevDate = calendar.date(byAdding: .day, value: -dayOffset, to: startOfMonth) {
+                    currentWeek.append(prevDate)
+                }
+            }
+        }
+        
+        // Add all days of the current month
+        for day in 1...daysInMonth {
+            if let date = calendar.date(byAdding: .day, value: day - 1, to: startOfMonth) {
+                currentWeek.append(date)
+                
+                // Start new week on Sunday
+                if currentWeek.count == 7 {
+                    weeks.append(currentWeek)
+                    currentWeek = []
+                }
+            }
+        }
+        
+        // Fill the last week with dates from next month
+        if currentWeek.count > 0 && currentWeek.count < 7 {
+            let lastDayOfMonth = calendar.date(byAdding: .day, value: daysInMonth - 1, to: startOfMonth)!
+            var dayOffset = 1
+            while currentWeek.count < 7 {
+                if let nextDate = calendar.date(byAdding: .day, value: dayOffset, to: lastDayOfMonth) {
+                    currentWeek.append(nextDate)
+                    dayOffset += 1
+                }
+            }
+        }
+        
+        if !currentWeek.isEmpty {
+            weeks.append(currentWeek)
         }
         
         return weeks
@@ -124,15 +111,27 @@ struct WeekSection: View {
             // Background grid
             HStack(spacing: 0) {
                 ForEach(Array(week.enumerated()), id: \.offset) { index, date in
-                    VStack(spacing: 0) {
-                        if let date = date {
-                            let hasActivity = dateHasActivity(date)
-                            
-                            ZStack {
-                                Text("\(Calendar.current.component(.day, from: date))")
-                                    .font(.system(size: 16))
+                    Rectangle()
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        .background(isInCurrentMonth(date) ? Color.white : Color.gray.opacity(0.05))
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .frame(height: 100) // Tall cells with lots of white space
+            
+            VStack(alignment: .leading, spacing: 0) {
+                // Day numbers row
+                HStack(spacing: 0) {
+                    ForEach(Array(week.enumerated()), id: \.offset) { index, date in
+                        ZStack {
+                            if let date = date {
+                                let hasActivity = dateHasActivity(date)
+                                
+                                Text("\(date.dayNumber())")
+                                    .font(.system(size: 14))
+                                    .fontWeight(date.isToday() ? .bold : .regular)
                                     .foregroundColor(date.isToday() ? .white : (isInCurrentMonth(date) ? .primary : .gray.opacity(0.5)))
-                                    .frame(width: 32, height: 32)
+                                    .frame(width: 24, height: 24)
                                     .background(
                                         Circle()
                                             .fill(date.isToday() ? Color.blue : Color.clear)
@@ -156,38 +155,29 @@ struct WeekSection: View {
                                 }
                             }
                         }
+                        .frame(maxWidth: .infinity, alignment: .center)
                     }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 100)
-                    .background(isInCurrentMonth(date) ? Color.white : Color.gray.opacity(0.05))
-                    .overlay(
-                        Rectangle()
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
-                    )
                 }
-            }
-            
-            // Booking bars for each property
-            VStack(spacing: 2) {
-                Spacer()
-                    .frame(height: 38)
-                
-                ForEach(properties) { property in
-                    PropertyRow(
-                        week: week,
-                        property: property,
-                        bookings: getBookingsForProperty(property),
-                        currentMonth: currentMonth
-                    )
-                }
+                .frame(height: 32)
+                .padding(.top, 4)
                 
                 Spacer()
-                    .frame(minHeight: 0)
+                
+                // Property rows at bottom
+                VStack(spacing: 2) {
+                    ForEach(properties) { property in
+                        PropertyRow(
+                            property: property,
+                            week: week,
+                            bookings: getBookingsForProperty(property),
+                            currentMonth: currentMonth
+                        )
+                    }
+                }
+                .padding(.bottom, 4)
+                .padding(.horizontal, 2)
             }
-            .padding(.top, 0)
             .frame(height: 100)
-            .allowsHitTesting(false)
-            .padding(.horizontal, 2)
         }
         .sheet(item: $dayDetailItem) { item in
             DayDetailView(date: item.date, activities: item.activities)
@@ -286,24 +276,30 @@ struct WeekSection: View {
 }
 
 struct PropertyRow: View {
-    let week: [Date?]
     let property: Property
+    let week: [Date?]
     let bookings: [Booking]
     let currentMonth: Date
     
     var body: some View {
-        ZStack(alignment: .leading) {
-            // Render booking bars
-            ForEach(bookings) { booking in
-                ContinuousBookingBar(
-                    booking: booking,
-                    property: property,
-                    week: week,
-                    currentMonth: currentMonth
-                )
+        GeometryReader { geometry in
+            let totalWidth = geometry.size.width
+            let cellWidth = totalWidth / 7
+            
+            ZStack(alignment: .leading) {
+                // Draw each booking as a continuous bar
+                ForEach(bookings, id: \.id) { booking in
+                    ContinuousBookingBar(
+                        booking: booking,
+                        property: property,
+                        week: week,
+                        cellWidth: cellWidth,
+                        currentMonth: currentMonth
+                    )
+                }
             }
         }
-        .frame(height: 16)
+        .frame(height: 16) // Thin bars
     }
 }
 
@@ -311,168 +307,132 @@ struct ContinuousBookingBar: View {
     let booking: Booking
     let property: Property
     let week: [Date?]
+    let cellWidth: CGFloat
     let currentMonth: Date
     
     var body: some View {
-        GeometryReader { geometry in
-            let barGeometry = calculateBarGeometry(geometry: geometry)
-            
-            if barGeometry.width > 0 {
-                HStack(spacing: 0) {
-                    ForEach(Array(barGeometry.segments.enumerated()), id: \.offset) { index, segment in
-                        Rectangle()
-                            .fill(segment.isInCurrentMonth ? property.color : Color.gray.opacity(0.4))
-                            .frame(width: segment.width)
-                    }
+        let barGeometry = calculateBarGeometry()
+        
+        if barGeometry.width > 0 {
+            HStack(spacing: 0) {
+                // Render bar as segments, one per day (for color variation)
+                ForEach(Array(barGeometry.segments.enumerated()), id: \.offset) { index, segment in
+                    Rectangle()
+                        .fill(segment.isInCurrentMonth ? property.color : Color.gray.opacity(0.4))
+                        .frame(width: segment.width)
                 }
-                .frame(width: barGeometry.width, height: 16)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.black, lineWidth: 1.5)
-                        .mask(
-                            HStack(spacing: 0) {
-                                if barGeometry.isActualStart {
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .frame(width: 10)
-                                } else {
-                                    Rectangle()
-                                        .frame(width: 10)
-                                }
-                                
-                                Rectangle()
-                                
-                                if barGeometry.isActualEnd {
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .frame(width: 10)
-                                } else {
-                                    Rectangle()
-                                        .frame(width: 10)
-                                }
-                            }
-                        )
-                )
-                .clipShape(
-                    RoundedCornerRectangle(
-                        cornerRadius: 8,
-                        corners: [
-                            barGeometry.isActualStart ? .topLeft : [],
-                            barGeometry.isActualStart ? .bottomLeft : [],
-                            barGeometry.isActualEnd ? .topRight : [],
-                            barGeometry.isActualEnd ? .bottomRight : []
-                        ].reduce(into: UIRectCorner()) { $0.formUnion($1) }
-                    )
-                )
-                .offset(x: barGeometry.startX)
-                .overlay(
-                    Text(property.shortName)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.black)
-                        .padding(.trailing, 4)
-                        .frame(maxWidth: .infinity, alignment: .trailing),
-                    alignment: .trailing
-                )
             }
+            .clipShape(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                    bottomLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                    bottomTrailingRadius: barGeometry.roundedEnd ? 8 : 0,
+                    topTrailingRadius: barGeometry.roundedEnd ? 8 : 0
+                )
+            )
+            .overlay(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                    bottomLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                    bottomTrailingRadius: barGeometry.roundedEnd ? 8 : 0,
+                    topTrailingRadius: barGeometry.roundedEnd ? 8 : 0
+                )
+                .stroke(Color.black, lineWidth: 1.5)
+            )
+            .overlay(
+                // Property label on the right end
+                Text(property.shortName)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.trailing, 6)
+            )
+            .offset(x: barGeometry.offset)
         }
     }
     
-    private func calculateBarGeometry(geometry: GeometryProxy) -> BarGeometry {
+    private func calculateBarGeometry() -> (offset: CGFloat, width: CGFloat, roundedStart: Bool, roundedEnd: Bool, segments: [(width: CGFloat, isInCurrentMonth: Bool)]) {
         let calendar = Calendar.current
-        let cellWidth = geometry.size.width / 7
+        var startIndex: Int?
+        var endIndex: Int?
+        var startOffset: CGFloat = 0
+        var endOffset: CGFloat = 0
+        var isActualStart = false
+        var isActualEnd = false
+        var segments: [(width: CGFloat, isInCurrentMonth: Bool)] = []
         
-        guard let firstDayInWeek = week.compactMap({ $0 }).first,
-              let lastDayInWeek = week.compactMap({ $0 }).last else {
-            return BarGeometry(startX: 0, width: 0, isActualStart: false, isActualEnd: false, segments: [])
-        }
-        
-        let bookingStart = calendar.startOfDay(for: booking.startDate)
-        let bookingEnd = calendar.startOfDay(for: booking.endDate)
-        let weekStart = calendar.startOfDay(for: firstDayInWeek)
-        let weekEnd = calendar.startOfDay(for: lastDayInWeek)
-        
-        // Determine if this is the actual start/end of the booking
-        let isActualStart = calendar.isDate(bookingStart, inSameDayAs: firstDayInWeek) || bookingStart > weekStart
-        let isActualEnd = calendar.isDate(bookingEnd, inSameDayAs: lastDayInWeek) || bookingEnd <= weekEnd
-        
-        var segments: [BarSegment] = []
-        var startX: CGFloat = 0
-        var totalWidth: CGFloat = 0
-        var foundStart = false
-        
-        for (dayIndex, dateOpt) in week.enumerated() {
-            guard let date = dateOpt else { continue }
+        // Find which days in this week the booking spans
+        for (index, date) in week.enumerated() {
+            guard let date = date else { continue }
             let dayStart = calendar.startOfDay(for: date)
+            let bookingStart = calendar.startOfDay(for: booking.startDate)
+            let bookingEnd = calendar.startOfDay(for: booking.endDate)
             
-            // Check if this day overlaps with the booking
-            if dayStart >= bookingStart && dayStart < bookingEnd {
-                if !foundStart {
-                    foundStart = true
-                    
-                    // Calculate start offset for check-in time (4PM = 0.67 of day)
-                    var startOffset: CGFloat = 0
-                    if calendar.isDate(dayStart, inSameDayAs: bookingStart) {
-                        startOffset = cellWidth * 0.67
+            // Include the checkout day in the range
+            if dayStart >= bookingStart && dayStart <= bookingEnd {
+                if startIndex == nil {
+                    startIndex = index
+                    // Check if this is the check-in day
+                    if calendar.isDate(booking.startDate, inSameDayAs: date) {
+                        isActualStart = true
+                        startOffset = 0.67 // Start at 4PM (16/24 ≈ 0.67)
+                    } else {
+                        isActualStart = false
+                        startOffset = 0 // Continues from previous week
                     }
-                    
-                    startX = CGFloat(dayIndex) * cellWidth + startOffset
                 }
                 
-                // Calculate width for this day
-                var dayWidth = cellWidth
-                
-                // Adjust for check-in day (starts at 4PM)
-                if calendar.isDate(dayStart, inSameDayAs: bookingStart) {
-                    dayWidth = cellWidth * 0.33
-                }
-                
-                // Check if this is the last day (checkout day)
-                let nextDay = calendar.date(byAdding: .day, value: 1, to: dayStart)!
-                if calendar.isDate(nextDay, inSameDayAs: bookingEnd) || nextDay >= bookingEnd {
-                    // This is the last occupied night, extend into checkout day
-                    dayWidth = cellWidth * 1.42  // Full day + 42% of next day (10AM)
-                }
-                
-                // Determine if this segment is in current month
-                let isInMonth = calendar.isDate(date, equalTo: currentMonth, toGranularity: .month)
-                
-                segments.append(BarSegment(width: dayWidth, isInCurrentMonth: isInMonth))
-                totalWidth += dayWidth
+                endIndex = index
             }
         }
         
-        return BarGeometry(
-            startX: startX,
-            width: totalWidth,
-            isActualStart: isActualStart,
-            isActualEnd: isActualEnd,
-            segments: segments
-        )
-    }
-}
-
-struct BarGeometry {
-    let startX: CGFloat
-    let width: CGFloat
-    let isActualStart: Bool
-    let isActualEnd: Bool
-    let segments: [BarSegment]
-}
-
-struct BarSegment {
-    let width: CGFloat
-    let isInCurrentMonth: Bool
-}
-
-struct RoundedCornerRectangle: Shape {
-    var cornerRadius: CGFloat
-    var corners: UIRectCorner
-    
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)
-        )
-        return Path(path.cgPath)
+        // After finding the range, determine if this is the actual end or continues
+        if let end = endIndex, let endDate = week[end] {
+            // Check if this is the checkout day
+            if calendar.isDate(booking.endDate, inSameDayAs: endDate) {
+                isActualEnd = true
+                endOffset = 0.42 // End at 10AM (10/24 ≈ 0.42)
+            } else {
+                // Booking continues beyond this week - square edge
+                isActualEnd = false
+                endOffset = 1.0 // Continues to next week
+            }
+        }
+        
+        guard let start = startIndex, let end = endIndex else {
+            return (0, 0, false, false, [])
+        }
+        
+        // Build segments for each day
+        for dayIndex in start...end {
+            guard let date = week[dayIndex] else { continue }
+            
+            let isInMonth = calendar.isDate(date, equalTo: currentMonth, toGranularity: .month)
+            let isFirstDay = dayIndex == start
+            let isLastDay = dayIndex == end
+            
+            var segmentWidth: CGFloat
+            if isFirstDay && isLastDay {
+                // Single day booking
+                segmentWidth = (endOffset - startOffset) * cellWidth
+            } else if isFirstDay {
+                // First day
+                segmentWidth = (1.0 - startOffset) * cellWidth
+            } else if isLastDay {
+                // Last day
+                segmentWidth = endOffset * cellWidth
+            } else {
+                // Middle day
+                segmentWidth = cellWidth
+            }
+            
+            segments.append((width: segmentWidth, isInCurrentMonth: isInMonth))
+        }
+        
+        let offset = (CGFloat(start) + startOffset) * cellWidth
+        let totalWidth = segments.reduce(0) { $0 + $1.width }
+        
+        return (offset, totalWidth, isActualStart, isActualEnd, segments)
     }
 }
 

@@ -52,8 +52,7 @@ struct CalendarView: View {
                                 ForEach(viewModel.getMonthsToDisplay(), id: \.self) { month in
                                     MonthView(
                                         month: month,
-                                        bookings: viewModel.bookings,
-                                        properties: viewModel.properties
+                                        bookings: viewModel.bookings
                                     )
                                 }
                             }
