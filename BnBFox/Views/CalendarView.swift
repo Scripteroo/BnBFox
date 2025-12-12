@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CalendarView: View {
     @StateObject private var viewModel = CalendarViewModel()
+    @State private var showingAdminPanel = false
     
     var body: some View {
         NavigationView {
@@ -64,8 +65,16 @@ struct CalendarView: View {
             .navigationBarHidden(true)
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .sheet(isPresented: $showingAdminPanel) {
+            AdminPanelView()
+        }
         .task {
             await viewModel.loadBookings()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .propertiesDidChange)) { _ in
+            Task {
+                await viewModel.refreshData()
+            }
         }
     }
     
@@ -111,7 +120,7 @@ struct CalendarView: View {
                 
                 // Settings button
                 Button(action: {
-                    // Settings action placeholder
+                    showingAdminPanel = true
                 }) {
                     Image(systemName: "gearshape")
                         .font(.system(size: 20))

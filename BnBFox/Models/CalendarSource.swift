@@ -12,6 +12,10 @@ struct CalendarSource: Identifiable, Codable {
     let platform: Platform
     let url: URL
     
+    var icalURL: String {
+        return url.absoluteString
+    }
+    
     init(id: UUID = UUID(), platform: Platform, url: URL) {
         self.id = id
         self.platform = platform
