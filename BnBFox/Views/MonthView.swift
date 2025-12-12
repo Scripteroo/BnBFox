@@ -24,7 +24,7 @@ struct MonthView: View {
             
             // Day headers
             HStack(spacing: 0) {
-                ForEach(daysOfWeek, id: \.self) { day in
+                ForEach(Array(daysOfWeek.enumerated()), id: \.offset) { index, day in
                     Text(day)
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(.gray)
