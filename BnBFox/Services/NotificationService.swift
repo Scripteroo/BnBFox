@@ -52,7 +52,7 @@ class NotificationService {
             let alertMinute = alertComponents.minute ?? 0
             
             // Group bookings by property and date
-            var cleaningDays: [String: [Date: [Booking]]] = [:]
+            var cleaningDays: [UUID: [Date: [Booking]]] = [:]
             
             for booking in bookings {
                 let propertyId = booking.propertyId
@@ -69,7 +69,7 @@ class NotificationService {
             
             // Schedule notifications for each cleaning day
             for (propertyId, dateBookings) in cleaningDays {
-                guard let property = PropertyService.shared.getProperty(byId: propertyId) else {
+                guard let property = PropertyService.shared.getProperty(by: propertyId) else {
                     continue
                 }
                 
