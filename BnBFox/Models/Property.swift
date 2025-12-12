@@ -20,6 +20,18 @@ struct Property: Identifiable, Codable, Hashable {
         Color(hex: colorHex) ?? .blue
     }
     
+    var complexName: String {
+        // Extract complex name from displayName (e.g., "Kawama" from "Kawama C-2")
+        let components = displayName.split(separator: " ")
+        return components.count > 1 ? String(components[0]) : "Complex"
+    }
+    
+    var unitName: String {
+        // Extract unit name from displayName (e.g., "C-2" from "Kawama C-2")
+        let components = displayName.split(separator: " ")
+        return components.count > 1 ? components.dropFirst().joined(separator: " ") : displayName
+    }
+    
     init(id: UUID = UUID(), name: String, displayName: String, shortName: String, colorHex: String, sources: [CalendarSource]) {
         self.id = id
         self.name = name

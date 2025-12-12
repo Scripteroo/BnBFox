@@ -32,6 +32,9 @@ struct AdminPanelView: View {
                                 },
                                 onDelete: {
                                     viewModel.deleteProperty(property)
+                                },
+                                onToggleLock: {
+                                    viewModel.toggleLock(property)
                                 }
                             )
                         }
@@ -69,15 +72,21 @@ struct PropertyConfigCard: View {
     let property: PropertyConfig
     let onUpdate: (PropertyConfig) -> Void
     let onDelete: () -> Void
+    let onToggleLock: () -> Void
     
+    @State private var complexName: String
+    @State private var unitName: String
     @State private var airbnbURL: String
     @State private var vrboURL: String
     @State private var bookingURL: String
     
-    init(property: PropertyConfig, onUpdate: @escaping (PropertyConfig) -> Void, onDelete: @escaping () -> Void) {
+    init(property: PropertyConfig, onUpdate: @escaping (PropertyConfig) -> Void, onDelete: @escaping () -> Void, onToggleLock: @escaping () -> Void) {
         self.property = property
         self.onUpdate = onUpdate
         self.onDelete = onDelete
+        self.onToggleLock = onToggleLock
+        _complexName = State(initialValue: property.complexName)
+        _unitName = State(initialValue: property.unitName)
         _airbnbURL = State(initialValue: property.airbnbURL)
         _vrboURL = State(initialValue: property.vrboURL)
         _bookingURL = State(initialValue: property.bookingURL)
@@ -85,23 +94,55 @@ struct PropertyConfigCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Header with property name and delete button
-            HStack {
+            // Header with property name and buttons
+            HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(property.complexName)
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
-                    Text(property.displayName)
-                        .font(.system(size: 20, weight: .bold))
+                    // Complex name - editable when unlocked
+                    if property.isLocked {
+                        Text(complexName)
+                            .font(.system(size: 12))
+                            .foregroundColor(.gray)
+                    } else {
+                        TextField("Complex", text: $complexName)
+                            .font(.system(size: 12))
+                            .foregroundColor(.gray)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: complexName) { _ in
+                                updateProperty()
+                            }
+                    }
+                    
+                    // Unit name - editable when unlocked
+                    if property.isLocked {
+                        Text(unitName)
+                            .font(.system(size: 20, weight: .bold))
+                    } else {
+                        TextField("Unit Name", text: $unitName)
+                            .font(.system(size: 20, weight: .bold))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: unitName) { _ in
+                                updateProperty()
+                            }
+                    }
                 }
                 
                 Spacer()
                 
-                if !property.isDefault {
-                    Button(action: onDelete) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(.red)
+                HStack(spacing: 8) {
+                    // Lock/Unlock button
+                    Button(action: onToggleLock) {
+                        Image(systemName: property.isLocked ? "lock.fill" : "lock.open.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(property.isLocked ? .green : .gray)
+                    }
+                    
+                    // Delete button - only visible when unlocked
+                    if !property.isLocked {
+                        Button(action: onDelete) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 28))
+                                .foregroundColor(.red)
+                        }
                     }
                 }
             }
@@ -109,23 +150,26 @@ struct PropertyConfigCard: View {
             Divider()
                 .padding(.vertical, 4)
             
-            // iCal URL fields
+            // iCal URL fields - disabled when locked
             VStack(spacing: 8) {
                 URLTextField(
-                    placeholder: "AirBnB iCal",
+                    placeholder: property.isLocked ? airbnbURL : "AirBnB iCal",
                     text: $airbnbURL,
+                    isDisabled: property.isLocked,
                     onChange: { updateProperty() }
                 )
                 
                 URLTextField(
-                    placeholder: "VRBO iCal",
+                    placeholder: property.isLocked ? vrboURL : "VRBO iCal",
                     text: $vrboURL,
+                    isDisabled: property.isLocked,
                     onChange: { updateProperty() }
                 )
                 
                 URLTextField(
-                    placeholder: "Booking.com iCal",
+                    placeholder: property.isLocked ? bookingURL : "Booking.com iCal",
                     text: $bookingURL,
+                    isDisabled: property.isLocked,
                     onChange: { updateProperty() }
                 )
             }
@@ -141,6 +185,8 @@ struct PropertyConfigCard: View {
     
     private func updateProperty() {
         var updated = property
+        updated.complexName = complexName
+        updated.unitName = unitName
         updated.airbnbURL = airbnbURL
         updated.vrboURL = vrboURL
         updated.bookingURL = bookingURL
@@ -151,16 +197,30 @@ struct PropertyConfigCard: View {
 struct URLTextField: View {
     let placeholder: String
     @Binding var text: String
+    let isDisabled: Bool
     let onChange: () -> Void
     
     var body: some View {
-        TextField(placeholder, text: $text)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .autocapitalization(.none)
-            .disableAutocorrection(true)
-            .onChange(of: text) { _ in
-                onChange()
-            }
+        if isDisabled {
+            // Show as read-only text when locked
+            Text(text.isEmpty ? placeholder : text)
+                .font(.system(size: 14))
+                .foregroundColor(text.isEmpty ? .gray.opacity(0.5) : .primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 8)
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(5)
+        } else {
+            // Editable when unlocked
+            TextField(placeholder, text: $text)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+                .disableAutocorrection(true)
+                .onChange(of: text) { _ in
+                    onChange()
+                }
+        }
     }
 }
 
@@ -190,12 +250,12 @@ class AdminPanelViewModel: ObservableObject {
         properties = existingProperties.map { property in
             PropertyConfig(
                 id: property.id.uuidString,
-                complexName: "Kawama",
-                displayName: property.displayName,
+                complexName: property.complexName,
+                unitName: property.unitName,
                 airbnbURL: property.sources.first(where: { $0.platform == .airbnb })?.url.absoluteString ?? "",
                 vrboURL: property.sources.first(where: { $0.platform == .vrbo })?.url.absoluteString ?? "",
                 bookingURL: property.sources.first(where: { $0.platform == .bookingCom })?.url.absoluteString ?? "",
-                isDefault: true,
+                isLocked: true, // All properties locked by default
                 color: property.color
             )
         }
@@ -210,7 +270,8 @@ class AdminPanelViewModel: ObservableObject {
         let newProperty = PropertyConfig(
             id: UUID().uuidString,
             complexName: "Complex",
-            displayName: "Unit#\(nextUnit)",
+            unitName: "Unit#\(nextUnit)",
+            isLocked: false, // New properties start unlocked for editing
             color: color
         )
         
@@ -224,7 +285,15 @@ class AdminPanelViewModel: ObservableObject {
     }
     
     func deleteProperty(_ property: PropertyConfig) {
+        // Only allow deletion if unlocked
+        guard !property.isLocked else { return }
         properties.removeAll { $0.id == property.id }
+    }
+    
+    func toggleLock(_ property: PropertyConfig) {
+        if let index = properties.firstIndex(where: { $0.id == property.id }) {
+            properties[index].isLocked.toggle()
+        }
     }
     
     func saveChanges() {
@@ -234,7 +303,7 @@ class AdminPanelViewModel: ObservableObject {
     
     private func getNextUnitNumber() -> Int {
         let existingNumbers = properties.compactMap { config -> Int? in
-            let name = config.displayName
+            let name = config.unitName
             if name.hasPrefix("Unit#") {
                 return Int(name.replacingOccurrences(of: "Unit#", with: ""))
             }

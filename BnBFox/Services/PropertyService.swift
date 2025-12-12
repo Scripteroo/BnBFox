@@ -105,7 +105,7 @@ class PropertyService {
                 sources.append(CalendarSource(platform: .bookingCom, url: url))
             }
             
-            let shortName = config.displayName.replacingOccurrences(of: "Kawama ", with: "")
+            let shortName = config.unitName
             let name = config.displayName.lowercased().replacingOccurrences(of: " ", with: "-")
             
             return Property(
@@ -194,26 +194,30 @@ extension Notification.Name {
 // Import PropertyConfig from AdminPanelView
 struct PropertyConfig: Identifiable, Codable {
     let id: String
-    let complexName: String
-    let displayName: String
+    var complexName: String
+    var unitName: String
     var airbnbURL: String
     var vrboURL: String
     var bookingURL: String
-    let isDefault: Bool
+    var isLocked: Bool
     let colorHex: String
     
     var color: Color {
         Color(hex: colorHex) ?? .blue
     }
     
-    init(id: String, complexName: String, displayName: String, airbnbURL: String = "", vrboURL: String = "", bookingURL: String = "", isDefault: Bool = false, color: Color) {
+    var displayName: String {
+        "\(complexName) \(unitName)"
+    }
+    
+    init(id: String, complexName: String, unitName: String, airbnbURL: String = "", vrboURL: String = "", bookingURL: String = "", isLocked: Bool = true, color: Color) {
         self.id = id
         self.complexName = complexName
-        self.displayName = displayName
+        self.unitName = unitName
         self.airbnbURL = airbnbURL
         self.vrboURL = vrboURL
         self.bookingURL = bookingURL
-        self.isDefault = isDefault
+        self.isLocked = isLocked
         self.colorHex = color.toHex()
     }
 }
