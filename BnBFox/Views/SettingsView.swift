@@ -132,7 +132,7 @@ struct SettingsView: View {
         let today = calendar.startOfDay(for: Date())
         let thirtyDaysFromNow = calendar.date(byAdding: .day, value: 30, to: today)!
         
-        var cleaningDays: [String: [Date: [Booking]]] = [:]
+        var cleaningDays: [UUID: [Date: [Booking]]] = [:]
         
         // Group bookings by property and checkout date
         for booking in bookings {
@@ -156,7 +156,7 @@ struct SettingsView: View {
         var cleanings: [CleaningDay] = []
         
         for (propertyId, dateBookings) in cleaningDays {
-            guard let property = PropertyService.shared.getProperty(byId: propertyId) else {
+            guard let property = PropertyService.shared.getProperty(by: propertyId) else {
                 continue
             }
             
