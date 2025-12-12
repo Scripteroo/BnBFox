@@ -55,12 +55,17 @@ struct MonthView: View {
         var weeks: [[Date?]] = []
         var currentWeek: [Date?] = []
         
-        // Add empty cells before the first day
-        for _ in 1..<firstWeekday {
-            currentWeek.append(nil)
+        // Add dates from previous month before the first day
+        if firstWeekday > 1 {
+            let daysToAdd = firstWeekday - 1
+            for dayOffset in (1...daysToAdd).reversed() {
+                if let prevDate = calendar.date(byAdding: .day, value: -dayOffset, to: startOfMonth) {
+                    currentWeek.append(prevDate)
+                }
+            }
         }
         
-        // Add all days of the month
+        // Add all days of the current month
         for day in 1...daysInMonth {
             if let date = calendar.date(byAdding: .day, value: day - 1, to: startOfMonth) {
                 currentWeek.append(date)
@@ -73,9 +78,16 @@ struct MonthView: View {
             }
         }
         
-        // Fill the last week with empty cells
-        while currentWeek.count < 7 && currentWeek.count > 0 {
-            currentWeek.append(nil)
+        // Fill the last week with dates from next month
+        if currentWeek.count > 0 && currentWeek.count < 7 {
+            let lastDayOfMonth = calendar.date(byAdding: .day, value: daysInMonth - 1, to: startOfMonth)!
+            var dayOffset = 1
+            while currentWeek.count < 7 {
+                if let nextDate = calendar.date(byAdding: .day, value: dayOffset, to: lastDayOfMonth) {
+                    currentWeek.append(nextDate)
+                    dayOffset += 1
+                }
+            }
         }
         
         if !currentWeek.isEmpty {
@@ -212,42 +224,38 @@ struct ContinuousBookingBar: View {
         
         if barGeometry.width > 0 {
             HStack(spacing: 0) {
-                // Render bar as segments, one per day
+                // Render bar as segments, one per day (for color variation)
                 ForEach(Array(barGeometry.segments.enumerated()), id: \.offset) { index, segment in
-                    let isFirst = index == 0
-                    let isLast = index == barGeometry.segments.count - 1
-                    
-                    UnevenRoundedRectangle(
-                        topLeadingRadius: (isFirst && barGeometry.roundedStart) ? 8 : 0,
-                        bottomLeadingRadius: (isFirst && barGeometry.roundedStart) ? 8 : 0,
-                        bottomTrailingRadius: (isLast && barGeometry.roundedEnd) ? 8 : 0,
-                        topTrailingRadius: (isLast && barGeometry.roundedEnd) ? 8 : 0
-                    )
-                    .fill(segment.isInCurrentMonth ? property.color : Color.gray.opacity(0.4))
-                    .overlay(
-                        UnevenRoundedRectangle(
-                            topLeadingRadius: (isFirst && barGeometry.roundedStart) ? 8 : 0,
-                            bottomLeadingRadius: (isFirst && barGeometry.roundedStart) ? 8 : 0,
-                            bottomTrailingRadius: (isLast && barGeometry.roundedEnd) ? 8 : 0,
-                            topTrailingRadius: (isLast && barGeometry.roundedEnd) ? 8 : 0
-                        )
-                        .stroke(Color.black, lineWidth: 1.5)
-                    )
-                    .frame(width: segment.width)
-                    .overlay(
-                        // Property label on the last segment
-                        Group {
-                            if isLast {
-                                Text(property.shortName)
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.black)
-                                    .frame(maxWidth: .infinity, alignment: .trailing)
-                                    .padding(.trailing, 6)
-                            }
-                        }
-                    )
+                    Rectangle()
+                        .fill(segment.isInCurrentMonth ? property.color : Color.gray.opacity(0.4))
+                        .frame(width: segment.width)
                 }
             }
+            .clipShape(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                    bottomLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                    bottomTrailingRadius: barGeometry.roundedEnd ? 8 : 0,
+                    topTrailingRadius: barGeometry.roundedEnd ? 8 : 0
+                )
+            )
+            .overlay(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                    bottomLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                    bottomTrailingRadius: barGeometry.roundedEnd ? 8 : 0,
+                    topTrailingRadius: barGeometry.roundedEnd ? 8 : 0
+                )
+                .stroke(Color.black, lineWidth: 1.5)
+            )
+            .overlay(
+                // Property label on the right end
+                Text(property.shortName)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.trailing, 6)
+            )
             .offset(x: barGeometry.offset)
         }
     }
