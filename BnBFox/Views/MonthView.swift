@@ -249,39 +249,38 @@ struct ContinuousBookingBar: View {
         var isActualEnd = false
         
         // Find which days in this week the booking spans
+        // Note: We need to check the checkout day too (endDate), not just occupied nights
         for (index, date) in week.enumerated() {
             guard let date = date else { continue }
+            let dayStart = calendar.startOfDay(for: date)
+            let bookingStart = calendar.startOfDay(for: booking.startDate)
+            let bookingEnd = calendar.startOfDay(for: booking.endDate)
             
-            // Check if booking overlaps this date (endDate is exclusive)
-            if booking.overlapsDate(date) {
+            // Include the checkout day in the range
+            if dayStart >= bookingStart && dayStart <= bookingEnd {
                 if startIndex == nil {
                     startIndex = index
-                    // Check if this is the actual start date
+                    // Check if this is the check-in day
                     if calendar.isDate(booking.startDate, inSameDayAs: date) {
                         isActualStart = true
-                        startOffset = 0.5 // Start at midday (4PM check-in)
+                        startOffset = 0.67 // Start at 4PM (16/24 ≈ 0.67)
                     } else {
                         isActualStart = false
                         startOffset = 0 // Continues from previous week
                     }
                 }
+                
+                // Update end index for each day in range
                 endIndex = index
-            }
-        }
-        
-        // Check if the booking ends in this week
-        if let end = endIndex, let endDate = week[end] {
-            // The last day the guest is there is the day before endDate
-            let lastOccupiedDay = calendar.date(byAdding: .day, value: -1, to: booking.endDate) ?? booking.endDate
-            
-            if calendar.isDate(lastOccupiedDay, inSameDayAs: endDate) {
-                // This is the last night - bar goes to end of this day
-                isActualEnd = true
-                endOffset = 1.0 // Bar extends through the full last night
-            } else {
-                // Booking continues beyond this week
-                isActualEnd = false
-                endOffset = 1.0 // Continues to next week
+                
+                // Check if this is the checkout day
+                if calendar.isDate(booking.endDate, inSameDayAs: date) {
+                    isActualEnd = true
+                    endOffset = 0.42 // End at 10AM (10/24 ≈ 0.42)
+                } else {
+                    isActualEnd = false
+                    endOffset = 1.0 // Full day or continues to next week
+                }
             }
         }
         
