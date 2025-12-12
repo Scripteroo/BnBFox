@@ -142,8 +142,14 @@ struct WeekSection: View {
                                     .onTapGesture {
                                         if hasActivity {
                                             selectedDate = date
-                                            selectedActivities = getActivitiesForDate(date)
-                                            showingDayDetail = true
+                                            let activities = getActivitiesForDate(date)
+                                            if !activities.isEmpty {
+                                                selectedActivities = activities
+                                                // Delay slightly to ensure state is updated
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                                    showingDayDetail = true
+                                                }
+                                            }
                                         }
                                     }
                                 
@@ -181,7 +187,7 @@ struct WeekSection: View {
             .frame(height: 100)
         }
         .sheet(isPresented: $showingDayDetail) {
-            if let date = selectedDate {
+            if let date = selectedDate, !selectedActivities.isEmpty {
                 DayDetailView(date: date, activities: selectedActivities)
             }
         }
