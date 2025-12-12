@@ -341,7 +341,8 @@ struct SinglePropertyCalendarView: View {
             MonthView(
                 month: currentMonth,
                 bookings: bookings,
-                showMonthTitle: false  // Hide duplicate title since we show it in navigation
+                showMonthTitle: false,  // Hide duplicate title since we show it in navigation
+                showDayHeaders: false   // Hide duplicate day headers since we show them above
             )
             .padding(.horizontal, 8)
         }

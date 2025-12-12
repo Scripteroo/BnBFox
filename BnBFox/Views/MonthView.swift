@@ -11,6 +11,7 @@ struct MonthView: View {
     let month: Date
     let bookings: [Booking]
     var showMonthTitle: Bool = true  // Allow hiding the title to prevent duplicates
+    var showDayHeaders: Bool = true  // Allow hiding day headers to prevent duplicates
     
     private let daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"]
     private let propertyService = PropertyService.shared
@@ -25,16 +26,18 @@ struct MonthView: View {
                     .padding(.vertical, 12)
             }
             
-            // Day headers
-            HStack(spacing: 0) {
-                ForEach(Array(daysOfWeek.enumerated()), id: \.offset) { index, day in
-                    Text(day)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.gray)
-                        .frame(maxWidth: .infinity)
+            // Day headers (optional)
+            if showDayHeaders {
+                HStack(spacing: 0) {
+                    ForEach(Array(daysOfWeek.enumerated()), id: \.offset) { index, day in
+                        Text(day)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity)
+                    }
                 }
+                .padding(.bottom, 4)
             }
-            .padding(.bottom, 4)
             
             // Calendar weeks
             ForEach(Array(generateWeeks().enumerated()), id: \.offset) { weekIndex, week in
