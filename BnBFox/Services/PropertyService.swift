@@ -96,6 +96,14 @@ class PropertyService {
         return properties
     }
     
+    func updateProperty(_ updatedProperty: Property) {
+        if let index = properties.firstIndex(where: { $0.id == updatedProperty.id }) {
+            properties[index] = updatedProperty
+            saveProperties()
+            NotificationCenter.default.post(name: .propertiesDidChange, object: nil)
+        }
+    }
+    
     func getProperty(by id: UUID) -> Property? {
         return properties.first { $0.id == id }
     }
@@ -148,6 +156,12 @@ struct PropertyData: Codable {
     let shortName: String
     let colorHex: String
     let sources: [CalendarSourceData]
+    let ownerName: String
+    let ownerPhone: String
+    let ownerEmail: String
+    let doorCode: String
+    let bikeLocks: String
+    let notes: String
     
     init(from property: Property) {
         self.id = property.id.uuidString
@@ -156,6 +170,12 @@ struct PropertyData: Codable {
         self.shortName = property.shortName
         self.colorHex = property.colorHex
         self.sources = property.sources.map { CalendarSourceData(from: $0) }
+        self.ownerName = property.ownerName
+        self.ownerPhone = property.ownerPhone
+        self.ownerEmail = property.ownerEmail
+        self.doorCode = property.doorCode
+        self.bikeLocks = property.bikeLocks
+        self.notes = property.notes
     }
     
     func toProperty() -> Property {
@@ -165,7 +185,13 @@ struct PropertyData: Codable {
             displayName: displayName,
             shortName: shortName,
             colorHex: colorHex,
-            sources: sources.map { $0.toCalendarSource() }
+            sources: sources.map { $0.toCalendarSource() },
+            ownerName: ownerName,
+            ownerPhone: ownerPhone,
+            ownerEmail: ownerEmail,
+            doorCode: doorCode,
+            bikeLocks: bikeLocks,
+            notes: notes
         )
     }
 }

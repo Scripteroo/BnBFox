@@ -16,7 +16,7 @@ class CalendarViewModel: ObservableObject {
     @Published var currentMonth: Date = Date()
     
     private let propertyService = PropertyService.shared
-    private let bookingService = BookingService.shared
+    let bookingService = BookingService.shared
     
     var properties: [Property] {
         return propertyService.getAllProperties()

@@ -16,6 +16,18 @@ struct Property: Identifiable, Codable, Hashable {
     let colorHex: String
     let sources: [CalendarSource]
     
+    // Owner information
+    var ownerName: String
+    var ownerPhone: String
+    var ownerEmail: String
+    
+    // Access codes
+    var doorCode: String
+    var bikeLocks: String
+    
+    // Notes
+    var notes: String
+    
     var color: Color {
         Color(hex: colorHex) ?? .blue
     }
@@ -32,13 +44,19 @@ struct Property: Identifiable, Codable, Hashable {
         return components.count > 1 ? components.dropFirst().joined(separator: " ") : displayName
     }
     
-    init(id: UUID = UUID(), name: String, displayName: String, shortName: String, colorHex: String, sources: [CalendarSource]) {
+    init(id: UUID = UUID(), name: String, displayName: String, shortName: String, colorHex: String, sources: [CalendarSource], ownerName: String = "", ownerPhone: String = "", ownerEmail: String = "", doorCode: String = "", bikeLocks: String = "", notes: String = "") {
         self.id = id
         self.name = name
         self.displayName = displayName
         self.shortName = shortName
         self.colorHex = colorHex
         self.sources = sources
+        self.ownerName = ownerName
+        self.ownerPhone = ownerPhone
+        self.ownerEmail = ownerEmail
+        self.doorCode = doorCode
+        self.bikeLocks = bikeLocks
+        self.notes = notes
     }
     
     static func == (lhs: Property, rhs: Property) -> Bool {
