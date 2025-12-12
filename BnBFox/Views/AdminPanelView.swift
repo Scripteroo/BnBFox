@@ -79,6 +79,7 @@ struct PropertyConfigCard: View {
     @State private var airbnbURL: String
     @State private var vrboURL: String
     @State private var bookingURL: String
+    @State private var showDeleteConfirmation = false
     
     init(property: PropertyConfig, onUpdate: @escaping (PropertyConfig) -> Void, onDelete: @escaping () -> Void, onToggleLock: @escaping () -> Void) {
         self.property = property
@@ -99,11 +100,11 @@ struct PropertyConfigCard: View {
                 VStack(alignment: .leading, spacing: 2) {
                     // Complex name - editable when unlocked
                     if property.isLocked {
-                        Text(complexName)
+                        Text(complexName.isEmpty ? "Complex" : complexName)
                             .font(.system(size: 12))
                             .foregroundColor(.gray)
                     } else {
-                        TextField("Complex", text: $complexName)
+                        TextField("", text: $complexName, prompt: Text("Complex").foregroundColor(.gray.opacity(0.5)))
                             .font(.system(size: 12))
                             .foregroundColor(.gray)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -138,7 +139,9 @@ struct PropertyConfigCard: View {
                     
                     // Delete button - only visible when unlocked
                     if !property.isLocked {
-                        Button(action: onDelete) {
+                        Button(action: {
+                            showDeleteConfirmation = true
+                        }) {
                             Image(systemName: "xmark.circle.fill")
                                 .font(.system(size: 28))
                                 .foregroundColor(.red)
@@ -181,6 +184,12 @@ struct PropertyConfigCard: View {
             RoundedRectangle(cornerRadius: 8)
                 .stroke(Color.gray.opacity(0.3), lineWidth: 1)
         )
+        .alert("Are you sure you want to delete this unit?", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                onDelete()
+            }
+        }
     }
     
     private func updateProperty() {
