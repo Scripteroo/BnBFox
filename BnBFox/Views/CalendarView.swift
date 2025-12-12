@@ -61,9 +61,15 @@ struct CalendarView: View {
                                 }
                             }
                         }
+                        .onAppear {
+                            // Scroll to current month on initial load
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                proxy.scrollTo(viewModel.currentMonth.startOfMonth(), anchor: .top)
+                            }
+                        }
                         .onChange(of: viewModel.monthsToShow) { _ in
                             // Scroll to current month when calendar expands
-                            withAnimation {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 proxy.scrollTo(viewModel.currentMonth.startOfMonth(), anchor: .top)
                             }
                         }
