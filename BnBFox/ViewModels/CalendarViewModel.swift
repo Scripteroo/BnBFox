@@ -58,19 +58,33 @@ class CalendarViewModel: ObservableObject {
     func getMonthsToDisplay() -> [Date] {
         var months: [Date] = []
         let calendar = Calendar.current
+        let currentMonthStart = currentMonth.startOfMonth()
         
         if monthsToShow == 1 {
             // Initial load: show only current month for speed
-            months.append(currentMonth.startOfMonth())
+            months.append(currentMonthStart)
         } else {
-            // Full load: show 6 months back to 12 months forward
-            let startMonth = calendar.date(byAdding: .month, value: -6, to: currentMonth.startOfMonth()) ?? currentMonth
+            // Full load: Start at current month, then add forward months, then prepend history
+            // This ensures current month is at the top of the list naturally
             
-            for i in 0..<monthsToShow {
-                if let month = calendar.date(byAdding: .month, value: i, to: startMonth) {
+            // Add current month
+            months.append(currentMonthStart)
+            
+            // Add 12 months forward
+            for i in 1...12 {
+                if let month = calendar.date(byAdding: .month, value: i, to: currentMonthStart) {
                     months.append(month)
                 }
             }
+            
+            // Prepend 6 months back (in reverse order so they appear before current)
+            var historyMonths: [Date] = []
+            for i in 1...6 {
+                if let month = calendar.date(byAdding: .month, value: -i, to: currentMonthStart) {
+                    historyMonths.insert(month, at: 0)
+                }
+            }
+            months = historyMonths + months
         }
         return months
     }
