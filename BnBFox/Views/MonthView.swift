@@ -105,6 +105,7 @@ struct WeekSection: View {
     let properties: [Property]
     
     @State private var selectedDate: Date?
+    @State private var selectedActivities: [PropertyActivity] = []
     @State private var showingDayDetail = false
     
     var body: some View {
@@ -141,6 +142,7 @@ struct WeekSection: View {
                                     .onTapGesture {
                                         if hasActivity {
                                             selectedDate = date
+                                            selectedActivities = getActivitiesForDate(date)
                                             showingDayDetail = true
                                         }
                                     }
@@ -148,7 +150,7 @@ struct WeekSection: View {
                                 // Activity indicator dot
                                 if hasActivity {
                                     Circle()
-                                        .fill(Color.orange)
+                                        .fill(Color.blue)
                                         .frame(width: 4, height: 4)
                                         .offset(y: 14)
                                 }
@@ -180,7 +182,7 @@ struct WeekSection: View {
         }
         .sheet(isPresented: $showingDayDetail) {
             if let date = selectedDate {
-                DayDetailView(date: date, activities: getActivitiesForDate(date))
+                DayDetailView(date: date, activities: selectedActivities)
             }
         }
     }
