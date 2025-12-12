@@ -42,20 +42,36 @@ The Kawama Calendar app now includes an **Administration Panel** that allows cle
 
 #### Editing Properties
 
-1. Tap on any text field to edit the iCal URL
-2. Paste the full iCal URL from the booking platform
-3. Changes are saved automatically when you tap "Done"
+**Lock/Unlock Feature:**
+- All properties are **locked by default** to prevent accidental changes
+- Tap the **lock icon** (🔒) to unlock a property for editing
+- When locked: Green lock icon, all fields are read-only
+- When unlocked: Gray open lock icon, all fields are editable
+
+**Editing Steps:**
+1. Tap the **green lock icon** to unlock the property
+2. Edit any of the following:
+   - Complex name (e.g., "Kawama")
+   - Unit name (e.g., "C-2")
+   - AirBnB iCal URL
+   - VRBO iCal URL
+   - Booking.com iCal URL
+3. Tap the **lock icon** again to lock and protect your changes
+4. Tap "Done" to save all changes
 
 #### Deleting Properties
 
 1. Find the property you want to remove
-2. Tap the **red X button** (⊗) in the top right of the property card
-3. The property will be removed immediately
-4. Tap "Done" to confirm
+2. Tap the **lock icon** to unlock the property
+3. The **red X button** (⊗) will appear next to the lock icon
+4. Tap the red X button to delete
+5. The property will be removed immediately
+6. Tap "Done" to save changes
 
 **Notes:**
-- Default properties (C-2 and E-5) cannot be deleted
-- Custom properties added via the plus button can be deleted
+- Properties must be **unlocked** before they can be deleted
+- The delete button only appears when a property is unlocked
+- This prevents accidental deletion
 
 ### iCal URL Format
 
