@@ -45,6 +45,11 @@ class CalendarViewModel: ObservableObject {
         // Sort by start date
         self.bookings = allBookings.sorted { $0.startDate < $1.startDate }
         isLoading = false
+        
+        // Schedule cleaning alerts if enabled
+        if AppSettings.shared.cleaningAlertsEnabled {
+            NotificationService.shared.scheduleCleaningAlerts()
+        }
     }
     
     func refreshData() async {

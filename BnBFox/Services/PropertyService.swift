@@ -112,6 +112,28 @@ class PropertyService: ObservableObject {
         return properties.first { $0.name == name }
     }
     
+    func getProperty(byId propertyId: String) -> Property? {
+        return properties.first { $0.id.uuidString == propertyId }
+    }
+    
+    // Get all bookings from all properties
+    func getAllBookings() async -> [Booking] {
+        var allBookings: [Booking] = []
+        
+        for property in properties {
+            for source in property.sources {
+                do {
+                    let bookings = try await BookingService.shared.fetchBookings(from: source.url, propertyId: property.id.uuidString)
+                    allBookings.append(contentsOf: bookings)
+                } catch {
+                    print("Error fetching bookings for \(property.shortName): \(error)")
+                }
+            }
+        }
+        
+        return allBookings
+    }
+    
     // Update properties from admin panel
     func updateProperties(_ configs: [PropertyConfig]) {
         properties = configs.map { config in

@@ -11,6 +11,7 @@ import AVKit
 struct CalendarView: View {
     @StateObject private var viewModel = CalendarViewModel()
     @State private var showingAdminPanel = false
+    @State private var showingSettings = false
     @State private var selectedProperty: Property?
     
     var body: some View {
@@ -97,14 +98,19 @@ struct CalendarView: View {
                 )
                 .environmentObject(PropertyService.shared)
             }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
+            }
         }
     }
     
     private var headerView: some View {
         VStack(spacing: 0) {
             HStack {
-                // Menu button (placeholder)
-                Button(action: {}) {
+                // Menu button - opens settings
+                Button(action: {
+                    showingSettings = true
+                }) {
                     Image(systemName: "line.3.horizontal")
                         .font(.system(size: 20))
                         .foregroundColor(.primary)
