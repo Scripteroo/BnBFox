@@ -275,9 +275,11 @@ struct ContinuousBookingBar: View {
             let lastOccupiedDay = calendar.date(byAdding: .day, value: -1, to: booking.endDate) ?? booking.endDate
             
             if calendar.isDate(lastOccupiedDay, inSameDayAs: endDate) {
+                // This is the last night - bar goes to end of this day
                 isActualEnd = true
-                endOffset = 0.5 // End at midday (10AM check-out)
+                endOffset = 1.0 // Bar extends through the full last night
             } else {
+                // Booking continues beyond this week
                 isActualEnd = false
                 endOffset = 1.0 // Continues to next week
             }
