@@ -371,12 +371,27 @@ struct ContinuousBookingBar: View {
                 // Property label on the right end
                 Text(property.shortName)
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(textColor(for: property.color))
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .padding(.trailing, 6)
             )
             .offset(x: barGeometry.offset)
         }
+    }
+    
+    private func textColor(for backgroundColor: Color) -> Color {
+        // Use white text for dark backgrounds (like blue), black for light backgrounds
+        // Check if color is dark by comparing to a threshold
+        // For simplicity, use white for blue and black for orange/yellow
+        let colorHex = property.colorHex
+        
+        // Blue color (007AFF) should use white text
+        if colorHex.uppercased().contains("007AFF") || colorHex.uppercased().contains("0000FF") {
+            return .white
+        }
+        
+        // Default to black for lighter colors (orange, yellow)
+        return .black
     }
     
     private func calculateBarGeometry() -> (offset: CGFloat, width: CGFloat, roundedStart: Bool, roundedEnd: Bool, segments: [(width: CGFloat, isInCurrentMonth: Bool)]) {

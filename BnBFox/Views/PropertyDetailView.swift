@@ -162,30 +162,6 @@ struct PropertyDetailView: View {
                 isLocked: isLocked,
                 placeholder: "0800"
             )
-            
-            // Notes
-            VStack(alignment: .leading, spacing: 4) {
-                if isLocked {
-                    Text(property.notes.isEmpty ? "Notes:" : property.notes)
-                        .font(.system(size: 14))
-                        .foregroundColor(property.notes.isEmpty ? .gray : .primary)
-                        .padding()
-                        .frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(4)
-                } else {
-                    TextEditor(text: $property.notes)
-                        .font(.system(size: 14))
-                        .frame(minHeight: 120)
-                        .padding(4)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(4)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        )
-                }
-            }
         }
         .padding()
         .background(Color.white)
@@ -204,6 +180,39 @@ struct PropertyDetailView: View {
                 bookings: bookings.filter { $0.propertyId == property.id }
             )
             .frame(minHeight: 400)
+            
+            // Notes section below calendar
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Notes:")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.gray)
+                    .padding(.horizontal)
+                    .padding(.top, 16)
+                
+                if isLocked {
+                    Text(property.notes.isEmpty ? "No notes" : property.notes)
+                        .font(.system(size: 14))
+                        .foregroundColor(property.notes.isEmpty ? .gray : .primary)
+                        .padding()
+                        .frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(4)
+                        .padding(.horizontal)
+                } else {
+                    TextEditor(text: $property.notes)
+                        .font(.system(size: 14))
+                        .frame(minHeight: 120)
+                        .padding(4)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                        .padding(.horizontal)
+                }
+            }
+            .padding(.bottom, 20)
         }
         .background(Color.white)
     }

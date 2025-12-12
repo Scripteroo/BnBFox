@@ -12,10 +12,20 @@ class BookingService: ObservableObject {
     static let shared = BookingService()
     
     private let icalService = ICalService.shared
+    private var cache: [String: (bookings: [Booking], timestamp: Date)] = [:]
+    private let cacheExpiration: TimeInterval = 300 // 5 minutes
     
     private init() {}
     
     func fetchAllBookings(for property: Property) async -> [Booking] {
+        // Check cache first
+        let cacheKey = property.id.uuidString
+        if let cached = cache[cacheKey],
+           Date().timeIntervalSince(cached.timestamp) < cacheExpiration {
+            print("Using cached bookings for \(property.shortName)")
+            return cached.bookings
+        }
+        
         var allBookings: [Booking] = []
         
         // Fetch bookings from all sources concurrently
@@ -43,7 +53,13 @@ class BookingService: ObservableObject {
         }
         
         // Sort bookings by start date
-        return allBookings.sorted { $0.startDate < $1.startDate }
+        let sortedBookings = allBookings.sorted { $0.startDate < $1.startDate }
+        
+        // Cache the results
+        cache[cacheKey] = (bookings: sortedBookings, timestamp: Date())
+        print("Cached bookings for \(property.shortName)")
+        
+        return sortedBookings
     }
     
     func getBookings(for date: Date, from bookings: [Booking]) -> [Booking] {

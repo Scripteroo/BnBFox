@@ -28,10 +28,17 @@ class CalendarViewModel: ObservableObject {
         
         var allBookings: [Booking] = []
         
-        // Fetch bookings from all properties
-        for property in properties {
-            let fetchedBookings = await bookingService.fetchAllBookings(for: property)
-            allBookings.append(contentsOf: fetchedBookings)
+        // Fetch bookings from all properties concurrently for better performance
+        await withTaskGroup(of: [Booking].self) { group in
+            for property in properties {
+                group.addTask {
+                    await self.bookingService.fetchAllBookings(for: property)
+                }
+            }
+            
+            for await fetchedBookings in group {
+                allBookings.append(contentsOf: fetchedBookings)
+            }
         }
         
         // Sort by start date
