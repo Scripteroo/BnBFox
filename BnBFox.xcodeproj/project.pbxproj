@@ -23,7 +23,7 @@
 A1000023000000000000001 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000024000000000000001 /* DayDetailView.swift */; };
 A1000025000000000000001 /* AdminPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000026000000000000001 /* AdminPanelView.swift */; };
 A1000027000000000000001 /* PropertyDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000028000000000000001 /* PropertyDetailView.swift */; };
-A1000033000000000000001 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000034000000000000001 /* LoadingView.swift */; };
+A1000033000000000000001 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000049000000000000001 /* LoadingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,7 +42,7 @@ A1000033000000000000001 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile
 		A1000030000000000000001 /* DateExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtensions.swift; sourceTree = "<group>"; };A1000024000000000000001 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
 A1000026000000000000001 /* AdminPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminPanelView.swift; sourceTree = "<group>"; };
 A1000028000000000000001 /* PropertyDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyDetailView.swift; sourceTree = "<group>"; };
-A1000034000000000000001 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
+A1000049000000000000001 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 				A1000032000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -124,7 +124,7 @@ A1000034000000000000001 /* LoadingView.swift */ = {isa = PBXFileReference; lastK
 						A1000024000000000000001 /* DayDetailView.swift */,
 						A1000026000000000000001 /* AdminPanelView.swift */,
 						A1000028000000000000001 /* PropertyDetailView.swift */,
-						A1000034000000000000001 /* LoadingView.swift */,
+						A1000049000000000000001 /* LoadingView.swift */,
 					);
 					path = Views;
 					sourceTree = "<group>";
