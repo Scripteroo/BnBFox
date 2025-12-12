@@ -10,7 +10,6 @@ import SwiftUI
 
 @MainActor
 class CalendarViewModel: ObservableObject {
-    @Published var selectedProperty: Property?
     @Published var bookings: [Booking] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
@@ -23,37 +22,25 @@ class CalendarViewModel: ObservableObject {
         return propertyService.getAllProperties()
     }
     
-    init() {
-        // Set the first property as default
-        self.selectedProperty = properties.first
-    }
-    
     func loadBookings() async {
-        guard let property = selectedProperty else { return }
-        
         isLoading = true
         errorMessage = nil
         
-        do {
+        var allBookings: [Booking] = []
+        
+        // Fetch bookings from all properties
+        for property in properties {
             let fetchedBookings = await bookingService.fetchAllBookings(for: property)
-            self.bookings = fetchedBookings
-        } catch {
-            errorMessage = "Failed to load bookings: \(error.localizedDescription)"
+            allBookings.append(contentsOf: fetchedBookings)
         }
         
+        // Sort by start date
+        self.bookings = allBookings.sorted { $0.startDate < $1.startDate }
         isLoading = false
     }
     
     func refreshData() async {
         await loadBookings()
-    }
-    
-    func selectProperty(_ property: Property) {
-        guard property.id != selectedProperty?.id else { return }
-        selectedProperty = property
-        Task {
-            await loadBookings()
-        }
     }
     
     func getBookings(for date: Date) -> [Booking] {

@@ -11,49 +11,46 @@ struct DayCell: View {
     let date: Date?
     let bookings: [Booking]
     let isCurrentMonth: Bool
-    
-    private let maxVisibleBookings = 3
+    let columnIndex: Int
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 0) {
             if let date = date {
-                // Day number
-                HStack {
-                    Spacer()
-                    Text("\(date.dayNumber())")
-                        .font(.system(size: 14))
-                        .fontWeight(date.isToday() ? .bold : .regular)
-                        .foregroundColor(isCurrentMonth ? .primary : .gray.opacity(0.5))
-                        .frame(width: 24, height: 24)
-                        .background(
-                            Circle()
-                                .fill(date.isToday() ? Color.blue : Color.clear)
-                        )
-                        .foregroundColor(date.isToday() ? .white : .primary)
-                    Spacer()
-                }
+                // Day number at top
+                Text("\(date.dayNumber())")
+                    .font(.system(size: 14))
+                    .fontWeight(date.isToday() ? .bold : .regular)
+                    .foregroundColor(isCurrentMonth ? .primary : .gray.opacity(0.5))
+                    .frame(width: 24, height: 24)
+                    .background(
+                        Circle()
+                            .fill(date.isToday() ? Color.blue : Color.clear)
+                    )
+                    .foregroundColor(date.isToday() ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 4)
                 
-                // Bookings
-                VStack(alignment: .leading, spacing: 1) {
-                    ForEach(Array(bookings.prefix(maxVisibleBookings)), id: \.id) { booking in
-                        BookingBadge(
-                            booking: booking,
-                            date: date,
-                            isCompact: bookings.count > 2
-                        )
-                    }
-                    
-                    if bookings.count > maxVisibleBookings {
-                        Text("+\(bookings.count - maxVisibleBookings)")
-                            .font(.system(size: 8))
-                            .foregroundColor(.gray)
-                            .padding(.leading, 2)
+                // Booking bars stacked vertically
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(bookings, id: \.id) { booking in
+                        if let property = booking.getProperty() {
+                            BookingBar(
+                                booking: booking,
+                                property: property,
+                                startDate: date,
+                                daysVisible: 1
+                            )
+                        }
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 2)
+                .padding(.top, 4)
+                .padding(.bottom, 4)
+                
+                Spacer()
             }
         }
-        .frame(height: 80)
+        .frame(height: 100)
         .frame(maxWidth: .infinity)
         .background(Color.white)
         .overlay(

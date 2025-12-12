@@ -23,7 +23,11 @@ struct Booking: Identifiable, Hashable {
         if let guestName = guestName, !guestName.isEmpty {
             return guestName
         }
-        return platform.shortName
+        return "Reserved"
+    }
+    
+    func getProperty(from service: PropertyService = .shared) -> Property? {
+        return service.getProperty(by: propertyId)
     }
     
     func overlapsDate(_ date: Date) -> Bool {

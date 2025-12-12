@@ -19,8 +19,7 @@
 		A1000019000000000000001 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000020000000000000001 /* CalendarView.swift */; };
 		A1000021000000000000001 /* MonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000022000000000000001 /* MonthView.swift */; };
 		A1000023000000000000001 /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000024000000000000001 /* DayCell.swift */; };
-		A1000025000000000000001 /* BookingBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000026000000000000001 /* BookingBadge.swift */; };
-		A1000027000000000000001 /* PropertySelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000028000000000000001 /* PropertySelectorView.swift */; };
+		A1000025000000000000001 /* BookingBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000026000000000000001 /* BookingBar.swift */; };
 		A1000029000000000000001 /* DateExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000030000000000000001 /* DateExtensions.swift */; };
 		A1000031000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1000032000000000000001 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -39,8 +38,7 @@
 		A1000020000000000000001 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		A1000022000000000000001 /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
 		A1000024000000000000001 /* DayCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayCell.swift; sourceTree = "<group>"; };
-		A1000026000000000000001 /* BookingBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingBadge.swift; sourceTree = "<group>"; };
-		A1000028000000000000001 /* PropertySelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertySelectorView.swift; sourceTree = "<group>"; };
+		A1000026000000000000001 /* BookingBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingBar.swift; sourceTree = "<group>"; };
 		A1000030000000000000001 /* DateExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtensions.swift; sourceTree = "<group>"; };
 		A1000032000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -121,8 +119,7 @@
 				A1000020000000000000001 /* CalendarView.swift */,
 				A1000022000000000000001 /* MonthView.swift */,
 				A1000024000000000000001 /* DayCell.swift */,
-				A1000026000000000000001 /* BookingBadge.swift */,
-				A1000028000000000000001 /* PropertySelectorView.swift */,
+				A1000026000000000000001 /* BookingBar.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -216,8 +213,7 @@
 				A1000019000000000000001 /* CalendarView.swift in Sources */,
 				A1000021000000000000001 /* MonthView.swift in Sources */,
 				A1000023000000000000001 /* DayCell.swift in Sources */,
-				A1000025000000000000001 /* BookingBadge.swift in Sources */,
-				A1000027000000000000001 /* PropertySelectorView.swift in Sources */,
+				A1000025000000000000001 /* BookingBar.swift in Sources */,
 				A1000029000000000000001 /* DateExtensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

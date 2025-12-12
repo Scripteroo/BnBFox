@@ -6,17 +6,26 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct Property: Identifiable, Codable, Hashable {
     let id: UUID
     let name: String
     let displayName: String
+    let shortName: String
+    let colorHex: String
     let sources: [CalendarSource]
     
-    init(id: UUID = UUID(), name: String, displayName: String, sources: [CalendarSource]) {
+    var color: Color {
+        Color(hex: colorHex) ?? .blue
+    }
+    
+    init(id: UUID = UUID(), name: String, displayName: String, shortName: String, colorHex: String, sources: [CalendarSource]) {
         self.id = id
         self.name = name
         self.displayName = displayName
+        self.shortName = shortName
+        self.colorHex = colorHex
         self.sources = sources
     }
     

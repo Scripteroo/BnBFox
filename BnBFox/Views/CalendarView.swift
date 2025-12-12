@@ -44,6 +44,9 @@ struct CalendarView: View {
                         .padding()
                         Spacer()
                     } else {
+                        // Legend
+                        legendView
+                        
                         ScrollView {
                             LazyVStack(spacing: 20) {
                                 ForEach(viewModel.getMonthsToDisplay(), id: \.self) { month in
@@ -81,12 +84,9 @@ struct CalendarView: View {
                 
                 Spacer()
                 
-                // Title and property selector
-                VStack(spacing: 2) {
-                    Text("Calendar")
-                        .font(.system(size: 18, weight: .semibold))
-                    PropertySelectorView(viewModel: viewModel)
-                }
+                // Title
+                Text("Rental Calendar")
+                    .font(.system(size: 18, weight: .semibold))
                 
                 Spacer()
                 
@@ -124,6 +124,24 @@ struct CalendarView: View {
             
             Divider()
         }
+        .background(Color(UIColor.systemBackground))
+    }
+    
+    private var legendView: some View {
+        HStack(spacing: 16) {
+            ForEach(viewModel.properties) { property in
+                HStack(spacing: 6) {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(property.color)
+                        .frame(width: 20, height: 12)
+                    Text(property.shortName)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
         .background(Color(UIColor.systemBackground))
     }
 }

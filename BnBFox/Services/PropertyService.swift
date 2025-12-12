@@ -16,6 +16,8 @@ class PropertyService {
         Property(
             name: "kawama-c2",
             displayName: "Kawama C-2",
+            shortName: "C-2",
+            colorHex: "FF8C00", // Orange
             sources: [
                 CalendarSource(
                     platform: .vrbo,
@@ -30,6 +32,8 @@ class PropertyService {
         Property(
             name: "kawama-e5",
             displayName: "Kawama E-5",
+            shortName: "E-5",
+            colorHex: "FFD700", // Gold/Yellow
             sources: [
                 CalendarSource(
                     platform: .vrbo,
