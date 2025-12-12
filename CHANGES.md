@@ -120,6 +120,28 @@
      - `/home/ubuntu/BnBFox/BnBFox/Views/CalendarView.swift` (removed properties parameter)
    - **Status**: ✅ FIXED - Calendar layout now displays correctly
 
+### Admin Panel Addition (December 12, 2025 - Fourth Update)
+
+#### 6. **Admin Panel for Property Management**
+   - **Feature**: Full property management system accessible via gear icon
+   - **Capabilities**:
+     - Add new rental units (up to 6 total)
+     - Delete custom properties (red X button)
+     - Configure iCal URLs for AirBnB, VRBO, and Booking.com
+     - Pre-populated with existing C-2 and E-5 URLs
+     - Persistent storage using UserDefaults
+     - Auto-refresh calendar when properties change
+   - **UI Design**: Matches user mockup with property cards and URL text fields
+   - **Files Added**:
+     - `/home/ubuntu/BnBFox/BnBFox/Views/AdminPanelView.swift` (admin UI)
+     - `/home/ubuntu/BnBFox/ADMIN_PANEL.md` (documentation)
+   - **Files Modified**:
+     - `/home/ubuntu/BnBFox/BnBFox/Services/PropertyService.swift` (dynamic loading/saving)
+     - `/home/ubuntu/BnBFox/BnBFox/Views/CalendarView.swift` (gear icon connection)
+     - `/home/ubuntu/BnBFox/BnBFox/Models/CalendarSource.swift` (icalURL property)
+     - `/home/ubuntu/BnBFox/BnBFox/Models/Property.swift` (color handling)
+   - **Status**: ✅ COMPLETED - Admin panel fully functional
+
 ### Future Enhancements (Mentioned by User)
 - Support for additional properties (architecture supports 6-10 properties)
 - Booking.com integration (architecture already supports multiple sources)
