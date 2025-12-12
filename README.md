@@ -10,10 +10,14 @@ BnBFox helps cleaning crews and property managers view rental unit booking calen
 
 - **Multi-Platform Support**: Integrates with AirBnB and VRBO (Booking.com ready for future)
 - **Real-Time Updates**: Fetch latest booking data with pull-to-refresh
-- **Multiple Properties**: Switch between different rental units
-- **Visual Calendar**: Month-by-month grid view with booking badges
-- **Color-Coded Bookings**: Different colors for each platform
-- **Guest Names**: Displays guest names from VRBO bookings
+- **All Properties View**: See all rental units on one calendar
+- **Visual Calendar**: Month-by-month grid view with horizontal booking bars
+- **Property-Based Colors**: Orange for C-2, Yellow for E-5
+- **Check-In/Check-Out Visualization**: Bars show 4PM check-in and 10AM checkout times
+- **Cross-Month Visibility**: Grayed-out bars show bookings extending into adjacent months
+- **Clickable Dates**: Tap dates with activity to see detailed check-in/check-out information
+- **Activity Indicators**: Orange dots mark dates with turnover activity
+- **Guest Names**: Displays guest names when available
 
 ## Current Properties
 
