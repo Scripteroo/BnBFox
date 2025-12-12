@@ -42,8 +42,7 @@ struct MonthView: View {
         let calendar = Calendar.current
         
         // Get the first day of the month
-        guard let monthInterval = calendar.dateInterval(of: .month, for: month),
-              let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: month)) else {
+        guard let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: month)) else {
             return []
         }
         
@@ -140,7 +139,7 @@ struct WeekSection: View {
                                     )
                                     .contentShape(Circle())
                                     .onTapGesture {
-                                        if hasActivity, let date = date {
+                                        if hasActivity {
                                             let activities = getActivitiesForDate(date)
                                             if !activities.isEmpty {
                                                 dayDetailItem = DayDetailItem(date: date, activities: activities)
