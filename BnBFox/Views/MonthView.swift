@@ -104,6 +104,9 @@ struct WeekSection: View {
     let currentMonth: Date
     let properties: [Property]
     
+    @State private var selectedDate: Date?
+    @State private var showingDayDetail = false
+    
     var body: some View {
         ZStack(alignment: .topLeading) {
             // Background grid
@@ -123,6 +126,8 @@ struct WeekSection: View {
                     ForEach(Array(week.enumerated()), id: \.offset) { index, date in
                         ZStack {
                             if let date = date {
+                                let hasActivity = dateHasActivity(date)
+                                
                                 Text("\(date.dayNumber())")
                                     .font(.system(size: 14))
                                     .fontWeight(date.isToday() ? .bold : .regular)
@@ -132,6 +137,21 @@ struct WeekSection: View {
                                         Circle()
                                             .fill(date.isToday() ? Color.blue : Color.clear)
                                     )
+                                    .contentShape(Circle())
+                                    .onTapGesture {
+                                        if hasActivity {
+                                            selectedDate = date
+                                            showingDayDetail = true
+                                        }
+                                    }
+                                
+                                // Activity indicator dot
+                                if hasActivity {
+                                    Circle()
+                                        .fill(Color.orange)
+                                        .frame(width: 4, height: 4)
+                                        .offset(y: 14)
+                                }
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -158,12 +178,84 @@ struct WeekSection: View {
             }
             .frame(height: 100)
         }
+        .sheet(isPresented: $showingDayDetail) {
+            if let date = selectedDate {
+                DayDetailView(date: date, activities: getActivitiesForDate(date))
+            }
+        }
     }
     
     private func isInCurrentMonth(_ date: Date?) -> Bool {
         guard let date = date else { return false }
         let calendar = Calendar.current
         return calendar.isDate(date, equalTo: currentMonth, toGranularity: .month)
+    }
+    
+    private func dateHasActivity(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        let dayStart = calendar.startOfDay(for: date)
+        
+        // Check if any property has check-in or check-out on this date
+        for property in properties {
+            let propertyBookings = bookings.filter { $0.propertyId == property.id }
+            
+            for booking in propertyBookings {
+                let bookingStart = calendar.startOfDay(for: booking.startDate)
+                let bookingEnd = calendar.startOfDay(for: booking.endDate)
+                
+                // Check-in on this date
+                if calendar.isDate(bookingStart, inSameDayAs: dayStart) {
+                    return true
+                }
+                
+                // Check-out on this date
+                if calendar.isDate(bookingEnd, inSameDayAs: dayStart) {
+                    return true
+                }
+            }
+        }
+        
+        return false
+    }
+    
+    private func getActivitiesForDate(_ date: Date) -> [PropertyActivity] {
+        let calendar = Calendar.current
+        let dayStart = calendar.startOfDay(for: date)
+        var activities: [PropertyActivity] = []
+        
+        for property in properties {
+            let propertyBookings = bookings.filter { $0.propertyId == property.id }
+            
+            var checkin: BookingInfo?
+            var checkout: BookingInfo?
+            
+            for booking in propertyBookings {
+                let bookingStart = calendar.startOfDay(for: booking.startDate)
+                let bookingEnd = calendar.startOfDay(for: booking.endDate)
+                
+                // Check-in on this date
+                if calendar.isDate(bookingStart, inSameDayAs: dayStart) {
+                    checkin = BookingInfo(guestName: booking.guestName, booking: booking)
+                }
+                
+                // Check-out on this date
+                if calendar.isDate(bookingEnd, inSameDayAs: dayStart) {
+                    checkout = BookingInfo(guestName: booking.guestName, booking: booking)
+                }
+            }
+            
+            // Only add if there's activity
+            if checkin != nil || checkout != nil {
+                activities.append(PropertyActivity(
+                    property: property,
+                    checkin: checkin,
+                    checkout: checkout
+                ))
+            }
+        }
+        
+        // Sort by property name
+        return activities.sorted { $0.property.displayName < $1.property.displayName }
     }
     
     private func getBookingsForProperty(_ property: Property) -> [Booking] {
