@@ -52,7 +52,8 @@ struct CalendarView: View {
                                 ForEach(viewModel.getMonthsToDisplay(), id: \.self) { month in
                                     MonthView(
                                         month: month,
-                                        bookings: viewModel.bookings
+                                        bookings: viewModel.bookings,
+                                        properties: viewModel.properties
                                     )
                                 }
                             }
@@ -85,7 +86,7 @@ struct CalendarView: View {
                 Spacer()
                 
                 // Title
-                Text("Rental Calendar")
+                Text("Kawama Calendar")
                     .font(.system(size: 18, weight: .semibold))
                 
                 Spacer()
