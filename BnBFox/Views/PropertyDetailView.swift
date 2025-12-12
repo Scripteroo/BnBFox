@@ -330,8 +330,7 @@ struct SinglePropertyCalendarView: View {
             
             // Calendar grid
             MonthView(
-                currentMonth: currentMonth,
-                properties: [property],
+                month: currentMonth,
                 bookings: bookings
             )
             .padding(.horizontal, 8)

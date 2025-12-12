@@ -8,13 +8,13 @@
 import Foundation
 import SwiftUI
 
-class PropertyService {
+class PropertyService: ObservableObject {
     static let shared = PropertyService()
     
     private let userDefaults = UserDefaults.standard
     private let propertiesKey = "saved_properties"
     
-    private var properties: [Property] = []
+    @Published private var properties: [Property] = []
     
     private init() {
         loadProperties()

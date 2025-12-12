@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import SwiftUI
 
-class BookingService {
+class BookingService: ObservableObject {
     static let shared = BookingService()
     
     private let icalService = ICalService.shared
