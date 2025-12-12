@@ -118,13 +118,17 @@ class ICalService {
         
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dateFormatter.timeZone = TimeZone(identifier: "UTC")
         
-        // Try YYYYMMDD format (DATE format)
+        // Try YYYYMMDD format (DATE format - no time component)
+        // For date-only values, use current timezone to avoid day shifts
         dateFormatter.dateFormat = "yyyyMMdd"
+        dateFormatter.timeZone = TimeZone.current
         if let date = dateFormatter.date(from: cleanDateString) {
             return date
         }
+        
+        // For datetime formats, use UTC
+        dateFormatter.timeZone = TimeZone(identifier: "UTC")
         
         // Try YYYYMMDDTHHmmssZ format (DATETIME format)
         dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
