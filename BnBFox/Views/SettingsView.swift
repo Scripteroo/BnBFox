@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @StateObject private var settings = AppSettings.shared
-    @StateObject private var viewModel = CalendarViewModel.shared
     @Environment(\.dismiss) private var dismiss
     
     @State private var pendingAlertsCount = 0
@@ -120,6 +119,15 @@ struct SettingsView: View {
     }
     
     private func loadUpcomingCleanings() {
+        Task {
+            let allBookings = await PropertyService.shared.getAllBookings()
+            await MainActor.run {
+                processBookings(allBookings)
+            }
+        }
+    }
+    
+    private func processBookings(_ bookings: [Booking]) {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let thirtyDaysFromNow = calendar.date(byAdding: .day, value: 30, to: today)!
@@ -127,7 +135,7 @@ struct SettingsView: View {
         var cleaningDays: [String: [Date: [Booking]]] = [:]
         
         // Group bookings by property and checkout date
-        for booking in viewModel.bookings {
+        for booking in bookings {
             let checkoutDate = calendar.startOfDay(for: booking.endDate)
             
             // Only include future cleanings within 30 days
@@ -154,7 +162,7 @@ struct SettingsView: View {
             
             for (checkoutDate, bookingsOnDate) in dateBookings {
                 // Check if there's a same-day turnover
-                let hasCheckin = viewModel.bookings.contains { booking in
+                let hasCheckin = bookings.contains { booking in
                     booking.propertyId == propertyId &&
                     calendar.isDate(booking.startDate, inSameDayAs: checkoutDate)
                 }

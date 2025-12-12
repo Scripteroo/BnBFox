@@ -121,14 +121,8 @@ class PropertyService: ObservableObject {
         var allBookings: [Booking] = []
         
         for property in properties {
-            for source in property.sources {
-                do {
-                    let bookings = try await BookingService.shared.fetchBookings(from: source.url, propertyId: property.id.uuidString)
-                    allBookings.append(contentsOf: bookings)
-                } catch {
-                    print("Error fetching bookings for \(property.shortName): \(error)")
-                }
-            }
+            let bookings = await BookingService.shared.fetchAllBookings(for: property)
+            allBookings.append(contentsOf: bookings)
         }
         
         return allBookings
