@@ -70,9 +70,8 @@ struct CalendarView: View {
             AdminPanelView()
         }
         .sheet(item: $selectedProperty) { property in
-            PropertyDetailView(property: property)
+            PropertyDetailView(property: property, bookings: viewModel.bookings)
                 .environmentObject(PropertyService.shared)
-                .environmentObject(viewModel.bookingService)
         }
         .task {
             await viewModel.loadBookings()

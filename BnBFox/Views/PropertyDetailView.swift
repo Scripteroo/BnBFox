@@ -9,10 +9,10 @@ import SwiftUI
 
 struct PropertyDetailView: View {
     @State var property: Property
+    let bookings: [Booking]
     @Environment(\.dismiss) var dismiss
     @State private var isLocked = true
     @EnvironmentObject var propertyService: PropertyService
-    @EnvironmentObject var bookingService: BookingService
     
     var body: some View {
         NavigationView {
@@ -201,7 +201,7 @@ struct PropertyDetailView: View {
             // Single property calendar will go here
             SinglePropertyCalendarView(
                 property: property,
-                bookings: bookingService.bookings.filter { $0.propertyId == property.id }
+                bookings: bookings.filter { $0.propertyId == property.id }
             )
             .frame(minHeight: 400)
         }
