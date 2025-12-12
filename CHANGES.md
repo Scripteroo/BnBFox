@@ -78,6 +78,20 @@
 - ✅ **Day detail modal opens correctly on FIRST tap**
 - ✅ **App name displays as "Kawama Calendar"**
 
+### Compilation Fixes (December 12, 2025 - Second Update)
+
+#### 4. **Swift Compilation Errors Fixed**
+   - **Error 1 - Line 45**: Unused variable warning
+     - Removed unused `monthInterval` variable from guard statement
+     - Only `firstDayOfMonth` is needed for the function logic
+   - **Error 2 - Line 143**: Optional binding error
+     - Fixed incorrect optional binding `if hasActivity, let date = date`
+     - `date` is already unwrapped in the outer scope (line 128: `if let date = date`)
+     - Changed to simple condition: `if hasActivity`
+   - **Files Modified**:
+     - `/home/ubuntu/BnBFox/BnBFox/Views/MonthView.swift` (lines 45, 142)
+   - **Status**: ✅ FIXED - Project now builds successfully
+
 ### Testing Recommendations
 1. Test modal opening on first tap for various scenarios:
    - Check-in only dates
