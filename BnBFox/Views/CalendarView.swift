@@ -24,9 +24,7 @@ struct CalendarView: View {
                     
                     // Calendar content
                     if viewModel.isLoading && viewModel.bookings.isEmpty {
-                        Spacer()
-                        ProgressView("Loading bookings...")
-                        Spacer()
+                        LoadingView()
                     } else if let errorMessage = viewModel.errorMessage {
                         Spacer()
                         VStack(spacing: 16) {
