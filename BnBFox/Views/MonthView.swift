@@ -272,15 +272,19 @@ struct ContinuousBookingBar: View {
                 
                 // Update end index for each day in range
                 endIndex = index
-                
-                // Check if this is the checkout day
-                if calendar.isDate(booking.endDate, inSameDayAs: date) {
-                    isActualEnd = true
-                    endOffset = 0.42 // End at 10AM (10/24 ≈ 0.42)
-                } else {
-                    isActualEnd = false
-                    endOffset = 1.0 // Full day or continues to next week
-                }
+            }
+        }
+        
+        // After finding the range, determine if this is the actual end or continues
+        if let end = endIndex, let endDate = week[end] {
+            // Check if this is the checkout day
+            if calendar.isDate(booking.endDate, inSameDayAs: endDate) {
+                isActualEnd = true
+                endOffset = 0.42 // End at 10AM (10/24 ≈ 0.42)
+            } else {
+                // Booking continues beyond this week - square edge
+                isActualEnd = false
+                endOffset = 1.0 // Continues to next week
             }
         }
         
