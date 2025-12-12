@@ -17,7 +17,7 @@ struct Property: Identifiable, Codable, Hashable {
     let sources: [CalendarSource]
     
     var color: Color {
-        Color(hex: colorHex)
+        Color(hex: colorHex) ?? .blue
     }
     
     init(id: UUID = UUID(), name: String, displayName: String, shortName: String, colorHex: String, sources: [CalendarSource]) {
