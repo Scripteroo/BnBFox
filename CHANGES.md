@@ -104,6 +104,22 @@
    - App switcher
 3. Test with real iCal data from AirBnB and VRBO
 
+### Layout Fix (December 12, 2025 - Third Update)
+
+#### 5. **Critical Layout Issues Fixed**
+   - **Problem**: Booking bars and property labels were overlapping date numbers and appearing in random positions
+   - **Root Cause**: Refactored layout structure broke the grid alignment and positioning
+   - **Solution**: Reverted to working layout structure from commit 7870153 and reapplied only the modal fix
+   - **Changes**:
+     - Restored proper WeekSection structure with day numbers at top and property rows at bottom
+     - Removed problematic property label overlay that was causing text to scatter
+     - Fixed grid alignment and spacing
+     - Kept item-based modal presentation (DayDetailItem) for reliable first-tap behavior
+   - **Files Modified**:
+     - `/home/ubuntu/BnBFox/BnBFox/Views/MonthView.swift` (reverted and reapplied modal fix)
+     - `/home/ubuntu/BnBFox/BnBFox/Views/CalendarView.swift` (removed properties parameter)
+   - **Status**: ✅ FIXED - Calendar layout now displays correctly
+
 ### Future Enhancements (Mentioned by User)
 - Support for additional properties (architecture supports 6-10 properties)
 - Booking.com integration (architecture already supports multiple sources)
