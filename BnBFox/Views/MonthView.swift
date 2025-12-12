@@ -159,9 +159,14 @@ struct WeekSection: View {
             return []
         }
         
+        // Get the day after lastDate to check for bookings that end on the next day
+        let calendar = Calendar.current
+        let dayAfterLast = calendar.date(byAdding: .day, value: 1, to: lastDate) ?? lastDate
+        
         return bookings.filter { booking in
             booking.propertyId == property.id &&
-            (booking.startDate...booking.endDate).overlaps(firstDate...lastDate)
+            booking.startDate < dayAfterLast &&
+            booking.endDate > firstDate
         }
     }
 }
@@ -203,64 +208,88 @@ struct ContinuousBookingBar: View {
         
         if barGeometry.width > 0 {
             HStack(spacing: 0) {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(property.color)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.black, lineWidth: 1.5)
+                // Use UnevenRoundedRectangle for selective corner rounding
+                UnevenRoundedRectangle(
+                    topLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                    bottomLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                    bottomTrailingRadius: barGeometry.roundedEnd ? 8 : 0,
+                    topTrailingRadius: barGeometry.roundedEnd ? 8 : 0
+                )
+                .fill(property.color)
+                .overlay(
+                    UnevenRoundedRectangle(
+                        topLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                        bottomLeadingRadius: barGeometry.roundedStart ? 8 : 0,
+                        bottomTrailingRadius: barGeometry.roundedEnd ? 8 : 0,
+                        topTrailingRadius: barGeometry.roundedEnd ? 8 : 0
                     )
-                    .overlay(
-                        // Property label
-                        Text(property.shortName)
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                            .padding(.trailing, 6)
-                    )
+                    .stroke(Color.black, lineWidth: 1.5)
+                )
+                .overlay(
+                    // Property label on the right end
+                    Text(property.shortName)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.trailing, 6)
+                )
             }
             .frame(width: barGeometry.width)
             .offset(x: barGeometry.offset)
         }
     }
     
-    private func calculateBarGeometry() -> (offset: CGFloat, width: CGFloat) {
+    private func calculateBarGeometry() -> (offset: CGFloat, width: CGFloat, roundedStart: Bool, roundedEnd: Bool) {
         let calendar = Calendar.current
         var startIndex: Int?
         var endIndex: Int?
         var startOffset: CGFloat = 0
         var endOffset: CGFloat = 0
+        var isActualStart = false
+        var isActualEnd = false
         
         // Find which days in this week the booking spans
         for (index, date) in week.enumerated() {
             guard let date = date else { continue }
             
+            // Check if booking overlaps this date (endDate is exclusive)
             if booking.overlapsDate(date) {
                 if startIndex == nil {
                     startIndex = index
                     // Check if this is the actual start date
                     if calendar.isDate(booking.startDate, inSameDayAs: date) {
+                        isActualStart = true
                         startOffset = 0.5 // Start at midday (4PM check-in)
                     } else {
+                        isActualStart = false
                         startOffset = 0 // Continues from previous week
                     }
                 }
                 endIndex = index
-                // Check if this is the actual end date
-                if calendar.isDate(booking.endDate, inSameDayAs: date) {
-                    endOffset = 0.5 // End at midday (10AM check-out)
-                } else {
-                    endOffset = 1.0 // Continues to next week
-                }
+            }
+        }
+        
+        // Check if the booking ends in this week
+        if let end = endIndex, let endDate = week[end] {
+            // The last day the guest is there is the day before endDate
+            let lastOccupiedDay = calendar.date(byAdding: .day, value: -1, to: booking.endDate) ?? booking.endDate
+            
+            if calendar.isDate(lastOccupiedDay, inSameDayAs: endDate) {
+                isActualEnd = true
+                endOffset = 0.5 // End at midday (10AM check-out)
+            } else {
+                isActualEnd = false
+                endOffset = 1.0 // Continues to next week
             }
         }
         
         guard let start = startIndex, let end = endIndex else {
-            return (0, 0)
+            return (0, 0, false, false)
         }
         
         let offset = (CGFloat(start) + startOffset) * cellWidth
         let width = (CGFloat(end - start) + endOffset - startOffset) * cellWidth
         
-        return (offset, width)
+        return (offset, width, isActualStart, isActualEnd)
     }
 }
