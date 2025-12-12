@@ -14,6 +14,7 @@ class CalendarViewModel: ObservableObject {
     @Published var isLoading: Bool = true
     @Published var errorMessage: String?
     @Published var currentMonth: Date = Date()
+    @Published var monthsToShow: Int = 1  // Start with 1 month for fast initial load
     
     private let propertyService = PropertyService.shared
     let bookingService = BookingService.shared
@@ -54,13 +55,33 @@ class CalendarViewModel: ObservableObject {
         return bookingService.getBookings(for: date, from: bookings)
     }
     
-    func getMonthsToDisplay(count: Int = 6) -> [Date] {
+    func getMonthsToDisplay() -> [Date] {
         var months: [Date] = []
-        for i in 0..<count {
-            if let month = Calendar.current.date(byAdding: .month, value: i, to: currentMonth.startOfMonth()) {
-                months.append(month)
+        let calendar = Calendar.current
+        
+        if monthsToShow == 1 {
+            // Initial load: show only current month for speed
+            months.append(currentMonth.startOfMonth())
+        } else {
+            // Full load: show 6 months back to 12 months forward
+            let startMonth = calendar.date(byAdding: .month, value: -6, to: currentMonth.startOfMonth()) ?? currentMonth
+            
+            for i in 0..<monthsToShow {
+                if let month = calendar.date(byAdding: .month, value: i, to: startMonth) {
+                    months.append(month)
+                }
             }
         }
         return months
+    }
+    
+    func expandMonthsAfterInitialLoad() {
+        // Expand to show full range (6 months back + 12 months forward = 18 months)
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 100_000_000)  // 0.1 second delay
+            withAnimation {
+                monthsToShow = 19  // 6 back + current + 12 forward
+            }
+        }
     }
 }

@@ -340,7 +340,8 @@ struct SinglePropertyCalendarView: View {
             // Calendar grid
             MonthView(
                 month: currentMonth,
-                bookings: bookings
+                bookings: bookings,
+                showMonthTitle: false  // Hide duplicate title since we show it in navigation
             )
             .padding(.horizontal, 8)
         }

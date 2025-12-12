@@ -48,19 +48,25 @@ struct CalendarView: View {
                     
                     Divider()
                     
-                    // Calendar
+                    // Calendar with progressive loading
                     ScrollView {
-                        MonthView(
-                            month: viewModel.currentMonth,
-                            bookings: viewModel.bookings
-                        )
-                        .environmentObject(viewModel)
+                        LazyVStack(spacing: 0) {
+                            ForEach(viewModel.getMonthsToDisplay(), id: \.self) { month in
+                                MonthView(
+                                    month: month,
+                                    bookings: viewModel.bookings
+                                )
+                                .id(month)
+                            }
+                        }
                     }
                 }
             }
             .navigationBarHidden(true)
             .task {
                 await viewModel.loadBookings()
+                // After data loads, expand to show all months
+                viewModel.expandMonthsAfterInitialLoad()
             }
             .refreshable {
                 await viewModel.loadBookings()

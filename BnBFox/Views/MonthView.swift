@@ -10,17 +10,20 @@ import SwiftUI
 struct MonthView: View {
     let month: Date
     let bookings: [Booking]
+    var showMonthTitle: Bool = true  // Allow hiding the title to prevent duplicates
     
     private let daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"]
     private let propertyService = PropertyService.shared
     
     var body: some View {
         VStack(spacing: 0) {
-            // Month title
-            Text(month.monthName())
-                .font(.system(size: 18, weight: .bold))
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.vertical, 12)
+            // Month title (optional)
+            if showMonthTitle {
+                Text(month.monthName())
+                    .font(.system(size: 18, weight: .bold))
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 12)
+            }
             
             // Day headers
             HStack(spacing: 0) {
