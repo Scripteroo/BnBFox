@@ -49,14 +49,22 @@ struct CalendarView: View {
                     Divider()
                     
                     // Calendar with progressive loading
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            ForEach(viewModel.getMonthsToDisplay(), id: \.self) { month in
-                                MonthView(
-                                    month: month,
-                                    bookings: viewModel.bookings
-                                )
-                                .id(month)
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                ForEach(viewModel.getMonthsToDisplay(), id: \.self) { month in
+                                    MonthView(
+                                        month: month,
+                                        bookings: viewModel.bookings
+                                    )
+                                    .id(month)
+                                }
+                            }
+                        }
+                        .onChange(of: viewModel.monthsToShow) { _ in
+                            // Scroll to current month when calendar expands
+                            withAnimation {
+                                proxy.scrollTo(viewModel.currentMonth.startOfMonth(), anchor: .top)
                             }
                         }
                     }
