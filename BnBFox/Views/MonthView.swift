@@ -33,7 +33,7 @@ struct MonthView: View {
             }
             .padding(.bottom, 4)
             
-            // Calendar weeks with property rows
+            // Calendar weeks
             ForEach(Array(generateWeeks().enumerated()), id: \.offset) { weekIndex, week in
                 WeekSection(
                     week: week,
@@ -93,43 +93,59 @@ struct WeekSection: View {
     let properties: [Property]
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Day numbers row
+        ZStack(alignment: .topLeading) {
+            // Background grid
             HStack(spacing: 0) {
                 ForEach(Array(week.enumerated()), id: \.offset) { index, date in
-                    ZStack {
-                        // Grid line background
-                        Rectangle()
-                            .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-                        
-                        if let date = date {
-                            Text("\(date.dayNumber())")
-                                .font(.system(size: 14))
-                                .fontWeight(date.isToday() ? .bold : .regular)
-                                .foregroundColor(isInCurrentMonth(date) ? .primary : .gray.opacity(0.5))
-                                .frame(width: 24, height: 24)
-                                .background(
-                                    Circle()
-                                        .fill(date.isToday() ? Color.blue : Color.clear)
-                                )
-                                .foregroundColor(date.isToday() ? .white : (isInCurrentMonth(date) ? .primary : .gray.opacity(0.5)))
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
+                    Rectangle()
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        .background(Color.white)
+                        .frame(maxWidth: .infinity)
                 }
             }
-            .frame(height: 32)
+            .frame(height: 100) // Tall cells with lots of white space
             
-            // Property rows
-            ForEach(properties) { property in
-                PropertyRow(
-                    property: property,
-                    week: week,
-                    bookings: getBookingsForProperty(property)
-                )
+            VStack(alignment: .leading, spacing: 0) {
+                // Day numbers row
+                HStack(spacing: 0) {
+                    ForEach(Array(week.enumerated()), id: \.offset) { index, date in
+                        ZStack {
+                            if let date = date {
+                                Text("\(date.dayNumber())")
+                                    .font(.system(size: 14))
+                                    .fontWeight(date.isToday() ? .bold : .regular)
+                                    .foregroundColor(isInCurrentMonth(date) ? .primary : .gray.opacity(0.5))
+                                    .frame(width: 24, height: 24)
+                                    .background(
+                                        Circle()
+                                            .fill(date.isToday() ? Color.blue : Color.clear)
+                                    )
+                                    .foregroundColor(date.isToday() ? .white : (isInCurrentMonth(date) ? .primary : .gray.opacity(0.5)))
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                }
+                .frame(height: 32)
+                .padding(.top, 4)
+                
+                Spacer()
+                
+                // Property rows at bottom
+                VStack(spacing: 2) {
+                    ForEach(properties) { property in
+                        PropertyRow(
+                            property: property,
+                            week: week,
+                            bookings: getBookingsForProperty(property)
+                        )
+                    }
+                }
+                .padding(.bottom, 4)
+                .padding(.horizontal, 2)
             }
+            .frame(height: 100)
         }
-        .background(Color.white)
     }
     
     private func isInCurrentMonth(_ date: Date) -> Bool {
@@ -156,103 +172,95 @@ struct PropertyRow: View {
     let bookings: [Booking]
     
     var body: some View {
-        HStack(spacing: 0) {
-            ForEach(Array(week.enumerated()), id: \.offset) { index, date in
-                ZStack {
-                    // Grid line background
-                    Rectangle()
-                        .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-                        .background(Color.white)
-                    
-                    if let date = date {
-                        // Check if there's a booking on this date
-                        if let booking = bookings.first(where: { $0.overlapsDate(date) }) {
-                            BookingSegment(
-                                booking: booking,
-                                property: property,
-                                date: date
-                            )
-                        }
-                    }
+        GeometryReader { geometry in
+            let totalWidth = geometry.size.width
+            let cellWidth = totalWidth / 7
+            
+            ZStack(alignment: .leading) {
+                // Draw each booking as a continuous bar
+                ForEach(bookings, id: \.id) { booking in
+                    ContinuousBookingBar(
+                        booking: booking,
+                        property: property,
+                        week: week,
+                        cellWidth: cellWidth
+                    )
                 }
-                .frame(maxWidth: .infinity)
             }
         }
-        .frame(height: 24)
+        .frame(height: 16) // Thin bars
     }
 }
 
-struct BookingSegment: View {
+struct ContinuousBookingBar: View {
     let booking: Booking
     let property: Property
-    let date: Date
+    let week: [Date?]
+    let cellWidth: CGFloat
     
     var body: some View {
-        GeometryReader { geometry in
-            let width = geometry.size.width
-            let segment = getSegmentType()
-            
+        let barGeometry = calculateBarGeometry()
+        
+        if barGeometry.width > 0 {
             HStack(spacing: 0) {
-                // Left spacer for check-in day
-                if segment == .checkIn {
-                    Color.clear
-                        .frame(width: width * 0.5)
-                }
-                
-                // Booking bar
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(property.color)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 3)
-                                .stroke(Color.black, lineWidth: 1.5)
-                        )
-                    
-                    // Property label on first day
-                    if Calendar.current.isDate(booking.startDate, inSameDayAs: date) {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(property.color)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.black, lineWidth: 1.5)
+                    )
+                    .overlay(
+                        // Property label
                         Text(property.shortName)
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.black)
-                            .padding(.leading, 4)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                            .padding(.trailing, 6)
+                    )
+            }
+            .frame(width: barGeometry.width)
+            .offset(x: barGeometry.offset)
+        }
+    }
+    
+    private func calculateBarGeometry() -> (offset: CGFloat, width: CGFloat) {
+        let calendar = Calendar.current
+        var startIndex: Int?
+        var endIndex: Int?
+        var startOffset: CGFloat = 0
+        var endOffset: CGFloat = 0
+        
+        // Find which days in this week the booking spans
+        for (index, date) in week.enumerated() {
+            guard let date = date else { continue }
+            
+            if booking.overlapsDate(date) {
+                if startIndex == nil {
+                    startIndex = index
+                    // Check if this is the actual start date
+                    if calendar.isDate(booking.startDate, inSameDayAs: date) {
+                        startOffset = 0.5 // Start at midday (4PM check-in)
+                    } else {
+                        startOffset = 0 // Continues from previous week
                     }
                 }
-                .frame(width: getSegmentWidth(segment, totalWidth: width))
-                
-                // Right spacer for check-out day
-                if segment == .checkOut {
-                    Color.clear
-                        .frame(width: width * 0.5)
+                endIndex = index
+                // Check if this is the actual end date
+                if calendar.isDate(booking.endDate, inSameDayAs: date) {
+                    endOffset = 0.5 // End at midday (10AM check-out)
+                } else {
+                    endOffset = 1.0 // Continues to next week
                 }
             }
         }
-    }
-    
-    private enum SegmentType {
-        case checkIn    // First day - starts at 50%
-        case checkOut   // Last day - ends at 50%
-        case full       // Middle day - full width
-    }
-    
-    private func getSegmentType() -> SegmentType {
-        let calendar = Calendar.current
-        let isFirst = calendar.isDate(booking.startDate, inSameDayAs: date)
-        let isLast = calendar.isDate(booking.endDate, inSameDayAs: date)
         
-        if isFirst {
-            return .checkIn
-        } else if isLast {
-            return .checkOut
-        } else {
-            return .full
+        guard let start = startIndex, let end = endIndex else {
+            return (0, 0)
         }
-    }
-    
-    private func getSegmentWidth(_ segment: SegmentType, totalWidth: CGFloat) -> CGFloat {
-        switch segment {
-        case .checkIn, .checkOut:
-            return totalWidth * 0.5
-        case .full:
-            return totalWidth
-        }
+        
+        let offset = (CGFloat(start) + startOffset) * cellWidth
+        let width = (CGFloat(end - start) + endOffset - startOffset) * cellWidth
+        
+        return (offset, width)
     }
 }
