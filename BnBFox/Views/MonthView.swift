@@ -99,7 +99,7 @@ struct WeekSection: View {
                 ForEach(Array(week.enumerated()), id: \.offset) { index, date in
                     Rectangle()
                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        .background(Color.white)
+                        .background(isInCurrentMonth(date) ? Color.white : Color.gray.opacity(0.05))
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -114,13 +114,12 @@ struct WeekSection: View {
                                 Text("\(date.dayNumber())")
                                     .font(.system(size: 14))
                                     .fontWeight(date.isToday() ? .bold : .regular)
-                                    .foregroundColor(isInCurrentMonth(date) ? .primary : .gray.opacity(0.5))
+                                    .foregroundColor(date.isToday() ? .white : (isInCurrentMonth(date) ? .primary : .gray.opacity(0.5)))
                                     .frame(width: 24, height: 24)
                                     .background(
                                         Circle()
                                             .fill(date.isToday() ? Color.blue : Color.clear)
                                     )
-                                    .foregroundColor(date.isToday() ? .white : (isInCurrentMonth(date) ? .primary : .gray.opacity(0.5)))
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -137,7 +136,8 @@ struct WeekSection: View {
                         PropertyRow(
                             property: property,
                             week: week,
-                            bookings: getBookingsForProperty(property)
+                            bookings: getBookingsForProperty(property),
+                            currentMonth: currentMonth
                         )
                     }
                 }
@@ -148,7 +148,8 @@ struct WeekSection: View {
         }
     }
     
-    private func isInCurrentMonth(_ date: Date) -> Bool {
+    private func isInCurrentMonth(_ date: Date?) -> Bool {
+        guard let date = date else { return false }
         let calendar = Calendar.current
         return calendar.isDate(date, equalTo: currentMonth, toGranularity: .month)
     }
@@ -175,6 +176,7 @@ struct PropertyRow: View {
     let property: Property
     let week: [Date?]
     let bookings: [Booking]
+    let currentMonth: Date
     
     var body: some View {
         GeometryReader { geometry in
@@ -188,7 +190,8 @@ struct PropertyRow: View {
                         booking: booking,
                         property: property,
                         week: week,
-                        cellWidth: cellWidth
+                        cellWidth: cellWidth,
+                        currentMonth: currentMonth
                     )
                 }
             }
@@ -202,44 +205,54 @@ struct ContinuousBookingBar: View {
     let property: Property
     let week: [Date?]
     let cellWidth: CGFloat
+    let currentMonth: Date
     
     var body: some View {
         let barGeometry = calculateBarGeometry()
         
         if barGeometry.width > 0 {
             HStack(spacing: 0) {
-                // Use UnevenRoundedRectangle for selective corner rounding
-                UnevenRoundedRectangle(
-                    topLeadingRadius: barGeometry.roundedStart ? 8 : 0,
-                    bottomLeadingRadius: barGeometry.roundedStart ? 8 : 0,
-                    bottomTrailingRadius: barGeometry.roundedEnd ? 8 : 0,
-                    topTrailingRadius: barGeometry.roundedEnd ? 8 : 0
-                )
-                .fill(property.color)
-                .overlay(
+                // Render bar as segments, one per day
+                ForEach(Array(barGeometry.segments.enumerated()), id: \.offset) { index, segment in
+                    let isFirst = index == 0
+                    let isLast = index == barGeometry.segments.count - 1
+                    
                     UnevenRoundedRectangle(
-                        topLeadingRadius: barGeometry.roundedStart ? 8 : 0,
-                        bottomLeadingRadius: barGeometry.roundedStart ? 8 : 0,
-                        bottomTrailingRadius: barGeometry.roundedEnd ? 8 : 0,
-                        topTrailingRadius: barGeometry.roundedEnd ? 8 : 0
+                        topLeadingRadius: (isFirst && barGeometry.roundedStart) ? 8 : 0,
+                        bottomLeadingRadius: (isFirst && barGeometry.roundedStart) ? 8 : 0,
+                        bottomTrailingRadius: (isLast && barGeometry.roundedEnd) ? 8 : 0,
+                        topTrailingRadius: (isLast && barGeometry.roundedEnd) ? 8 : 0
                     )
-                    .stroke(Color.black, lineWidth: 1.5)
-                )
-                .overlay(
-                    // Property label on the right end
-                    Text(property.shortName)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .padding(.trailing, 6)
-                )
+                    .fill(segment.isInCurrentMonth ? property.color : Color.gray.opacity(0.4))
+                    .overlay(
+                        UnevenRoundedRectangle(
+                            topLeadingRadius: (isFirst && barGeometry.roundedStart) ? 8 : 0,
+                            bottomLeadingRadius: (isFirst && barGeometry.roundedStart) ? 8 : 0,
+                            bottomTrailingRadius: (isLast && barGeometry.roundedEnd) ? 8 : 0,
+                            topTrailingRadius: (isLast && barGeometry.roundedEnd) ? 8 : 0
+                        )
+                        .stroke(Color.black, lineWidth: 1.5)
+                    )
+                    .frame(width: segment.width)
+                    .overlay(
+                        // Property label on the last segment
+                        Group {
+                            if isLast {
+                                Text(property.shortName)
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.black)
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                                    .padding(.trailing, 6)
+                            }
+                        }
+                    )
+                }
             }
-            .frame(width: barGeometry.width)
             .offset(x: barGeometry.offset)
         }
     }
     
-    private func calculateBarGeometry() -> (offset: CGFloat, width: CGFloat, roundedStart: Bool, roundedEnd: Bool) {
+    private func calculateBarGeometry() -> (offset: CGFloat, width: CGFloat, roundedStart: Bool, roundedEnd: Bool, segments: [(width: CGFloat, isInCurrentMonth: Bool)]) {
         let calendar = Calendar.current
         var startIndex: Int?
         var endIndex: Int?
@@ -247,9 +260,9 @@ struct ContinuousBookingBar: View {
         var endOffset: CGFloat = 0
         var isActualStart = false
         var isActualEnd = false
+        var segments: [(width: CGFloat, isInCurrentMonth: Bool)] = []
         
         // Find which days in this week the booking spans
-        // Note: We need to check the checkout day too (endDate), not just occupied nights
         for (index, date) in week.enumerated() {
             guard let date = date else { continue }
             let dayStart = calendar.startOfDay(for: date)
@@ -270,7 +283,6 @@ struct ContinuousBookingBar: View {
                     }
                 }
                 
-                // Update end index for each day in range
                 endIndex = index
             }
         }
@@ -289,12 +301,38 @@ struct ContinuousBookingBar: View {
         }
         
         guard let start = startIndex, let end = endIndex else {
-            return (0, 0, false, false)
+            return (0, 0, false, false, [])
+        }
+        
+        // Build segments for each day
+        for dayIndex in start...end {
+            guard let date = week[dayIndex] else { continue }
+            
+            let isInMonth = calendar.isDate(date, equalTo: currentMonth, toGranularity: .month)
+            let isFirstDay = dayIndex == start
+            let isLastDay = dayIndex == end
+            
+            var segmentWidth: CGFloat
+            if isFirstDay && isLastDay {
+                // Single day booking
+                segmentWidth = (endOffset - startOffset) * cellWidth
+            } else if isFirstDay {
+                // First day
+                segmentWidth = (1.0 - startOffset) * cellWidth
+            } else if isLastDay {
+                // Last day
+                segmentWidth = endOffset * cellWidth
+            } else {
+                // Middle day
+                segmentWidth = cellWidth
+            }
+            
+            segments.append((width: segmentWidth, isInCurrentMonth: isInMonth))
         }
         
         let offset = (CGFloat(start) + startOffset) * cellWidth
-        let width = (CGFloat(end - start) + endOffset - startOffset) * cellWidth
+        let totalWidth = segments.reduce(0) { $0 + $1.width }
         
-        return (offset, width, isActualStart, isActualEnd)
+        return (offset, totalWidth, isActualStart, isActualEnd, segments)
     }
 }
