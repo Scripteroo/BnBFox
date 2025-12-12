@@ -6,88 +6,89 @@
 //
 
 import SwiftUI
+import AVKit
 
 struct CalendarView: View {
     @StateObject private var viewModel = CalendarViewModel()
     @State private var showingAdminPanel = false
-    @State private var selectedProperty: Property? = nil
+    @State private var selectedProperty: Property?
     
     var body: some View {
         NavigationView {
-            ZStack {
-                Color(UIColor.systemGroupedBackground)
-                    .ignoresSafeArea()
-                
-                VStack(spacing: 0) {
+            VStack(spacing: 0) {
+                if viewModel.isLoading && viewModel.bookings.isEmpty {
+                    AnimatedLoadingScreen()
+                } else if let errorMessage = viewModel.errorMessage {
+                    Spacer()
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 50))
+                            .foregroundColor(.orange)
+                        Text("Error Loading Bookings")
+                            .font(.headline)
+                        Text(errorMessage)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        Button("Retry") {
+                            Task {
+                                await viewModel.loadBookings()
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    Spacer()
+                } else {
                     // Header
                     headerView
                     
-                    // Calendar content
-                    if viewModel.isLoading && viewModel.bookings.isEmpty {
-                        AnimatedLoadingScreen()
-                    } else if let errorMessage = viewModel.errorMessage {
-                        Spacer()
-                        VStack(spacing: 16) {
-                            Image(systemName: "exclamationmark.triangle")
-                                .font(.system(size: 48))
-                                .foregroundColor(.orange)
-                            Text(errorMessage)
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(.secondary)
-                            Button("Retry") {
-                                Task {
-                                    await viewModel.refreshData()
-                                }
-                            }
-                            .buttonStyle(.bordered)
-                        }
-                        .padding()
-                        Spacer()
-                    } else {
-                        // Legend
-                        legendView
-                        
-                        ScrollView {
-                            LazyVStack(spacing: 20) {
-                                ForEach(viewModel.getMonthsToDisplay(), id: \.self) { month in
-                                    MonthView(
-                                        month: month,
-                                        bookings: viewModel.bookings
-                                    )
-                                }
-                            }
-                            .padding(.vertical, 16)
-                        }
+                    // Legend
+                    legendView
+                    
+                    Divider()
+                    
+                    // Calendar
+                    ScrollView {
+                        MonthView(
+                            month: viewModel.currentMonth,
+                            bookings: viewModel.bookings
+                        )
+                        .environmentObject(viewModel)
                     }
                 }
             }
             .navigationBarHidden(true)
-        }
-        .navigationViewStyle(StackNavigationViewStyle())
-        .sheet(isPresented: $showingAdminPanel) {
-            AdminPanelView()
-        }
-        .sheet(item: $selectedProperty) { property in
-            PropertyDetailView(property: property, bookings: viewModel.bookings)
+            .task {
+                await viewModel.loadBookings()
+            }
+            .refreshable {
+                await viewModel.loadBookings()
+            }
+            .sheet(isPresented: $showingAdminPanel) {
+                AdminPanelView()
+                    .environmentObject(PropertyService.shared)
+                    .onDisappear {
+                        Task {
+                            await viewModel.loadBookings()
+                        }
+                    }
+            }
+            .sheet(item: $selectedProperty) { property in
+                PropertyDetailView(
+                    property: property,
+                    bookings: viewModel.bookings
+                )
                 .environmentObject(PropertyService.shared)
-        }
-        .task {
-            await viewModel.loadBookings()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .propertiesDidChange)) { _ in
-            Task {
-                await viewModel.refreshData()
             }
         }
     }
     
     private var headerView: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 0) {
             HStack {
-                // Menu button
-                Button(action: {
-                    // Menu action placeholder
-                }) {
+                // Menu button (placeholder)
+                Button(action: {}) {
                     Image(systemName: "line.3.horizontal")
                         .font(.system(size: 20))
                         .foregroundColor(.primary)
@@ -98,27 +99,20 @@ struct CalendarView: View {
                 
                 // Title
                 Text("Kawama Calendar")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 20, weight: .semibold))
                 
                 Spacer()
                 
                 // Refresh button
                 Button(action: {
                     Task {
-                        await viewModel.refreshData()
+                        await viewModel.loadBookings()
                     }
                 }) {
-                    Image(systemName: viewModel.isLoading ? "arrow.clockwise.circle.fill" : "arrow.clockwise")
+                    Image(systemName: "arrow.clockwise")
                         .font(.system(size: 20))
                         .foregroundColor(.primary)
                         .frame(width: 44, height: 44)
-                        .rotationEffect(.degrees(viewModel.isLoading ? 360 : 0))
-                        .animation(
-                            viewModel.isLoading ?
-                            Animation.linear(duration: 1).repeatForever(autoreverses: false) :
-                            .default,
-                            value: viewModel.isLoading
-                        )
                 }
                 
                 // Settings button
@@ -163,100 +157,86 @@ struct CalendarView: View {
     }
 }
 
-// MARK: - Animated Loading Screen
+// MARK: - Animated Loading Screen with Video
 struct AnimatedLoadingScreen: View {
-    @State private var isAnimating = false
-    @State private var bubbles: [LoadingBubble] = []
+    @State private var player: AVPlayer?
     
     var body: some View {
         ZStack {
-            Color(UIColor.systemGroupedBackground)
+            // Dark background
+            Color.black
                 .ignoresSafeArea()
             
-            VStack(spacing: 40) {
+            VStack(spacing: 0) {
                 Spacer()
                 
-                ZStack {
-                    ForEach(bubbles) { bubble in
-                        Circle()
-                            .fill(Color.blue.opacity(0.3))
-                            .frame(width: bubble.size, height: bubble.size)
-                            .position(x: bubble.x, y: bubble.y)
-                    }
-                    
-                    Image("KawamaLogo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 280, height: 280)
-                        .offset(y: isAnimating ? -10 : 10)
-                        .animation(
-                            Animation.easeInOut(duration: 2.0)
-                                .repeatForever(autoreverses: true),
-                            value: isAnimating
-                        )
+                // Full screen video player
+                if let player = player {
+                    VideoPlayer(player: player)
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .clipped()
+                        .ignoresSafeArea()
+                        .allowsHitTesting(false)
+                } else {
+                    // Fallback while video loads
+                    ProgressView()
+                        .scaleEffect(2)
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 }
-                .frame(height: 250)
                 
+                Spacer()
+                
+                // Text overlay at bottom
                 VStack(spacing: 12) {
-                    Text("Loading Kawama Calendar")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.primary)
+                    Text("Loading your Kawama Calendar")
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundColor(.white)
+                        .shadow(color: .black.opacity(0.5), radius: 4, x: 0, y: 2)
                     
                     Text("Fetching booking data...")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 15))
+                        .foregroundColor(.white.opacity(0.9))
+                        .shadow(color: .black.opacity(0.5), radius: 4, x: 0, y: 2)
                     
                     ProgressView()
                         .scaleEffect(1.2)
-                        .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         .padding(.top, 8)
                 }
-                
-                Spacer()
+                .padding(.bottom, 60)
             }
         }
         .onAppear {
-            isAnimating = true
-            startBubbleAnimation()
+            setupVideoPlayer()
+        }
+        .onDisappear {
+            player?.pause()
         }
     }
     
-    private func startBubbleAnimation() {
-        for _ in 0..<8 {
-            addBubble()
+    private func setupVideoPlayer() {
+        guard let videoURL = Bundle.main.url(forResource: "sea-turtle-swimming", withExtension: "mov") else {
+            print("Error: Could not find sea-turtle-swimming.mov")
+            return
         }
         
-        Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { _ in
-            addBubble()
-            removeOldBubbles()
-        }
-    }
-    
-    private func addBubble() {
-        let bubble = LoadingBubble(
-            x: CGFloat.random(in: 100...300),
-            y: 300,
-            size: CGFloat.random(in: 8...20)
-        )
+        let playerItem = AVPlayerItem(url: videoURL)
+        let player = AVPlayer(playerItem: playerItem)
         
-        withAnimation(.linear(duration: Double.random(in: 3...5))) {
-            bubbles.append(bubble)
-            if let index = bubbles.firstIndex(where: { $0.id == bubble.id }) {
-                bubbles[index].y = -50
-            }
+        // Loop the video
+        NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: playerItem,
+            queue: .main
+        ) { _ in
+            player.seek(to: .zero)
+            player.play()
         }
+        
+        self.player = player
+        player.play()
     }
-    
-    private func removeOldBubbles() {
-        bubbles.removeAll { $0.y < 0 }
-    }
-}
-
-struct LoadingBubble: Identifiable {
-    let id = UUID()
-    var x: CGFloat
-    var y: CGFloat
-    let size: CGFloat
 }
 
 struct CalendarView_Previews: PreviewProvider {
