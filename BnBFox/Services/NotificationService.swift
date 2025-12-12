@@ -150,4 +150,83 @@ class NotificationService {
         let requests = await UNUserNotificationCenter.current().pendingNotificationRequests()
         return requests.filter { $0.identifier.starts(with: "cleaning_") }.count
     }
+    
+    // MARK: - New Booking Alerts
+    
+    // Store previous bookings to detect new ones
+    private var previousBookingIds: Set<String> = []
+    
+    // Check for new bookings and send notifications
+    func checkForNewBookings(_ currentBookings: [Booking]) {
+        guard AppSettings.shared.newBookingAlertsEnabled else { return }
+        
+        let calendar = Calendar.current
+        let currentMonth = calendar.component(.month, from: Date())
+        let currentYear = calendar.component(.year, from: Date())
+        
+        // Get current booking IDs
+        let currentBookingIds = Set(currentBookings.map { $0.id })
+        
+        // Find new bookings (in current IDs but not in previous)
+        let newBookingIds = currentBookingIds.subtracting(previousBookingIds)
+        
+        // Only alert for bookings in current month
+        for bookingId in newBookingIds {
+            guard let booking = currentBookings.first(where: { $0.id == bookingId }) else { continue }
+            
+            // Check if booking is in current month
+            let bookingMonth = calendar.component(.month, from: booking.startDate)
+            let bookingYear = calendar.component(.year, from: booking.startDate)
+            
+            if bookingMonth == currentMonth && bookingYear == currentYear {
+                // Get property name
+                guard let property = PropertyService.shared.getProperty(by: booking.propertyId) else { continue }
+                
+                // Send notification immediately
+                sendNewBookingNotification(propertyName: property.displayName, booking: booking)
+            }
+        }
+        
+        // Update stored booking IDs
+        previousBookingIds = currentBookingIds
+    }
+    
+    private func sendNewBookingNotification(propertyName: String, booking: Booking) {
+        let content = UNMutableNotificationContent()
+        content.title = "📅 New Booking"
+        content.body = "New booking in \(propertyName)"
+        
+        // Add sound if enabled
+        if AppSettings.shared.alertSoundEnabled {
+            content.sound = .default
+        }
+        
+        // Format dates for subtitle
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        let startDate = dateFormatter.string(from: booking.startDate)
+        let endDate = dateFormatter.string(from: booking.endDate)
+        content.subtitle = "\(startDate) - \(endDate)"
+        
+        // Create trigger to fire immediately
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        
+        // Create request
+        let identifier = "new_booking_\(booking.id)"
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        
+        // Schedule notification
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling new booking notification: \(error)")
+            } else {
+                print("Scheduled new booking notification for \(propertyName)")
+            }
+        }
+    }
+    
+    // Initialize previous bookings on first load
+    func initializeBookingTracking(_ bookings: [Booking]) {
+        previousBookingIds = Set(bookings.map { $0.id })
+    }
 }

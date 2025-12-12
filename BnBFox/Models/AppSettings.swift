@@ -36,10 +36,17 @@ class AppSettings: ObservableObject {
         }
     }
     
+    @Published var newBookingAlertsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(newBookingAlertsEnabled, forKey: "newBookingAlertsEnabled")
+        }
+    }
+    
     private init() {
         // Load saved settings or use defaults
         self.cleaningAlertsEnabled = UserDefaults.standard.object(forKey: "cleaningAlertsEnabled") as? Bool ?? true
         self.alertSoundEnabled = UserDefaults.standard.object(forKey: "alertSoundEnabled") as? Bool ?? true
+        self.newBookingAlertsEnabled = UserDefaults.standard.object(forKey: "newBookingAlertsEnabled") as? Bool ?? true
         
         // Default alert time: 8:00 AM
         if let savedTime = UserDefaults.standard.object(forKey: "alertTime") as? Date {

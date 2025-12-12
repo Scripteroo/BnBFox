@@ -43,7 +43,18 @@ class CalendarViewModel: ObservableObject {
         }
         
         // Sort by start date
-        self.bookings = allBookings.sorted { $0.startDate < $1.startDate }
+        let sortedBookings = allBookings.sorted { $0.startDate < $1.startDate }
+        
+        // Check for new bookings before updating
+        if !self.bookings.isEmpty {
+            // Not first load, check for new bookings
+            NotificationService.shared.checkForNewBookings(sortedBookings)
+        } else {
+            // First load, initialize tracking
+            NotificationService.shared.initializeBookingTracking(sortedBookings)
+        }
+        
+        self.bookings = sortedBookings
         isLoading = false
         
         // Schedule cleaning alerts if enabled

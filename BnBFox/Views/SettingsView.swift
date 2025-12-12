@@ -46,6 +46,21 @@ struct SettingsView: View {
                     }
                 }
                 
+                // New Booking Alerts Section
+                Section(header: Text("New Booking Alerts")) {
+                    Toggle("Enable New Booking Alerts", isOn: $settings.newBookingAlertsEnabled)
+                    
+                    if settings.newBookingAlertsEnabled {
+                        HStack {
+                            Image(systemName: "info.circle")
+                                .foregroundColor(.blue)
+                            Text("Get notified when new bookings appear in the current month")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                
                 // Upcoming Cleanings Section
                 if settings.cleaningAlertsEnabled && !upcomingCleanings.isEmpty {
                     Section(header: Text("Upcoming Cleanings (Next 30 Days)")) {
