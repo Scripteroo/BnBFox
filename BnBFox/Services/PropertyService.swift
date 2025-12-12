@@ -63,7 +63,7 @@ class PropertyService: ObservableObject {
                 sources: [
                     CalendarSource(
                         platform: .vrbo,
-                        url: URL(string: "http://www.vrbo.com/icalendar/42211aa1409741bd9ad359d1ccd9f522.ics")!
+                        url: URL(string: "https://www.vrbo.com/icalendar/42211aa1409741bd9ad359d1ccd9f522.ics")!
                     ),
                     CalendarSource(
                         platform: .airbnb,
