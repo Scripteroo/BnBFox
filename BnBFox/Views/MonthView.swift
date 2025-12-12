@@ -167,21 +167,46 @@ struct HorizontalBookingBar: View {
         HStack(spacing: 0) {
             ForEach(Array(week.enumerated()), id: \.offset) { index, date in
                 if let date = date {
-                    if booking.overlapsDate(date) {
-                        // Show booking bar segment
-                        Text(labelText(for: date))
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(.white)
-                            .lineLimit(1)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 4)
-                            .background(property.color)
-                            .cornerRadius(2)
-                    } else {
-                        // Empty space
-                        Color.clear
-                            .frame(maxWidth: .infinity)
+                    GeometryReader { geometry in
+                        let width = geometry.size.width
+                        let daySegment = getDaySegment(for: date)
+                        
+                        if daySegment != .none {
+                            HStack(spacing: 0) {
+                                // Left spacer for check-in day (starts at 50%)
+                                if daySegment == .checkInOnly || daySegment == .checkInMiddle {
+                                    Color.clear
+                                        .frame(width: width * 0.5)
+                                }
+                                
+                                // Booking bar segment
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(property.color)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .stroke(Color.black, lineWidth: 1.5)
+                                        )
+                                    
+                                    // Label on check-in day
+                                    if booking.isFirstDay(of: date) {
+                                        Text(property.shortName)
+                                            .font(.system(size: 10, weight: .semibold))
+                                            .foregroundColor(.white)
+                                            .padding(.leading, 4)
+                                    }
+                                }
+                                .frame(width: segmentWidth(for: daySegment, totalWidth: width))
+                                
+                                // Right spacer for check-out day (ends at 50%)
+                                if daySegment == .checkOutOnly || daySegment == .checkOutMiddle {
+                                    Color.clear
+                                        .frame(width: width * 0.5)
+                                }
+                            }
+                        }
                     }
+                    .frame(maxWidth: .infinity)
                 } else {
                     // Empty cell
                     Color.clear
@@ -189,14 +214,52 @@ struct HorizontalBookingBar: View {
                 }
             }
         }
-        .frame(height: 22)
+        .frame(height: 24)
     }
     
-    private func labelText(for date: Date) -> String {
-        // Show property short name on the first day of the booking
-        if booking.isFirstDay(of: date) {
-            return property.shortName
+    private enum DaySegment {
+        case none
+        case checkInOnly        // Check-in day only (no checkout same day) - starts at 50%
+        case checkOutOnly       // Check-out day only - ends at 50%
+        case checkInMiddle      // Check-in day with continuation - starts at 50%, full width after
+        case checkOutMiddle     // Check-out day with continuation - full width before, ends at 50%
+        case fullDay            // Middle day - full width
+    }
+    
+    private func getDaySegment(for date: Date) -> DaySegment {
+        let calendar = Calendar.current
+        let isCheckIn = calendar.isDate(booking.startDate, inSameDayAs: date)
+        let isCheckOut = calendar.isDate(booking.endDate, inSameDayAs: date)
+        let isMiddle = date > booking.startDate && date < booking.endDate
+        
+        if isCheckIn && isCheckOut {
+            // Same day check-in and check-out (shouldn't happen in practice)
+            return .checkInOnly
+        } else if isCheckIn {
+            return .checkInMiddle
+        } else if isCheckOut {
+            return .checkOutMiddle
+        } else if isMiddle {
+            return .fullDay
+        } else {
+            return .none
         }
-        return ""
+    }
+    
+    private func segmentWidth(for segment: DaySegment, totalWidth: CGFloat) -> CGFloat {
+        switch segment {
+        case .none:
+            return 0
+        case .checkInOnly:
+            return totalWidth * 0.5  // Right half only
+        case .checkOutOnly:
+            return totalWidth * 0.5  // Left half only
+        case .checkInMiddle:
+            return totalWidth * 0.5  // Right half of check-in day
+        case .checkOutMiddle:
+            return totalWidth * 0.5  // Left half of check-out day
+        case .fullDay:
+            return totalWidth        // Full day
+        }
     }
 }
