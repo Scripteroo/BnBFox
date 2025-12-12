@@ -230,8 +230,8 @@ struct AnimatedLoadingScreen: View {
     }
     
     private func setupVideoPlayer() {
-        guard let videoURL = Bundle.main.url(forResource: "sea-turtle-swimming", withExtension: "mov") else {
-            print("Error: Could not find sea-turtle-swimming.mov")
+        guard let videoURL = Bundle.main.url(forResource: "sea-turtle-swimming-2", withExtension: "mov") else {
+            print("Error: Could not find sea-turtle-swimming-2.mov")
             return
         }
         
