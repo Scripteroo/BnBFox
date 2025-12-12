@@ -126,6 +126,14 @@ struct WeekSection: View {
                         ZStack {
                             if let date = date {
                                 let hasActivity = dateHasActivity(date)
+                                let hasCheckout = dateHasCheckout(date)
+                                
+                                // Light green background for cleaning days
+                                if hasCheckout {
+                                    Rectangle()
+                                        .fill(Color.green.opacity(0.1))
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                }
                                 
                                 Text("\(date.dayNumber())")
                                     .font(.system(size: 14))
@@ -188,6 +196,26 @@ struct WeekSection: View {
         guard let date = date else { return false }
         let calendar = Calendar.current
         return calendar.isDate(date, equalTo: currentMonth, toGranularity: .month)
+    }
+    
+    private func dateHasCheckout(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        let dayStart = calendar.startOfDay(for: date)
+        
+        // Check if any property has check-out on this date
+        for property in properties {
+            let propertyBookings = bookings.filter { $0.propertyId == property.id }
+            
+            for booking in propertyBookings {
+                let bookingEnd = calendar.startOfDay(for: booking.endDate)
+                
+                if calendar.isDate(bookingEnd, inSameDayAs: dayStart) {
+                    return true
+                }
+            }
+        }
+        
+        return false
     }
     
     private func dateHasActivity(_ date: Date) -> Bool {

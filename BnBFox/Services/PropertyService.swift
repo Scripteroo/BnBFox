@@ -54,6 +54,22 @@ class PropertyService {
                         url: URL(string: "https://www.airbnb.com/calendar/ical/634088790463336883.ics?s=aa7722940a08ab86e82b802120481e3d")!
                     )
                 ]
+            ),
+            Property(
+                name: "kawama-c5",
+                displayName: "Kawama C-5",
+                shortName: "C-5",
+                colorHex: "007AFF", // Blue
+                sources: [
+                    CalendarSource(
+                        platform: .vrbo,
+                        url: URL(string: "http://www.vrbo.com/icalendar/42211aa1409741bd9ad359d1ccd9f522.ics")!
+                    ),
+                    CalendarSource(
+                        platform: .airbnb,
+                        url: URL(string: "https://www.airbnb.com/calendar/ical/1329041307852345218.ics?s=380d406f0019dfb3fe07b61f94f8f0fa&locale=en")!
+                    )
+                ]
             )
         ]
     }

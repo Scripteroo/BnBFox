@@ -10,6 +10,7 @@ import SwiftUI
 struct CalendarView: View {
     @StateObject private var viewModel = CalendarViewModel()
     @State private var showingAdminPanel = false
+    @State private var selectedProperty: Property? = nil
     
     var body: some View {
         NavigationView {
@@ -67,6 +68,9 @@ struct CalendarView: View {
         .navigationViewStyle(StackNavigationViewStyle())
         .sheet(isPresented: $showingAdminPanel) {
             AdminPanelView()
+        }
+        .sheet(item: $selectedProperty) { property in
+            PropertyDetailView(property: property)
         }
         .task {
             await viewModel.loadBookings()
@@ -139,14 +143,19 @@ struct CalendarView: View {
     private var legendView: some View {
         HStack(spacing: 16) {
             ForEach(viewModel.properties) { property in
-                HStack(spacing: 6) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(property.color)
-                        .frame(width: 20, height: 12)
-                    Text(property.shortName)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.secondary)
+                Button(action: {
+                    selectedProperty = property
+                }) {
+                    HStack(spacing: 6) {
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(property.color)
+                            .frame(width: 20, height: 12)
+                        Text(property.shortName)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
                 }
+                .buttonStyle(PlainButtonStyle())
             }
         }
         .padding(.vertical, 8)
