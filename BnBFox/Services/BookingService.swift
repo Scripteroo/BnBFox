@@ -13,7 +13,7 @@ class BookingService: ObservableObject {
     
     private let icalService = ICalService.shared
     private var cache: [String: (bookings: [Booking], timestamp: Date)] = [:]
-    private let cacheExpiration: TimeInterval = 300 // 5 minutes
+    private let cacheExpiration: TimeInterval = 900 // 15 minutes
     
     private init() {}
     

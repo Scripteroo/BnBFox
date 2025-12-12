@@ -11,7 +11,7 @@ import SwiftUI
 @MainActor
 class CalendarViewModel: ObservableObject {
     @Published var bookings: [Booking] = []
-    @Published var isLoading: Bool = false
+    @Published var isLoading: Bool = true
     @Published var errorMessage: String?
     @Published var currentMonth: Date = Date()
     

@@ -187,8 +187,7 @@ struct AnimatedLoadingScreen: View {
                     Image("KawamaLogo")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 200, height: 200)
-                        .rotationEffect(.degrees(isAnimating ? 3 : -3))
+                        .frame(width: 280, height: 280)
                         .offset(y: isAnimating ? -10 : 10)
                         .animation(
                             Animation.easeInOut(duration: 2.0)
