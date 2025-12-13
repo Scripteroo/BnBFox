@@ -31,12 +31,12 @@ struct MonthView: View {
                 HStack(spacing: 0) {
                     ForEach(Array(daysOfWeek.enumerated()), id: \.offset) { index, day in
                         Text(day)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 13, weight: index == 0 ? .regular : .bold))
+                            .foregroundColor(index == 0 ? .gray : .black)
                             .frame(maxWidth: .infinity)
                     }
                 }
-                .padding(.bottom, 4)
+                .padding(.bottom, 8)
             }
             
             // Calendar weeks
@@ -117,13 +117,17 @@ struct WeekSection: View {
             // Background grid
             HStack(spacing: 0) {
                 ForEach(Array(week.enumerated()), id: \.offset) { index, date in
+                    let hasCheckout = date != nil ? dateHasCheckout(date!) : false
                     Rectangle()
                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        .background(isInCurrentMonth(date) ? Color.white : Color.gray.opacity(0.05))
+                        .background(
+                            hasCheckout ? Color.green.opacity(0.15) :
+                            (isInCurrentMonth(date) ? Color.white : Color.gray.opacity(0.05))
+                        )
                         .frame(maxWidth: .infinity)
                 }
             }
-            .frame(height: 100) // Tall cells with lots of white space
+            .frame(height: 120) // Optimized for single-screen month view
             
             VStack(alignment: .leading, spacing: 0) {
                 // Day numbers row
@@ -134,23 +138,21 @@ struct WeekSection: View {
                                 let hasActivity = dateHasActivity(date)
                                 let hasCheckout = dateHasCheckout(date)
                                 
-                                // Light green background for cleaning days
-                                if hasCheckout {
-                                    Rectangle()
-                                        .fill(Color.green.opacity(0.1))
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                }
-                                
                                 Text("\(date.dayNumber())")
-                                    .font(.system(size: 14))
+                                    .font(.system(size: 15))
                                     .fontWeight(date.isToday() ? .bold : .regular)
-                                    .foregroundColor(date.isToday() ? .white : (isInCurrentMonth(date) ? .primary : .gray.opacity(0.5)))
-                                    .frame(width: 24, height: 24)
+                                    .foregroundColor(
+                                        date.isToday() ? .white : 
+                                        (hasActivity ? .blue : 
+                                        (isInCurrentMonth(date) ? .primary : .gray.opacity(0.5)))
+                                    )
+                                    .underline(hasActivity && !date.isToday())
+                                    .frame(width: 28, height: 28)
                                     .background(
                                         Circle()
                                             .fill(date.isToday() ? Color.blue : Color.clear)
                                     )
-                                    .contentShape(Circle())
+                                    .contentShape(Rectangle())
                                     .onTapGesture {
                                         if hasActivity {
                                             let activities = getActivitiesForDate(date)
@@ -159,21 +161,13 @@ struct WeekSection: View {
                                             }
                                         }
                                     }
-                                
-                                // Activity indicator dot
-                                if hasActivity {
-                                    Circle()
-                                        .fill(Color.blue)
-                                        .frame(width: 4, height: 4)
-                                        .offset(y: 14)
-                                }
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .center)
                     }
                 }
-                .frame(height: 32)
-                .padding(.top, 4)
+                .frame(height: 28)
+                .padding(.top, 2)
                 
                 Spacer()
                 
@@ -191,7 +185,7 @@ struct WeekSection: View {
                 .padding(.bottom, 4)
                 .padding(.horizontal, 2)
             }
-            .frame(height: 100)
+            .frame(height: 120)
         }
         .sheet(item: $dayDetailItem) { item in
             DayDetailView(date: item.date, activities: item.activities)

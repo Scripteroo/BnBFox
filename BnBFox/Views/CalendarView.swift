@@ -166,8 +166,9 @@ struct CalendarView: View {
                             .fill(property.color)
                             .frame(width: 20, height: 12)
                         Text(property.shortName)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.secondary)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.blue)
+                            .underline()
                     }
                 }
                 .buttonStyle(PlainButtonStyle())
