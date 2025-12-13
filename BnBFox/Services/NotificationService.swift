@@ -73,7 +73,7 @@ class NotificationService {
                     continue
                 }
                 
-                for (checkoutDate, bookingsOnDate) in dateBookings {
+                for (checkoutDate, _) in dateBookings {
                     // Only schedule for future dates
                     guard checkoutDate >= calendar.startOfDay(for: Date()) else { continue }
                     

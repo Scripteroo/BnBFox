@@ -136,7 +136,7 @@ struct WeekSection: View {
                         ZStack {
                             if let date = date {
                                 let hasActivity = dateHasActivity(date)
-                                let hasCheckout = dateHasCheckout(date)
+                                _ = dateHasCheckout(date)
                                 
                                 Text("\(date.dayNumber())")
                                     .font(.system(size: 15))
