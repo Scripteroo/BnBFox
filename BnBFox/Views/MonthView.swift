@@ -32,7 +32,7 @@ struct MonthView: View {
                     ForEach(Array(daysOfWeek.enumerated()), id: \.offset) { index, day in
                         Text(day)
                             .font(.system(size: 13, weight: index == 0 ? .regular : .bold))
-                            .foregroundColor(index == 0 ? .gray : .black)
+                            .foregroundColor(index == 0 ? .red : .black)
                             .frame(maxWidth: .infinity)
                     }
                 }
