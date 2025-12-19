@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4446E30C2EF5E8C00003CE05 /* PropertyActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E30A2EF5E8C00003CE05 /* PropertyActionsView.swift */; };
+		4446E30D2EF5E8C00003CE05 /* PropertyActionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3082EF5E8C00003CE05 /* PropertyActionModels.swift */; };
+		4446E30E2EF5E8C00003CE05 /* PropertyActionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3092EF5E8C00003CE05 /* PropertyActionService.swift */; };
+		4446E3112EF5EADE0003CE05 /* NotificationCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3102EF5EADE0003CE05 /* NotificationCenterView.swift */; };
+		4446E3122EF5EADE0003CE05 /* CleaningStatusButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E30F2EF5EADE0003CE05 /* CleaningStatusButtons.swift */; };
+		4446E3142EF5EB060003CE05 /* BadgeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3132EF5EB060003CE05 /* BadgeManager.swift */; };
+		4446E3162EF5EB240003CE05 /* CleaningStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3152EF5EB240003CE05 /* CleaningStatus.swift */; };
 		A1000001000000000000001 /* BnBFoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002000000000000001 /* BnBFoxApp.swift */; };
 		A1000003000000000000001 /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004000000000000001 /* Platform.swift */; };
 		A1000005000000000000001 /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006000000000000001 /* Property.swift */; };
@@ -18,17 +25,24 @@
 		A1000017000000000000001 /* CalendarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000018000000000000001 /* CalendarViewModel.swift */; };
 		A1000019000000000000001 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000020000000000000001 /* CalendarView.swift */; };
 		A1000021000000000000001 /* MonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000022000000000000001 /* MonthView.swift */; };
+		A1000023000000000000001 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000024000000000000001 /* DayDetailView.swift */; };
+		A1000025000000000000001 /* AdminPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000026000000000000001 /* AdminPanelView.swift */; };
+		A1000027000000000000001 /* PropertyDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000028000000000000001 /* PropertyDetailView.swift */; };
 		A1000029000000000000001 /* DateExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000030000000000000001 /* DateExtensions.swift */; };
 		A1000031000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1000032000000000000001 /* Assets.xcassets */; };
-A1000023000000000000001 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000024000000000000001 /* DayDetailView.swift */; };
-A1000025000000000000001 /* AdminPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000026000000000000001 /* AdminPanelView.swift */; };
-A1000027000000000000001 /* PropertyDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000028000000000000001 /* PropertyDetailView.swift */; };
-	A1000061000000000000001 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000060000000000000001 /* AppSettings.swift */; };
-	A1000063000000000000001 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000062000000000000001 /* NotificationService.swift */; };
-	A1000065000000000000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000064000000000000001 /* SettingsView.swift */; };
+		A1000061000000000000001 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000060000000000000001 /* AppSettings.swift */; };
+		A1000063000000000000001 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000062000000000000001 /* NotificationService.swift */; };
+		A1000065000000000000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000064000000000000001 /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4446E3082EF5E8C00003CE05 /* PropertyActionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyActionModels.swift; sourceTree = "<group>"; };
+		4446E3092EF5E8C00003CE05 /* PropertyActionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyActionService.swift; sourceTree = "<group>"; };
+		4446E30A2EF5E8C00003CE05 /* PropertyActionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyActionsView.swift; sourceTree = "<group>"; };
+		4446E30F2EF5EADE0003CE05 /* CleaningStatusButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningStatusButtons.swift; sourceTree = "<group>"; };
+		4446E3102EF5EADE0003CE05 /* NotificationCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterView.swift; sourceTree = "<group>"; };
+		4446E3132EF5EB060003CE05 /* BadgeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeManager.swift; sourceTree = "<group>"; };
+		4446E3152EF5EB240003CE05 /* CleaningStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningStatus.swift; sourceTree = "<group>"; };
 		A1000000000000000000001 /* BnBFox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BnBFox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000002000000000000001 /* BnBFoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BnBFoxApp.swift; sourceTree = "<group>"; };
 		A1000004000000000000001 /* Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
@@ -41,13 +55,14 @@ A1000027000000000000001 /* PropertyDetailView.swift in Sources */ = {isa = PBXBu
 		A1000018000000000000001 /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarViewModel.swift; sourceTree = "<group>"; };
 		A1000020000000000000001 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		A1000022000000000000001 /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
-		A1000030000000000000001 /* DateExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtensions.swift; sourceTree = "<group>"; };A1000024000000000000001 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
-A1000026000000000000001 /* AdminPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminPanelView.swift; sourceTree = "<group>"; };
-A1000028000000000000001 /* PropertyDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyDetailView.swift; sourceTree = "<group>"; };
-	A1000060000000000000001 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
-	A1000062000000000000001 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
-	A1000064000000000000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-			A1000032000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A1000024000000000000001 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
+		A1000026000000000000001 /* AdminPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminPanelView.swift; sourceTree = "<group>"; };
+		A1000028000000000000001 /* PropertyDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyDetailView.swift; sourceTree = "<group>"; };
+		A1000030000000000000001 /* DateExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtensions.swift; sourceTree = "<group>"; };
+		A1000032000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A1000060000000000000001 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		A1000062000000000000001 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		A1000064000000000000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +76,16 @@ A1000028000000000000001 /* PropertyDetailView.swift */ = {isa = PBXFileReference
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4446E30B2EF5E8C00003CE05 /* Actions */ = {
+			isa = PBXGroup;
+			children = (
+				4446E3082EF5E8C00003CE05 /* PropertyActionModels.swift */,
+				4446E3092EF5E8C00003CE05 /* PropertyActionService.swift */,
+				4446E30A2EF5E8C00003CE05 /* PropertyActionsView.swift */,
+			);
+			path = Actions;
+			sourceTree = "<group>";
+		};
 		A1000034000000000000001 = {
 			isa = PBXGroup;
 			children = (
@@ -72,6 +97,7 @@ A1000028000000000000001 /* PropertyDetailView.swift */ = {isa = PBXFileReference
 		A1000035000000000000001 /* BnBFox */ = {
 			isa = PBXGroup;
 			children = (
+				4446E30B2EF5E8C00003CE05 /* Actions */,
 				A1000002000000000000001 /* BnBFoxApp.swift */,
 				A1000037000000000000001 /* Models */,
 				A1000038000000000000001 /* Services */,
@@ -94,6 +120,7 @@ A1000028000000000000001 /* PropertyDetailView.swift */ = {isa = PBXFileReference
 		A1000037000000000000001 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				4446E3152EF5EB240003CE05 /* CleaningStatus.swift */,
 				A1000004000000000000001 /* Platform.swift */,
 				A1000006000000000000001 /* Property.swift */,
 				A1000008000000000000001 /* CalendarSource.swift */,
@@ -122,22 +149,25 @@ A1000028000000000000001 /* PropertyDetailView.swift */ = {isa = PBXFileReference
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
-			A1000040000000000000001 /* Views */ = {
-				isa = PBXGroup;
-				children = (
-					A1000020000000000000001 /* CalendarView.swift */,
-					A1000022000000000000001 /* MonthView.swift */,
-					A1000024000000000000001 /* DayDetailView.swift */,
-					A1000026000000000000001 /* AdminPanelView.swift */,
-					A1000028000000000000001 /* PropertyDetailView.swift */,
-					A1000064000000000000001 /* SettingsView.swift */,
-				);
-				path = Views;
-				sourceTree = "<group>";
-			};
+		A1000040000000000000001 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				4446E30F2EF5EADE0003CE05 /* CleaningStatusButtons.swift */,
+				4446E3102EF5EADE0003CE05 /* NotificationCenterView.swift */,
+				A1000020000000000000001 /* CalendarView.swift */,
+				A1000022000000000000001 /* MonthView.swift */,
+				A1000024000000000000001 /* DayDetailView.swift */,
+				A1000026000000000000001 /* AdminPanelView.swift */,
+				A1000028000000000000001 /* PropertyDetailView.swift */,
+				A1000064000000000000001 /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		A1000041000000000000001 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				4446E3132EF5EB060003CE05 /* BadgeManager.swift */,
 				A1000030000000000000001 /* DateExtensions.swift */,
 			);
 			path = Utilities;
@@ -223,16 +253,23 @@ A1000028000000000000001 /* PropertyDetailView.swift */ = {isa = PBXFileReference
 				A1000017000000000000001 /* CalendarViewModel.swift in Sources */,
 				A1000019000000000000001 /* CalendarView.swift in Sources */,
 				A1000021000000000000001 /* MonthView.swift in Sources */,
+				4446E3142EF5EB060003CE05 /* BadgeManager.swift in Sources */,
 				A1000029000000000000001 /* DateExtensions.swift in Sources */,
-					A1000023000000000000001 /* DayDetailView.swift in Sources */,
-					A1000025000000000000001 /* AdminPanelView.swift in Sources */,
-					A1000027000000000000001 /* PropertyDetailView.swift in Sources */,
+				A1000023000000000000001 /* DayDetailView.swift in Sources */,
+				A1000025000000000000001 /* AdminPanelView.swift in Sources */,
+				4446E3112EF5EADE0003CE05 /* NotificationCenterView.swift in Sources */,
+				4446E3122EF5EADE0003CE05 /* CleaningStatusButtons.swift in Sources */,
+				A1000027000000000000001 /* PropertyDetailView.swift in Sources */,
 				A1000061000000000000001 /* AppSettings.swift in Sources */,
+				4446E30C2EF5E8C00003CE05 /* PropertyActionsView.swift in Sources */,
+				4446E30D2EF5E8C00003CE05 /* PropertyActionModels.swift in Sources */,
+				4446E30E2EF5E8C00003CE05 /* PropertyActionService.swift in Sources */,
 				A1000063000000000000001 /* NotificationService.swift in Sources */,
 				A1000065000000000000001 /* SettingsView.swift in Sources */,
-				);
-				runOnlyForDeploymentPostprocessing = 0;
-			};
+				4446E3162EF5EB240003CE05 /* CleaningStatus.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -362,7 +399,7 @@ A1000028000000000000001 /* PropertyDetailView.swift */ = {isa = PBXFileReference
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = AXP9TJV4B4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Kawama Calendar";
@@ -396,7 +433,7 @@ A1000028000000000000001 /* PropertyDetailView.swift */ = {isa = PBXFileReference
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = AXP9TJV4B4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Kawama Calendar";

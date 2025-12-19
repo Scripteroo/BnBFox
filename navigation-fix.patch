@@ -1,0 +1,294 @@
+From 64e8175cbbe35189a7c5894dfaf95dbc31390df3 Mon Sep 17 00:00:00 2001
+From: Manus AI <manus@bnbfox.app>
+Date: Fri, 19 Dec 2025 14:01:39 -0500
+Subject: [PATCH] Fix navigation bar Done button rendering issues
+
+- Remove NavigationView wrapper from DayDetailView (conflicted with parent NavigationStack)
+- Remove NavigationView wrapper from SettingsView (conflicted with parent NavigationStack)
+- Wrap SettingsView in NavigationStack when presented as sheet in CalendarView
+- Add .navigationTitle("") to DayDetailView for proper toolbar rendering
+- MonthView already correctly wraps DayDetailView in NavigationStack
+
+This fixes the issue where Done buttons were not appearing in navigation bars for modal sheets.
+---
+ BnBFox/Views/CalendarView.swift  |   4 +-
+ BnBFox/Views/DayDetailView.swift |   5 +-
+ BnBFox/Views/MonthView.swift     |   4 +-
+ BnBFox/Views/SettingsView.swift  | 180 +++++++++++++++----------------
+ 4 files changed, 97 insertions(+), 96 deletions(-)
+
+diff --git a/BnBFox/Views/CalendarView.swift b/BnBFox/Views/CalendarView.swift
+index 55b1a51..1646aca 100644
+--- a/BnBFox/Views/CalendarView.swift
++++ b/BnBFox/Views/CalendarView.swift
+@@ -99,7 +99,9 @@ struct CalendarView: View {
+                 .environmentObject(PropertyService.shared)
+             }
+             .sheet(isPresented: $showingSettings) {
+-                SettingsView()
++                NavigationStack {
++                    SettingsView()
++                }
+             }
+         }
+     }
+diff --git a/BnBFox/Views/DayDetailView.swift b/BnBFox/Views/DayDetailView.swift
+index 27c0fdd..62ff576 100644
+--- a/BnBFox/Views/DayDetailView.swift
++++ b/BnBFox/Views/DayDetailView.swift
+@@ -15,8 +15,7 @@ struct DayDetailView: View {
+     @State private var showTooltip = false
+     
+     var body: some View {
+-        NavigationView {
+-            VStack(spacing: 0) {
++        VStack(spacing: 0) {
+                 // Date header
+                 VStack(spacing: 4) {
+                     Text(date.formatted(.dateTime.weekday(.wide)))
+@@ -55,6 +54,7 @@ struct DayDetailView: View {
+                 
+                 Spacer()
+             }
++            .navigationTitle("")
+             .navigationBarTitleDisplayMode(.inline)
+             .toolbar {
+                 ToolbarItem(placement: .navigationBarTrailing) {
+@@ -63,7 +63,6 @@ struct DayDetailView: View {
+                     }
+                 }
+             }
+-        }
+     }
+ }
+ 
+diff --git a/BnBFox/Views/MonthView.swift b/BnBFox/Views/MonthView.swift
+index c921000..8d3b348 100644
+--- a/BnBFox/Views/MonthView.swift
++++ b/BnBFox/Views/MonthView.swift
+@@ -187,7 +187,9 @@ struct WeekSection: View {
+             .frame(height: 120)
+         }
+         .sheet(item: $dayDetailItem) { item in
+-            DayDetailView(date: item.date, activities: item.activities)
++            NavigationStack {
++                DayDetailView(date: item.date, activities: item.activities)
++            }
+         }
+     }
+     
+diff --git a/BnBFox/Views/SettingsView.swift b/BnBFox/Views/SettingsView.swift
+index eb411cf..44e01d0 100644
+--- a/BnBFox/Views/SettingsView.swift
++++ b/BnBFox/Views/SettingsView.swift
+@@ -15,118 +15,116 @@ struct SettingsView: View {
+     @State private var upcomingCleanings: [CleaningDay] = []
+     
+     var body: some View {
+-        NavigationView {
+-            Form {
+-                // Cleaning Alerts Section
+-                Section(header: Text("Cleaning Day Alerts")) {
+-                    Toggle("Enable Alerts", isOn: $settings.cleaningAlertsEnabled)
+-                        .onChange(of: settings.cleaningAlertsEnabled) { _ in
+-                            Task {
+-                                await updatePendingCount()
+-                            }
+-                        }
+-                    
+-                    Toggle("Alert Sound", isOn: $settings.alertSoundEnabled)
+-                        .disabled(!settings.cleaningAlertsEnabled)
+-                    
+-                    DatePicker(
+-                        "Alert Time",
+-                        selection: $settings.alertTime,
+-                        displayedComponents: .hourAndMinute
+-                    )
+-                    .disabled(!settings.cleaningAlertsEnabled)
+-                    
+-                    if settings.cleaningAlertsEnabled {
+-                        HStack {
+-                            Text("Pending Alerts")
+-                            Spacer()
+-                            Text("\(pendingAlertsCount)")
+-                                .foregroundColor(.secondary)
++        Form {
++            // Cleaning Alerts Section
++            Section(header: Text("Cleaning Day Alerts")) {
++                Toggle("Enable Alerts", isOn: $settings.cleaningAlertsEnabled)
++                    .onChange(of: settings.cleaningAlertsEnabled) { _ in
++                        Task {
++                            await updatePendingCount()
+                         }
+                     }
+-                }
+                 
+-                // New Booking Alerts Section
+-                Section(header: Text("New Booking Alerts")) {
+-                    Toggle("Enable New Booking Alerts", isOn: $settings.newBookingAlertsEnabled)
+-                    
+-                    if settings.newBookingAlertsEnabled {
+-                        HStack {
+-                            Image(systemName: "info.circle")
+-                                .foregroundColor(.blue)
+-                            Text("Get notified when new bookings appear in the current month")
+-                                .font(.caption)
+-                                .foregroundColor(.secondary)
+-                        }
+-                    }
+-                }
++                Toggle("Alert Sound", isOn: $settings.alertSoundEnabled)
++                    .disabled(!settings.cleaningAlertsEnabled)
+                 
+-                // Upcoming Cleanings Section
+-                if settings.cleaningAlertsEnabled && !upcomingCleanings.isEmpty {
+-                    Section(header: Text("Upcoming Cleanings (Next 30 Days)")) {
+-                        ForEach(upcomingCleanings) { cleaning in
+-                            CleaningDayRow(cleaning: cleaning)
+-                        }
+-                    }
+-                }
++                DatePicker(
++                    "Alert Time",
++                    selection: $settings.alertTime,
++                    displayedComponents: .hourAndMinute
++                )
++                .disabled(!settings.cleaningAlertsEnabled)
+                 
+-                // Product Backlog Section
+-                Section(header: Text("Coming Soon")) {
++                if settings.cleaningAlertsEnabled {
+                     HStack {
+-                        Image(systemName: "camera.fill")
+-                            .foregroundColor(.gray)
+-                        Text("Completion Photos")
+-                            .foregroundColor(.secondary)
++                        Text("Pending Alerts")
+                         Spacer()
+-                        Text("Planned")
+-                            .font(.caption)
+-                            .foregroundColor(.orange)
+-                            .padding(.horizontal, 8)
+-                            .padding(.vertical, 4)
+-                            .background(Color.orange.opacity(0.2))
+-                            .cornerRadius(4)
+-                    }
+-                    
+-                    HStack {
+-                        Image(systemName: "exclamationmark.triangle.fill")
+-                            .foregroundColor(.gray)
+-                        Text("Damage Reporting")
++                        Text("\(pendingAlertsCount)")
+                             .foregroundColor(.secondary)
+-                        Spacer()
+-                        Text("Planned")
+-                            .font(.caption)
+-                            .foregroundColor(.orange)
+-                            .padding(.horizontal, 8)
+-                            .padding(.vertical, 4)
+-                            .background(Color.orange.opacity(0.2))
+-                            .cornerRadius(4)
+                     }
+                 }
++            }
++            
++            // New Booking Alerts Section
++            Section(header: Text("New Booking Alerts")) {
++                Toggle("Enable New Booking Alerts", isOn: $settings.newBookingAlertsEnabled)
+                 
+-                // About Section
+-                Section(header: Text("About")) {
++                if settings.newBookingAlertsEnabled {
+                     HStack {
+-                        Text("Version")
+-                        Spacer()
+-                        Text("3.3")
++                        Image(systemName: "info.circle")
++                            .foregroundColor(.blue)
++                        Text("Get notified when new bookings appear in the current month")
++                            .font(.caption)
+                             .foregroundColor(.secondary)
+                     }
+                 }
+             }
+-            .navigationTitle("Settings")
+-            .navigationBarTitleDisplayMode(.inline)
+-            .toolbar {
+-                ToolbarItem(placement: .navigationBarTrailing) {
+-                    Button("Done") {
+-                        dismiss()
++            
++            // Upcoming Cleanings Section
++            if settings.cleaningAlertsEnabled && !upcomingCleanings.isEmpty {
++                Section(header: Text("Upcoming Cleanings (Next 30 Days)")) {
++                    ForEach(upcomingCleanings) { cleaning in
++                        CleaningDayRow(cleaning: cleaning)
+                     }
+                 }
+             }
+-            .task {
+-                await updatePendingCount()
+-                loadUpcomingCleanings()
++            
++            // Product Backlog Section
++            Section(header: Text("Coming Soon")) {
++                HStack {
++                    Image(systemName: "camera.fill")
++                        .foregroundColor(.gray)
++                    Text("Completion Photos")
++                        .foregroundColor(.secondary)
++                    Spacer()
++                    Text("Planned")
++                        .font(.caption)
++                        .foregroundColor(.orange)
++                        .padding(.horizontal, 8)
++                        .padding(.vertical, 4)
++                        .background(Color.orange.opacity(0.2))
++                        .cornerRadius(4)
++                }
++                
++                HStack {
++                    Image(systemName: "exclamationmark.triangle.fill")
++                        .foregroundColor(.gray)
++                    Text("Damage Reporting")
++                        .foregroundColor(.secondary)
++                    Spacer()
++                    Text("Planned")
++                        .font(.caption)
++                        .foregroundColor(.orange)
++                        .padding(.horizontal, 8)
++                        .padding(.vertical, 4)
++                        .background(Color.orange.opacity(0.2))
++                        .cornerRadius(4)
++                }
++            }
++            
++            // About Section
++            Section(header: Text("About")) {
++                HStack {
++                    Text("Version")
++                    Spacer()
++                    Text("3.3")
++                        .foregroundColor(.secondary)
++                }
+             }
+         }
++        .navigationTitle("Settings")
++        .navigationBarTitleDisplayMode(.inline)
++        .toolbar {
++            ToolbarItem(placement: .navigationBarTrailing) {
++                Button("Done") {
++                    dismiss()
++                }
++            }
++        }
++        .task {
++            await updatePendingCount()
++            loadUpcomingCleanings()
++        }
+     }
+     
+     private func updatePendingCount() async {
+-- 
+2.34.1
+

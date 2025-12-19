@@ -11,7 +11,7 @@ import SwiftUI
 // MARK: - Property Action Report
 
 /// Container for all actions taken on a property for a specific date
-struct PropertyActionReport: Identifiable, Codable {
+struct PropertyActionReport: Identifiable, Codable, Equatable {
     let id: UUID
     let propertyId: UUID
     let propertyName: String
@@ -41,7 +41,7 @@ struct PropertyActionReport: Identifiable, Codable {
 
 // MARK: - Photo Record
 
-struct PhotoRecord: Codable {
+struct PhotoRecord: Codable, Equatable {
     let id: UUID
     let localPath: String  // Local file path
     let cloudURL: String?  // Cloud URL after sync
@@ -57,7 +57,7 @@ struct PhotoRecord: Codable {
 
 // MARK: - Damage Report
 
-struct DamageReport: Codable {
+struct DamageReport: Codable, Equatable {
     var description: String
     var photos: [PhotoRecord]
     var reportedAt: Date
@@ -71,7 +71,7 @@ struct DamageReport: Codable {
 
 // MARK: - Pest Control Report
 
-struct PestControlReport: Codable {
+struct PestControlReport: Codable, Equatable {
     var termites: Bool
     var cockroaches: Bool
     var bedbugs: Bool
@@ -113,7 +113,7 @@ struct PestControlReport: Codable {
 
 // MARK: - Supplies Report
 
-struct SuppliesReport: Codable {
+struct SuppliesReport: Codable, Equatable {
     var toiletPaper: Bool
     var paperTowels: Bool
     var towels: Bool
