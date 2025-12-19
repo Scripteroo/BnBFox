@@ -3,6 +3,7 @@
 //  BnBFox
 //
 //  Created on 12/12/2025.
+//  Updated on 12/17/2025 - Added Actions section
 //
 
 import SwiftUI
@@ -11,6 +12,7 @@ struct DayDetailView: View {
     let date: Date
     let activities: [PropertyActivity]
     @Environment(\.dismiss) var dismiss
+    @State private var showTooltip = false
     
     var body: some View {
         NavigationView {
@@ -31,10 +33,24 @@ struct DayDetailView: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         ForEach(activities) { activity in
-                            PropertyActivityCard(activity: activity)
+                            PropertyActivityCard(
+                                activity: activity,
+                                date: date,
+                                showTooltip: $showTooltip
+                            )
+                        }
+                        
+                        // NEW - Actions Section (only show if there's at least one activity)
+                        if !activities.isEmpty, let firstActivity = activities.first {
+                            PropertyActionsView(
+                                property: firstActivity.property,
+                                date: date
+                            )
+                            .padding(.top, 8)
                         }
                     }
                     .padding(.horizontal, 20)
+                    .padding(.bottom, 40)
                 }
                 
                 Spacer()
@@ -53,6 +69,8 @@ struct DayDetailView: View {
 
 struct PropertyActivityCard: View {
     let activity: PropertyActivity
+    let date: Date
+    @Binding var showTooltip: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -91,6 +109,26 @@ struct PropertyActivityCard: View {
                 }
             }
             .padding(.leading, 24)
+            
+            // Cleaning Status Buttons (only show if there's a checkout)
+            if activity.checkout != nil {
+                Divider()
+                    .padding(.vertical, 8)
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Cleaning Status")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.gray)
+                    
+                    CleaningStatusButtons(
+                        propertyName: activity.property.displayName,
+                        date: date,
+                        bookingId: activity.checkout?.booking.id ?? "",
+                        showTooltip: $showTooltip
+                    )
+                }
+                .padding(.top, 4)
+            }
         }
         .padding(16)
         .background(Color.gray.opacity(0.05))
