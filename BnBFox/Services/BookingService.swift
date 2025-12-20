@@ -22,7 +22,7 @@ class BookingService: ObservableObject {
         let cacheKey = property.id.uuidString
         if let cached = cache[cacheKey],
            Date().timeIntervalSince(cached.timestamp) < cacheExpiration {
-            print("Using cached bookings for \(property.shortName)")
+            // Using cached bookings for \(property.shortName)
             return cached.bookings
         }
         
@@ -57,7 +57,7 @@ class BookingService: ObservableObject {
         
         // Cache the results
         cache[cacheKey] = (bookings: sortedBookings, timestamp: Date())
-        print("Cached bookings for property \(cacheKey)")
+        // Cached bookings for property \(cacheKey)
         return sortedBookings
     }
     
@@ -73,3 +73,4 @@ class BookingService: ObservableObject {
         }
     }
 }
+

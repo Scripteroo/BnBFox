@@ -15,7 +15,7 @@ struct NotificationCenterView: View {
     
     var body: some View {
         let _ = BadgeManager.shared.clearBadge()  // Clear badge when opening
-        NavigationView {
+        NavigationStack {
             List {
                 let pendingStatuses = statusManager.getPendingStatuses()
                 
@@ -46,13 +46,6 @@ struct NotificationCenterView: View {
             }
             .navigationTitle("Cleaning Tasks")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
         }
     }
 }
@@ -113,3 +106,4 @@ struct NotificationRow: View {
         return formatter.string(from: status.date)
     }
 }
+

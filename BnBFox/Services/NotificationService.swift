@@ -124,31 +124,132 @@ class NotificationService {
                     // Schedule the notification
                     do {
                         try await UNUserNotificationCenter.current().add(request)
-                        print("Scheduled cleaning alert for \(property.shortName) on \(checkoutDate)")
+                        // Scheduled cleaning alert for \(property.shortName) on \(checkoutDate)
                     } catch {
                         print("Error scheduling notification: \(error)")
                     }
                 }
             }
+            
+            // NEW: Schedule daily reminders for properties in cleaning gaps
+            await scheduleDailyCleaningReminders(bookings: bookings, alertHour: alertHour, alertMinute: alertMinute)
         }
     }
     
-    // Cancel all cleaning alerts
+    // Schedule daily notifications for each day a property needs cleaning
+    private func scheduleDailyCleaningReminders(bookings: [Booking], alertHour: Int, alertMinute: Int) async {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let settings = AppSettings.shared
+        
+        // Get all properties
+        let allProperties = PropertyService.shared.getAllProperties()
+        
+        // For each property, find cleaning gaps and schedule daily notifications
+        for property in allProperties {
+            let propertyBookings = bookings.filter { $0.propertyId == property.id }.sorted { $0.endDate < $1.endDate }
+            
+            // Find all cleaning gaps for this property
+            for i in 0..<propertyBookings.count {
+                let checkoutDate = calendar.startOfDay(for: propertyBookings[i].endDate)
+                
+                // Find next checkin after this checkout
+                var nextCheckin: Date?
+                for j in 0..<propertyBookings.count {
+                    let checkinDate = calendar.startOfDay(for: propertyBookings[j].startDate)
+                    if checkinDate > checkoutDate {
+                        if nextCheckin == nil || checkinDate < nextCheckin! {
+                            nextCheckin = checkinDate
+                        }
+                    }
+                }
+                
+                guard let checkin = nextCheckin else { continue }
+                
+                // Schedule notification for each day in the gap (checkout through checkin)
+                var currentDate = checkoutDate
+                while currentDate <= checkin {
+                    // Only schedule for future dates
+                    if currentDate >= today {
+                        // Check if there's a same-day turnover
+                        let hasCheckin = calendar.isDate(checkin, inSameDayAs: currentDate)
+                        
+                        // Create notification content
+                        let content = UNMutableNotificationContent()
+                        
+                        if hasCheckin {
+                            content.title = "🚨 URGENT: Checkin Today"
+                            content.body = "\(property.shortName) must be cleaned by 4:00 PM - guests checking in today!"
+                        } else {
+                            let daysUntilCheckin = calendar.dateComponents([.day], from: currentDate, to: checkin).day ?? 0
+                            if daysUntilCheckin == 0 {
+                                content.title = "🧹 Cleaning Reminder"
+                                content.body = "\(property.shortName) needs cleaning today"
+                            } else if daysUntilCheckin == 1 {
+                                content.title = "🧹 Cleaning Reminder"
+                                content.body = "\(property.shortName) needs cleaning - checkin tomorrow!"
+                            } else {
+                                content.title = "🧹 Cleaning Reminder"
+                                content.body = "\(property.shortName) needs cleaning - checkin in \(daysUntilCheckin) days"
+                            }
+                        }
+                        
+                        content.categoryIdentifier = "CLEANING_REMINDER"
+                        
+                        if settings.alertSoundEnabled {
+                            content.sound = .default
+                        }
+                        
+                        content.badge = 1
+                        
+                        // Schedule for alert time on this date
+                        var notificationDate = calendar.dateComponents([.year, .month, .day], from: currentDate)
+                        notificationDate.hour = alertHour
+                        notificationDate.minute = alertMinute
+                        
+                        let trigger = UNCalendarNotificationTrigger(dateMatching: notificationDate, repeats: false)
+                        
+                        // Create unique identifier
+                        let identifier = "cleaning_daily_\(property.id)_\(currentDate.timeIntervalSince1970)"
+                        
+                        let request = UNNotificationRequest(
+                            identifier: identifier,
+                            content: content,
+                            trigger: trigger
+                        )
+                        
+                        // Schedule the notification
+                        do {
+                            try await UNUserNotificationCenter.current().add(request)
+                            // Scheduled daily cleaning reminder for \(property.shortName) on \(currentDate)
+                        } catch {
+                            print("Error scheduling daily reminder: \(error)")
+                        }
+                    }
+                    
+                    // Move to next day
+                    currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate
+                }
+            }
+        }
+    }
+    
+    // Cancel all cleaning alerts (including daily reminders)
     func cancelAllCleaningAlerts() {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
             let cleaningIdentifiers = requests
-                .filter { $0.identifier.starts(with: "cleaning_") }
+                .filter { $0.identifier.starts(with: "cleaning_") || $0.identifier.starts(with: "cleaning_daily_") }
                 .map { $0.identifier }
             
             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: cleaningIdentifiers)
-            print("Cancelled \(cleaningIdentifiers.count) cleaning alerts")
+            // Cancelled \(cleaningIdentifiers.count) cleaning alerts and reminders
         }
     }
     
     // Get count of pending alerts (for display in settings)
     func getPendingAlertsCount() async -> Int {
         let requests = await UNUserNotificationCenter.current().pendingNotificationRequests()
-        return requests.filter { $0.identifier.starts(with: "cleaning_") }.count
+        return requests.filter { $0.identifier.starts(with: "cleaning_") || $0.identifier.starts(with: "cleaning_daily_") }.count
     }
     
     // MARK: - New Booking Alerts
@@ -219,9 +320,8 @@ class NotificationService {
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
                 print("Error scheduling new booking notification: \(error)")
-            } else {
-                print("Scheduled new booking notification for \(propertyName)")
             }
+            // Scheduled new booking notification for \(propertyName) if no error
         }
     }
     
@@ -230,3 +330,5 @@ class NotificationService {
         previousBookingIds = Set(bookings.map { $0.id })
     }
 }
+
+

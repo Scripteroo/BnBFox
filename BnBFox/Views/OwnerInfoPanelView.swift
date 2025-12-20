@@ -10,8 +10,8 @@ import SwiftUI
 struct OwnerInfoPanelView: View {
     let property: Property
     @Environment(\.dismiss) var dismiss
-    @StateObject private var bookingService = BookingService.shared
     @State private var currentMonth = Date()
+    @State private var bookings: [Booking] = []
     
     var body: some View {
         NavigationView {
@@ -83,13 +83,12 @@ struct OwnerInfoPanelView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Calendar grid
+                    // Calendar grid with platform labels enabled
                     MonthView(
                         month: currentMonth,
                         bookings: getBookingsForProperty(),
                         showMonthTitle: false,
-                        showDayHeaders: true,
-                        showPlatformLabels: true
+                        showDayHeaders: true
                     )
                     .padding(.horizontal)
                 }
@@ -105,10 +104,17 @@ struct OwnerInfoPanelView: View {
                 }
             }
         }
+        .task {
+            await loadBookings()
+        }
+    }
+    
+    private func loadBookings() async {
+        bookings = await BookingService.shared.fetchAllBookings(for: property)
     }
     
     private func getBookingsForProperty() -> [Booking] {
-        return bookingService.bookings.filter { $0.propertyId == property.id }
+        return bookings.filter { $0.propertyId == property.id }
     }
     
     private func previousMonth() {
@@ -223,3 +229,5 @@ extension Date {
         return formatter.string(from: self)
     }
 }
+
+

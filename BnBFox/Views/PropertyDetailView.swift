@@ -11,7 +11,10 @@ struct PropertyDetailView: View {
     let propertyId: UUID  // Changed: store ID instead of full property
     let bookings: [Booking]
     @Environment(\.dismiss) var dismiss
-    @State private var isLocked = true
+    @State private var isPropertyInfoLocked = true
+    @State private var isOwnerInfoLocked = true
+    @State private var isListingURLsLocked = true
+    @State private var isColorLocked = true
     @EnvironmentObject var propertyService: PropertyService
     @State private var property: Property = Property(  // Default placeholder
         name: "",
@@ -27,7 +30,7 @@ struct PropertyDetailView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 0) {
                     // Header
@@ -55,7 +58,10 @@ struct PropertyDetailView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         saveChanges()
-                        dismiss()
+                        // Small delay to ensure save completes
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            dismiss()
+                        }
                     }
                 }
             }
@@ -81,22 +87,6 @@ struct PropertyDetailView: View {
                     .font(.system(size: 16))
                 Text(property.shortName)
                     .font(.system(size: 16, weight: .bold))
-            }
-            
-            HStack(spacing: 16) {
-                // Lock/Unlock button
-                Button(action: {
-                    isLocked.toggle()
-                }) {
-                    Image(systemName: isLocked ? "lock.fill" : "lock.open.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(isLocked ? .red : .gray)
-                }
-                
-                // Edit button (visual only, editing controlled by lock)
-                Image(systemName: "pencil")
-                    .font(.system(size: 24))
-                    .foregroundColor(.gray)
             }
         }
         .padding()
@@ -125,7 +115,7 @@ struct PropertyDetailView: View {
                     .padding(.horizontal)
                     .padding(.top, 16)
                 
-                if isLocked {
+                if isPropertyInfoLocked {
                     Text(property.notes.isEmpty ? "No notes" : property.notes)
                         .font(.system(size: 14))
                         .foregroundColor(property.notes.isEmpty ? .gray : .primary)
@@ -155,17 +145,27 @@ struct PropertyDetailView: View {
     
     private var propertyInfoPanel: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Property Information")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.gray)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 8)
+            HStack {
+                Spacer()
+                Text("Property Information")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.gray)
+                Spacer()
+                Button(action: {
+                    isPropertyInfoLocked.toggle()
+                }) {
+                    Image(systemName: isPropertyInfoLocked ? "lock.fill" : "lock.open.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(isPropertyInfoLocked ? .red : .green)
+                }
+            }
+            .padding(.top, 8)
             
             // Door code
             FormField(
                 label: "Door code",
                 text: $property.doorCode,
-                isLocked: isLocked,
+                isLocked: isPropertyInfoLocked,
                 placeholder: "0800"
             )
             
@@ -173,7 +173,7 @@ struct PropertyDetailView: View {
             FormField(
                 label: "Bike Locks",
                 text: $property.bikeLocks,
-                isLocked: isLocked,
+                isLocked: isPropertyInfoLocked,
                 placeholder: "0800"
             )
             
@@ -181,7 +181,7 @@ struct PropertyDetailView: View {
             FormField(
                 label: "Camera",
                 text: $property.camera,
-                isLocked: isLocked,
+                isLocked: isPropertyInfoLocked,
                 placeholder: "Camera info"
             )
             
@@ -189,7 +189,7 @@ struct PropertyDetailView: View {
             FormField(
                 label: "Thermostat",
                 text: $property.thermostat,
-                isLocked: isLocked,
+                isLocked: isPropertyInfoLocked,
                 placeholder: "Thermostat info"
             )
             
@@ -197,7 +197,7 @@ struct PropertyDetailView: View {
             FormField(
                 label: "Other",
                 text: $property.other,
-                isLocked: isLocked,
+                isLocked: isPropertyInfoLocked,
                 placeholder: "Other info"
             )
         }
@@ -208,17 +208,27 @@ struct PropertyDetailView: View {
     
     private var ownerInfoPanel: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Owner Information")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.gray)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 8)
+            HStack {
+                Spacer()
+                Text("Owner Information")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.gray)
+                Spacer()
+                Button(action: {
+                    isOwnerInfoLocked.toggle()
+                }) {
+                    Image(systemName: isOwnerInfoLocked ? "lock.fill" : "lock.open.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(isOwnerInfoLocked ? .red : .green)
+                }
+            }
+            .padding(.top, 8)
             
             // Owner
             FormField(
                 label: "Owner",
                 text: $property.ownerName,
-                isLocked: isLocked,
+                isLocked: isOwnerInfoLocked,
                 placeholder: "Phil Goss"
             )
             
@@ -226,7 +236,7 @@ struct PropertyDetailView: View {
             FormField(
                 label: "Phone",
                 text: $property.ownerPhone,
-                isLocked: isLocked,
+                isLocked: isOwnerInfoLocked,
                 placeholder: "+1 (812) 589-1482",
                 keyboardType: .phonePad,
                 isLink: true,
@@ -241,7 +251,7 @@ struct PropertyDetailView: View {
             FormField(
                 label: "email",
                 text: $property.ownerEmail,
-                isLocked: isLocked,
+                isLocked: isOwnerInfoLocked,
                 placeholder: "email",
                 keyboardType: .emailAddress,
                 isLink: true,
@@ -259,17 +269,27 @@ struct PropertyDetailView: View {
     
     private var listingURLsPanel: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Listing URLs")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.gray)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 8)
+            HStack {
+                Spacer()
+                Text("Listing URLs")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.gray)
+                Spacer()
+                Button(action: {
+                    isListingURLsLocked.toggle()
+                }) {
+                    Image(systemName: isListingURLsLocked ? "lock.fill" : "lock.open.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(isListingURLsLocked ? .red : .green)
+                }
+            }
+            .padding(.top, 8)
             
             // AirBnB Listing
             ListingURLField(
                 label: "AirBnB",
                 text: $property.airbnbListingURL,
-                isLocked: isLocked,
+                isLocked: isListingURLsLocked,
                 placeholder: "https://www.airbnb.com/rooms/..."
             )
             
@@ -277,7 +297,7 @@ struct PropertyDetailView: View {
             ListingURLField(
                 label: "VRBO",
                 text: $property.vrboListingURL,
-                isLocked: isLocked,
+                isLocked: isListingURLsLocked,
                 placeholder: "https://www.vrbo.com/..."
             )
             
@@ -285,7 +305,7 @@ struct PropertyDetailView: View {
             ListingURLField(
                 label: "Booking.com",
                 text: $property.bookingComListingURL,
-                isLocked: isLocked,
+                isLocked: isListingURLsLocked,
                 placeholder: "https://www.booking.com/..."
             )
         }
@@ -297,11 +317,21 @@ struct PropertyDetailView: View {
     
     private var colorPickerPanel: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Color")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.gray)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 8)
+            HStack {
+                Spacer()
+                Text("Color")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.gray)
+                Spacer()
+                Button(action: {
+                    isColorLocked.toggle()
+                }) {
+                    Image(systemName: isColorLocked ? "lock.fill" : "lock.open.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(isColorLocked ? .red : .green)
+                }
+            }
+            .padding(.top, 8)
             
             HStack(spacing: 16) {
                 // Color square with picker
@@ -317,7 +347,7 @@ struct PropertyDetailView: View {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(property.color)
                 )
-                .disabled(isLocked)
+                .disabled(isColorLocked)
                 
                 Spacer()
                 
@@ -533,4 +563,5 @@ extension Color {
                      Int(b * 255))
     }
 }
+
 

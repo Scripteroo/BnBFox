@@ -13,8 +13,21 @@ struct MonthView: View {
     var showMonthTitle: Bool = true  // Allow hiding the title to prevent duplicates
     var showDayHeaders: Bool = true  // Allow hiding day headers to prevent duplicates
     
-    private let daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"]
+    private let daysOfWeek = [
+        DayOfWeek(id: 0, label: "S"),
+        DayOfWeek(id: 1, label: "M"),
+        DayOfWeek(id: 2, label: "T"),
+        DayOfWeek(id: 3, label: "W"),
+        DayOfWeek(id: 4, label: "T"),
+        DayOfWeek(id: 5, label: "F"),
+        DayOfWeek(id: 6, label: "S")
+    ]
     private let propertyService = PropertyService.shared
+    
+    private struct DayOfWeek: Identifiable {
+        let id: Int
+        let label: String
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -29,10 +42,10 @@ struct MonthView: View {
             // Day headers (optional)
             if showDayHeaders {
                 HStack(spacing: 0) {
-                    ForEach(Array(daysOfWeek.enumerated()), id: \.offset) { index, day in
-                        Text(day)
-                            .font(.system(size: 13, weight: index == 0 ? .regular : .bold))
-                            .foregroundColor(index == 0 ? .red : .black)
+                    ForEach(daysOfWeek) { day in
+                        Text(day.label)
+                            .font(.system(size: 13, weight: day.id == 0 ? .regular : .bold))
+                            .foregroundColor(day.id == 0 ? .red : .black)
                             .frame(maxWidth: .infinity)
                     }
                 }
@@ -177,6 +190,7 @@ struct WeekSection: View {
                             property: property,
                             week: week,
                             bookings: getBookingsForProperty(property),
+                            allBookings: bookings,
                             currentMonth: currentMonth
                         )
                     }
@@ -306,6 +320,7 @@ struct PropertyRow: View {
     let property: Property
     let week: [Date?]
     let bookings: [Booking]
+    let allBookings: [Booking]
     let currentMonth: Date
     
     var body: some View {
@@ -321,8 +336,22 @@ struct PropertyRow: View {
                         property: property,
                         week: week,
                         cellWidth: cellWidth,
+                        allBookings: allBookings,
                         currentMonth: currentMonth
                     )
+                }
+                
+                // Draw cleaning status dots in gap areas (between bookings)
+                ForEach(Array(week.enumerated()), id: \.offset) { index, date in
+                    if let date = date {
+                        CleaningStatusDot(
+                            propertyName: property.displayName,
+                            propertyId: property.id,
+                            date: date,
+                            allBookings: allBookings
+                        )
+                        .offset(x: CGFloat(index) * cellWidth + cellWidth / 2 - 4) // Center in day cell
+                    }
                 }
             }
         }
@@ -335,6 +364,7 @@ struct ContinuousBookingBar: View {
     let property: Property
     let week: [Date?]
     let cellWidth: CGFloat
+    let allBookings: [Booking]
     let currentMonth: Date
     
     var body: some View {
@@ -367,14 +397,9 @@ struct ContinuousBookingBar: View {
                 .stroke(Color.black, lineWidth: 1.5)
             )
             .overlay(
-                // Property label with status dot on the right end
+                // Property label on the right end
                 HStack(spacing: 2) {
                     Spacer()
-                    
-                    // Status dot (only show on checkout day if bar ends this week)
-                    if barGeometry.roundedEnd, let checkoutDate = getCheckoutDate() {
-                        CleaningStatusDot(propertyName: property.displayName, checkoutDate: checkoutDate)
-                    }
                     
                     Text(property.shortName)
                         .font(.system(size: 10, weight: .bold))
@@ -497,4 +522,6 @@ struct DayDetailItem: Identifiable {
     let date: Date
     let activities: [PropertyActivity]
 }
+
+
 

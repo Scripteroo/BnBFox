@@ -57,8 +57,9 @@ struct CleaningStatusDot: View {
             
             // Check if TODAY falls in this gap
             if let checkin = nextCheckin {
-                // Gap is from checkout to day before checkin
-                if now >= checkoutDate && now < checkin {
+                // Gap extends through checkin day until next morning (after first night)
+                let dayAfterCheckin = calendar.date(byAdding: .day, value: 1, to: checkin) ?? checkin
+                if now >= checkoutDate && now < dayAfterCheckin {
                     return checkoutDate
                 }
             } else {
@@ -85,8 +86,9 @@ struct CleaningStatusDot: View {
         for booking in propertyBookings {
             let bookingStart = calendar.startOfDay(for: booking.startDate)
             let bookingEnd = calendar.startOfDay(for: booking.endDate)
-            // Check if this day is DURING a booking (checkin day through day before checkout)
-            if dayStart >= bookingStart && dayStart < bookingEnd {
+            // Check if this day is DURING a booking (day AFTER checkin through day before checkout)
+            // Checkin day is NOT considered active booking (guests arrive at 4 PM, cleaning happens before)
+            if dayStart > bookingStart && dayStart < bookingEnd {
                 return false  // Active booking, no dot
             }
         }
@@ -111,9 +113,11 @@ struct CleaningStatusDot: View {
             
             // Check if TODAY falls in this gap
             if let checkin = nextCheckin {
-                if now >= checkoutDate && now < checkin {
+                // Gap extends through checkin day until next morning
+                let dayAfterCheckin = calendar.date(byAdding: .day, value: 1, to: checkin) ?? checkin
+                if now >= checkoutDate && now < dayAfterCheckin {
                     currentGapCheckout = checkoutDate
-                    currentGapCheckin = checkin
+                    currentGapCheckin = checkin  // Store actual checkin, not day after
                     break
                 }
             } else {
@@ -132,8 +136,9 @@ struct CleaningStatusDot: View {
             return false
         }
         
-        // Show dot from checkout day up to (but not including) checkin day
-        return dayStart >= gapStart && dayStart < gapEnd
+        // Show dot from checkout day through checkin day (inclusive)
+        // BUT only show dots on dates that are today or in the past (not future dates)
+        return dayStart >= gapStart && dayStart <= gapEnd && dayStart <= now
     }
     
     private func statusColor(_ status: CleaningStatus.Status) -> Color {
@@ -149,4 +154,6 @@ struct CleaningStatusDot: View {
         }
     }
 }
+
+
 
