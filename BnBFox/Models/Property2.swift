@@ -13,7 +13,7 @@ struct Property: Identifiable, Codable, Hashable {
     let name: String
     let displayName: String
     let shortName: String
-    var colorHex: String  // Changed from 'let' to 'var' to allow color updates
+    let colorHex: String
     let sources: [CalendarSource]
     
     // Owner information
@@ -100,4 +100,3 @@ struct Property: Identifiable, Codable, Hashable {
         hasher.combine(id)
     }
 }
-

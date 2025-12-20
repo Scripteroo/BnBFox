@@ -13,7 +13,7 @@ struct Property: Identifiable, Codable, Hashable {
     let name: String
     let displayName: String
     let shortName: String
-    var colorHex: String  // Changed from 'let' to 'var' to allow color updates
+    let colorHex: String
     let sources: [CalendarSource]
     
     // Owner information
@@ -21,17 +21,9 @@ struct Property: Identifiable, Codable, Hashable {
     var ownerPhone: String
     var ownerEmail: String
     
-    // Access codes and property info
+    // Access codes
     var doorCode: String
     var bikeLocks: String
-    var camera: String          // NEW
-    var thermostat: String      // NEW
-    var other: String           // NEW
-    
-    // Listing URLs
-    var airbnbListingURL: String      // NEW
-    var vrboListingURL: String        // NEW
-    var bookingComListingURL: String  // NEW
     
     // Notes
     var notes: String
@@ -52,26 +44,7 @@ struct Property: Identifiable, Codable, Hashable {
         return components.count > 1 ? components.dropFirst().joined(separator: " ") : displayName
     }
     
-    init(
-        id: UUID = UUID(),
-        name: String,
-        displayName: String,
-        shortName: String,
-        colorHex: String,
-        sources: [CalendarSource],
-        ownerName: String = "",
-        ownerPhone: String = "",
-        ownerEmail: String = "",
-        doorCode: String = "",
-        bikeLocks: String = "",
-        camera: String = "",
-        thermostat: String = "",
-        other: String = "",
-        airbnbListingURL: String = "",
-        vrboListingURL: String = "",
-        bookingComListingURL: String = "",
-        notes: String = ""
-    ) {
+    init(id: UUID = UUID(), name: String, displayName: String, shortName: String, colorHex: String, sources: [CalendarSource], ownerName: String = "", ownerPhone: String = "", ownerEmail: String = "", doorCode: String = "", bikeLocks: String = "", notes: String = "") {
         self.id = id
         self.name = name
         self.displayName = displayName
@@ -83,12 +56,6 @@ struct Property: Identifiable, Codable, Hashable {
         self.ownerEmail = ownerEmail
         self.doorCode = doorCode
         self.bikeLocks = bikeLocks
-        self.camera = camera
-        self.thermostat = thermostat
-        self.other = other
-        self.airbnbListingURL = airbnbListingURL
-        self.vrboListingURL = vrboListingURL
-        self.bookingComListingURL = bookingComListingURL
         self.notes = notes
     }
     
@@ -100,4 +67,3 @@ struct Property: Identifiable, Codable, Hashable {
         hasher.combine(id)
     }
 }
-

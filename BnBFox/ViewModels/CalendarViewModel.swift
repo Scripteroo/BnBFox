@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 @MainActor
 class CalendarViewModel: ObservableObject {
@@ -14,13 +15,22 @@ class CalendarViewModel: ObservableObject {
     @Published var isLoading: Bool = true
     @Published var errorMessage: String?
     @Published var currentMonth: Date = Date()
-    @Published var monthsToShow: Int = 1  // Start with 1 month for fast initial load
     
     private let propertyService = PropertyService.shared
     let bookingService = BookingService.shared
+    private var cancellables = Set<AnyCancellable>()
     
     var properties: [Property] {
         return propertyService.getAllProperties()
+    }
+    
+    init() {
+        // Observe PropertyService changes to refresh calendar when properties are updated
+        propertyService.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
     
     func loadBookings() async {
@@ -76,42 +86,25 @@ class CalendarViewModel: ObservableObject {
         let calendar = Calendar.current
         let currentMonthStart = currentMonth.startOfMonth()
         
-        if monthsToShow == 1 {
-            // Initial load: show only current month for speed
-            months.append(currentMonthStart)
-        } else {
-            // Full load: Start at current month, then add forward months, then prepend history
-            // This ensures current month is at the top of the list naturally
-            
-            // Add current month
-            months.append(currentMonthStart)
-            
-            // Add 12 months forward
-            for i in 1...12 {
-                if let month = calendar.date(byAdding: .month, value: i, to: currentMonthStart) {
-                    months.append(month)
-                }
+        // Always show full range: 6 months back + current + 12 months forward
+        // Add 6 months back
+        for i in (1...6).reversed() {
+            if let month = calendar.date(byAdding: .month, value: -i, to: currentMonthStart) {
+                months.append(month)
             }
-            
-            // Prepend 6 months back (in reverse order so they appear before current)
-            var historyMonths: [Date] = []
-            for i in 1...6 {
-                if let month = calendar.date(byAdding: .month, value: -i, to: currentMonthStart) {
-                    historyMonths.insert(month, at: 0)
-                }
-            }
-            months = historyMonths + months
         }
+        
+        // Add current month
+        months.append(currentMonthStart)
+        
+        // Add 12 months forward
+        for i in 1...12 {
+            if let month = calendar.date(byAdding: .month, value: i, to: currentMonthStart) {
+                months.append(month)
+            }
+        }
+        
         return months
     }
-    
-    func expandMonthsAfterInitialLoad() {
-        // Expand to show full range (6 months back + 12 months forward = 18 months)
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 100_000_000)  // 0.1 second delay
-            withAnimation {
-                monthsToShow = 19  // 6 back + current + 12 forward
-            }
-        }
-    }
 }
+

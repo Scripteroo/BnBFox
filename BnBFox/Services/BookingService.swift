@@ -57,8 +57,7 @@ class BookingService: ObservableObject {
         
         // Cache the results
         cache[cacheKey] = (bookings: sortedBookings, timestamp: Date())
-        print("Cached bookings for \(property.shortName)")
-        
+        print("Cached bookings for property \(cacheKey)")
         return sortedBookings
     }
     

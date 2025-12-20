@@ -141,8 +141,8 @@ struct WeekSection: View {
                                     .font(.system(size: 15))
                                     .fontWeight(date.isToday() ? .bold : .regular)
                                     .foregroundColor(
-                                        date.isToday() ? .white : 
-                                        (hasActivity ? .blue : 
+                                        date.isToday() ? .white :
+                                        (hasActivity ? .blue :
                                         (isInCurrentMonth(date) ? .primary : .gray.opacity(0.5)))
                                     )
                                     .underline(hasActivity && !date.isToday())
@@ -367,12 +367,20 @@ struct ContinuousBookingBar: View {
                 .stroke(Color.black, lineWidth: 1.5)
             )
             .overlay(
-                // Property label on the right end
-                Text(property.shortName)
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(textColor(for: property.color))
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .padding(.trailing, 6)
+                // Property label with status dot on the right end
+                HStack(spacing: 2) {
+                    Spacer()
+                    
+                    // Status dot (only show on checkout day if bar ends this week)
+                    if barGeometry.roundedEnd, let checkoutDate = getCheckoutDate() {
+                        CleaningStatusDot(propertyName: property.displayName, checkoutDate: checkoutDate)
+                    }
+                    
+                    Text(property.shortName)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(textColor(for: property.color))
+                }
+                .padding(.trailing, 6)
             )
             .offset(x: barGeometry.offset)
         }
@@ -476,6 +484,11 @@ struct ContinuousBookingBar: View {
         
         return (offset, totalWidth, isActualStart, isActualEnd, segments)
     }
+    
+    private func getCheckoutDate() -> Date? {
+        // Return the checkout date (end date) of this booking
+        return booking.endDate
+    }
 }
 
 // Add this struct for item-based sheet presentation
@@ -484,3 +497,4 @@ struct DayDetailItem: Identifiable {
     let date: Date
     let activities: [PropertyActivity]
 }
+

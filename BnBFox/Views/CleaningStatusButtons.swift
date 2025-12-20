@@ -2,7 +2,7 @@
 //  CleaningStatusButtons.swift
 //  BnBFox
 //
-//  Created on 12/15/25.
+//  Created on 12/16/2025.
 //
 
 import SwiftUI
@@ -13,142 +13,144 @@ struct CleaningStatusButtons: View {
     let bookingId: String
     @Binding var showTooltip: Bool
     
-    @ObservedObject var statusManager = CleaningStatusManager.shared
-    @State private var tooltipTimer: Timer?
+    @ObservedObject private var statusManager = CleaningStatusManager.shared
     
-    var currentStatus: CleaningStatus.Status {
+    // Check if this checkout is in the future
+    private var isFutureCheckout: Bool {
+        let calendar = Calendar.current
+        let checkoutDay = calendar.startOfDay(for: date)
+        let today = calendar.startOfDay(for: Date())
+        return checkoutDay > today
+    }
+    
+    private var currentStatus: CleaningStatus.Status {
         statusManager.getStatus(propertyName: propertyName, date: date)?.status ?? .todo
     }
     
     var body: some View {
         HStack(spacing: 20) {
-            // Button 1: To do (Red)
+            // Red button (To do / Sucio)
             StatusButton(
-                icon: "spray.bottle",
-                label: "To do",
-                color: .red,
-                isActive: currentStatus == .todo,
-                isEnabled: true
+                imageName: "red-cleaning-button",
+                label: "Sucio",
+                sublabel: "To do",
+                labelColor: .red,
+                isSelected: currentStatus == .todo,
+                isDisabled: isFutureCheckout
             ) {
-                statusManager.setStatus(
-                    propertyName: propertyName,
-                    date: date,
-                    bookingId: bookingId,
-                    status: .todo
-                )
+                if !isFutureCheckout {
+                    statusManager.setStatus(
+                        propertyName: propertyName,
+                        date: date,
+                        bookingId: bookingId,
+                        status: .todo
+                    )
+                    BadgeManager.shared.updateBadge()
+                }
             }
             
-            // Button 2: Doing... (Amber)
+            // Yellow button (In Progress / Limpiando)
             StatusButton(
-                icon: "spray.bottle",
-                label: "Doing...",
-                color: .orange,
-                isActive: currentStatus == .inProgress,
-                isEnabled: currentStatus != .pending
+                imageName: "amber-cleaning-button",
+                label: "Limpiando",
+                sublabel: "Doing",
+                labelColor: .orange,
+                isSelected: currentStatus == .inProgress,
+                isDisabled: isFutureCheckout
             ) {
-                statusManager.setStatus(
-                    propertyName: propertyName,
-                    date: date,
-                    bookingId: bookingId,
-                    status: .inProgress
-                )
-                
-                // Show tooltip
-                withAnimation {
-                    showTooltip = true
-                }
-                
-                // Hide tooltip after 2 seconds
-                tooltipTimer?.invalidate()
-                tooltipTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { _ in
+                if !isFutureCheckout {
+                    statusManager.setStatus(
+                        propertyName: propertyName,
+                        date: date,
+                        bookingId: bookingId,
+                        status: .inProgress
+                    )
+                    BadgeManager.shared.updateBadge()
+                    
+                    // Show tooltip
                     withAnimation {
-                        showTooltip = false
+                        showTooltip = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        withAnimation {
+                            showTooltip = false
+                        }
                     }
                 }
             }
             
-            // Button 3: Done! (Green)
+            // Green button (Done / Limpio)
             StatusButton(
-                icon: "spray.bottle",
-                label: "Done!",
-                color: .green,
-                isActive: currentStatus == .done,
-                isEnabled: currentStatus != .pending
+                imageName: "green-cleaning-button",
+                label: "Limpio",
+                sublabel: "Done!",
+                labelColor: .green,
+                isSelected: currentStatus == .done,
+                isDisabled: isFutureCheckout
             ) {
-                statusManager.setStatus(
-                    propertyName: propertyName,
-                    date: date,
-                    bookingId: bookingId,
-                    status: .done
-                )
+                if !isFutureCheckout {
+                    statusManager.setStatus(
+                        propertyName: propertyName,
+                        date: date,
+                        bookingId: bookingId,
+                        status: .done
+                    )
+                    BadgeManager.shared.updateBadge()
+                }
             }
         }
-        .overlay(alignment: .top) {
-            if showTooltip {
-                Text("On my way!")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.black.opacity(0.8))
-                    .cornerRadius(8)
-                    .offset(y: -40)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+        .overlay(
+            // Tooltip overlay
+            Group {
+                if showTooltip {
+                    VStack {
+                        Text("I'm on my way! 🚗")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.black.opacity(0.8))
+                            .cornerRadius(8)
+                            .offset(y: -60)
+                    }
+                    .transition(.opacity)
+                }
             }
-        }
+        )
     }
 }
 
 struct StatusButton: View {
-    let icon: String
+    let imageName: String
     let label: String
-    let color: Color
-    let isActive: Bool
-    let isEnabled: Bool
+    let sublabel: String
+    let labelColor: Color
+    let isSelected: Bool
+    let isDisabled: Bool
     let action: () -> Void
     
     var body: some View {
-        VStack(spacing: 8) {
-            Button(action: {
-                if isEnabled {
-                    action()
-                }
-            }) {
-                ZStack {
-                    Circle()
-                        .fill(isActive ? color.opacity(0.15) : Color.gray.opacity(0.1))
-                        .frame(width: 70, height: 70)
+        Button(action: action) {
+            VStack(spacing: 8) {
+                // Show custom image
+                Image(isDisabled ? "grey-cleaning-button" : imageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 96, height: 96)
+                    .opacity(isDisabled ? 1.0 : (isSelected ? 1.0 : 0.5))
+                
+                VStack(spacing: 2) {
+                    Text(label)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(isDisabled ? .gray : (isSelected ? labelColor : .primary))
                     
-                    Image(systemName: icon)
-                        .font(.system(size: 30))
-                        .foregroundColor(isActive ? color : Color.gray.opacity(0.4))
+                    Text(sublabel)
+                        .font(.system(size: 12))
+                        .foregroundColor(isDisabled ? .gray.opacity(0.6) : .gray)
                 }
             }
-            .disabled(!isEnabled)
-            
-            Text(label)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(isActive ? color : .gray)
         }
+        .disabled(isDisabled)
     }
 }
 
-#Preview {
-    VStack(spacing: 40) {
-        // Preview with different states
-        CleaningStatusButtons(
-            propertyName: "C-5",
-            date: Date(),
-            bookingId: UUID().uuidString,
-            showTooltip: .constant(false)
-        )
-        
-        CleaningStatusButtons(
-            propertyName: "E-5",
-            date: Date(),
-            bookingId: UUID().uuidString,
-            showTooltip: .constant(true)
-        )
-    }
-    .padding()
-}

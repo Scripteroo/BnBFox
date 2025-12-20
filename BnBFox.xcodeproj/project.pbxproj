@@ -14,6 +14,8 @@
 		4446E3122EF5EADE0003CE05 /* CleaningStatusButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E30F2EF5EADE0003CE05 /* CleaningStatusButtons.swift */; };
 		4446E3142EF5EB060003CE05 /* BadgeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3132EF5EB060003CE05 /* BadgeManager.swift */; };
 		4446E3162EF5EB240003CE05 /* CleaningStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3152EF5EB240003CE05 /* CleaningStatus.swift */; };
+		4446E3182EF60F9F0003CE05 /* CleaningStatusDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3172EF60F9F0003CE05 /* CleaningStatusDot.swift */; };
+		4446E31A2EF60FDA0003CE05 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3192EF60FDA0003CE05 /* ToastView.swift */; };
 		A1000001000000000000001 /* BnBFoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002000000000000001 /* BnBFoxApp.swift */; };
 		A1000003000000000000001 /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004000000000000001 /* Platform.swift */; };
 		A1000005000000000000001 /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006000000000000001 /* Property.swift */; };
@@ -43,6 +45,8 @@
 		4446E3102EF5EADE0003CE05 /* NotificationCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterView.swift; sourceTree = "<group>"; };
 		4446E3132EF5EB060003CE05 /* BadgeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeManager.swift; sourceTree = "<group>"; };
 		4446E3152EF5EB240003CE05 /* CleaningStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningStatus.swift; sourceTree = "<group>"; };
+		4446E3172EF60F9F0003CE05 /* CleaningStatusDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningStatusDot.swift; sourceTree = "<group>"; };
+		4446E3192EF60FDA0003CE05 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		A1000000000000000000001 /* BnBFox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BnBFox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000002000000000000001 /* BnBFoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BnBFoxApp.swift; sourceTree = "<group>"; };
 		A1000004000000000000001 /* Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
@@ -120,12 +124,12 @@
 		A1000037000000000000001 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				A1000060000000000000001 /* AppSettings.swift */,
+				A1000010000000000000001 /* Booking.swift */,
+				A1000008000000000000001 /* CalendarSource.swift */,
 				4446E3152EF5EB240003CE05 /* CleaningStatus.swift */,
 				A1000004000000000000001 /* Platform.swift */,
 				A1000006000000000000001 /* Property.swift */,
-				A1000008000000000000001 /* CalendarSource.swift */,
-				A1000010000000000000001 /* Booking.swift */,
-				A1000060000000000000001 /* AppSettings.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -133,8 +137,8 @@
 		A1000038000000000000001 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				A1000012000000000000001 /* ICalService.swift */,
 				A1000014000000000000001 /* BookingService.swift */,
+				A1000012000000000000001 /* ICalService.swift */,
 				A1000016000000000000001 /* PropertyService.swift */,
 				A1000062000000000000001 /* NotificationService.swift */,
 			);
@@ -152,12 +156,14 @@
 		A1000040000000000000001 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				4446E30F2EF5EADE0003CE05 /* CleaningStatusButtons.swift */,
-				4446E3102EF5EADE0003CE05 /* NotificationCenterView.swift */,
-				A1000020000000000000001 /* CalendarView.swift */,
-				A1000022000000000000001 /* MonthView.swift */,
-				A1000024000000000000001 /* DayDetailView.swift */,
+				4446E3192EF60FDA0003CE05 /* ToastView.swift */,
 				A1000026000000000000001 /* AdminPanelView.swift */,
+				A1000020000000000000001 /* CalendarView.swift */,
+				4446E3172EF60F9F0003CE05 /* CleaningStatusDot.swift */,
+				4446E30F2EF5EADE0003CE05 /* CleaningStatusButtons.swift */,
+				A1000024000000000000001 /* DayDetailView.swift */,
+				A1000022000000000000001 /* MonthView.swift */,
+				4446E3102EF5EADE0003CE05 /* NotificationCenterView.swift */,
 				A1000028000000000000001 /* PropertyDetailView.swift */,
 				A1000064000000000000001 /* SettingsView.swift */,
 			);
@@ -250,6 +256,7 @@
 				A1000011000000000000001 /* ICalService.swift in Sources */,
 				A1000013000000000000001 /* BookingService.swift in Sources */,
 				A1000015000000000000001 /* PropertyService.swift in Sources */,
+				4446E3182EF60F9F0003CE05 /* CleaningStatusDot.swift in Sources */,
 				A1000017000000000000001 /* CalendarViewModel.swift in Sources */,
 				A1000019000000000000001 /* CalendarView.swift in Sources */,
 				A1000021000000000000001 /* MonthView.swift in Sources */,
@@ -257,6 +264,7 @@
 				A1000029000000000000001 /* DateExtensions.swift in Sources */,
 				A1000023000000000000001 /* DayDetailView.swift in Sources */,
 				A1000025000000000000001 /* AdminPanelView.swift in Sources */,
+				4446E31A2EF60FDA0003CE05 /* ToastView.swift in Sources */,
 				4446E3112EF5EADE0003CE05 /* NotificationCenterView.swift in Sources */,
 				4446E3122EF5EADE0003CE05 /* CleaningStatusButtons.swift in Sources */,
 				A1000027000000000000001 /* PropertyDetailView.swift in Sources */,

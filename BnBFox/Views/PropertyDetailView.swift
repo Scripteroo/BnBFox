@@ -8,11 +8,23 @@
 import SwiftUI
 
 struct PropertyDetailView: View {
-    @State var property: Property
+    let propertyId: UUID  // Changed: store ID instead of full property
     let bookings: [Booking]
     @Environment(\.dismiss) var dismiss
     @State private var isLocked = true
     @EnvironmentObject var propertyService: PropertyService
+    @State private var property: Property = Property(  // Default placeholder
+        name: "",
+        displayName: "",
+        shortName: "",
+        colorHex: "007AFF",
+        sources: []
+    )
+    
+    init(propertyId: UUID, bookings: [Booking]) {
+        self.propertyId = propertyId
+        self.bookings = bookings
+    }
     
     var body: some View {
         NavigationView {
@@ -21,11 +33,20 @@ struct PropertyDetailView: View {
                     // Header
                     headerView
                     
+                    // Calendar Section (MOVED TO TOP)
+                    calendarSection
+                    
+                    // Property Information Panel
+                    propertyInfoPanel
+                    
                     // Owner Info Panel
                     ownerInfoPanel
                     
-                    // Calendar Section
-                    calendarSection
+                    // Listing URLs Panel
+                    listingURLsPanel
+                    
+                    // Color Picker Panel
+                    colorPickerPanel
                 }
             }
             .background(Color(.systemGroupedBackground))
@@ -36,6 +57,12 @@ struct PropertyDetailView: View {
                         saveChanges()
                         dismiss()
                     }
+                }
+            }
+            .onAppear {
+                // Load fresh property from service
+                if let loadedProperty = propertyService.getProperty(by: propertyId) {
+                    property = loadedProperty
                 }
             }
         }
@@ -76,97 +103,6 @@ struct PropertyDetailView: View {
         .background(Color.white)
     }
     
-    private var ownerInfoPanel: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Owner
-            FormField(
-                label: "Owner",
-                text: $property.ownerName,
-                isLocked: isLocked,
-                placeholder: "Phil Goss"
-            )
-            
-            // Phone
-            FormField(
-                label: "Phone",
-                text: $property.ownerPhone,
-                isLocked: isLocked,
-                placeholder: "+1 (812) 589-1482",
-                keyboardType: .phonePad,
-                isLink: true,
-                linkAction: {
-                    if let url = URL(string: "tel://\(property.ownerPhone.filter { $0.isNumber })") {
-                        UIApplication.shared.open(url)
-                    }
-                }
-            )
-            
-            // Email
-            FormField(
-                label: "email",
-                text: $property.ownerEmail,
-                isLocked: isLocked,
-                placeholder: "email",
-                keyboardType: .emailAddress,
-                isLink: true,
-                linkAction: {
-                    if let url = URL(string: "mailto:\(property.ownerEmail)") {
-                        UIApplication.shared.open(url)
-                    }
-                }
-            )
-            
-            Divider()
-            
-            // iCal URLs Section
-            Text("iCal URL")
-                .font(.system(size: 14))
-                .foregroundColor(.gray)
-                .frame(maxWidth: .infinity, alignment: .center)
-            
-            // AirBnB
-            iCalField(
-                label: "AirBnB",
-                url: property.sources.first(where: { $0.platform == .airbnb })?.icalURL ?? "",
-                isLocked: isLocked
-            )
-            
-            // VRBO
-            iCalField(
-                label: "VRBO",
-                url: property.sources.first(where: { $0.platform == .vrbo })?.icalURL ?? "",
-                isLocked: isLocked
-            )
-            
-            // Booking.com
-            iCalField(
-                label: "Booking.com",
-                url: property.sources.first(where: { $0.platform == .bookingCom })?.icalURL ?? "",
-                isLocked: isLocked
-            )
-            
-            Divider()
-            
-            // Door code
-            FormField(
-                label: "Door code",
-                text: $property.doorCode,
-                isLocked: isLocked,
-                placeholder: "0800"
-            )
-            
-            // Bike Locks
-            FormField(
-                label: "Bike Locks",
-                text: $property.bikeLocks,
-                isLocked: isLocked,
-                placeholder: "0800"
-            )
-        }
-        .padding()
-        .background(Color.white)
-    }
-    
     private var calendarSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Calendar - \(property.shortName)")
@@ -174,7 +110,7 @@ struct PropertyDetailView: View {
                 .padding(.horizontal)
                 .padding(.top, 16)
             
-            // Single property calendar will go here
+            // Single property calendar
             SinglePropertyCalendarView(
                 property: property,
                 bookings: bookings.filter { $0.propertyId == property.id }
@@ -217,6 +153,196 @@ struct PropertyDetailView: View {
         .background(Color.white)
     }
     
+    private var propertyInfoPanel: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Property Information")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.gray)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 8)
+            
+            // Door code
+            FormField(
+                label: "Door code",
+                text: $property.doorCode,
+                isLocked: isLocked,
+                placeholder: "0800"
+            )
+            
+            // Bike Locks
+            FormField(
+                label: "Bike Locks",
+                text: $property.bikeLocks,
+                isLocked: isLocked,
+                placeholder: "0800"
+            )
+            
+            // Camera (NEW)
+            FormField(
+                label: "Camera",
+                text: $property.camera,
+                isLocked: isLocked,
+                placeholder: "Camera info"
+            )
+            
+            // Thermostat (NEW)
+            FormField(
+                label: "Thermostat",
+                text: $property.thermostat,
+                isLocked: isLocked,
+                placeholder: "Thermostat info"
+            )
+            
+            // Other (NEW)
+            FormField(
+                label: "Other",
+                text: $property.other,
+                isLocked: isLocked,
+                placeholder: "Other info"
+            )
+        }
+        .padding()
+        .background(Color.white)
+        .padding(.top, 8)
+    }
+    
+    private var ownerInfoPanel: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Owner Information")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.gray)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 8)
+            
+            // Owner
+            FormField(
+                label: "Owner",
+                text: $property.ownerName,
+                isLocked: isLocked,
+                placeholder: "Phil Goss"
+            )
+            
+            // Phone
+            FormField(
+                label: "Phone",
+                text: $property.ownerPhone,
+                isLocked: isLocked,
+                placeholder: "+1 (812) 589-1482",
+                keyboardType: .phonePad,
+                isLink: true,
+                linkAction: {
+                    if let url = URL(string: "tel://\(property.ownerPhone.filter { $0.isNumber })") {
+                        UIApplication.shared.open(url)
+                    }
+                }
+            )
+            
+            // Email
+            FormField(
+                label: "email",
+                text: $property.ownerEmail,
+                isLocked: isLocked,
+                placeholder: "email",
+                keyboardType: .emailAddress,
+                isLink: true,
+                linkAction: {
+                    if let url = URL(string: "mailto:\(property.ownerEmail)") {
+                        UIApplication.shared.open(url)
+                    }
+                }
+            )
+        }
+        .padding()
+        .background(Color.white)
+        .padding(.top, 8)
+    }
+    
+    private var listingURLsPanel: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Listing URLs")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.gray)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 8)
+            
+            // AirBnB Listing
+            ListingURLField(
+                label: "AirBnB",
+                text: $property.airbnbListingURL,
+                isLocked: isLocked,
+                placeholder: "https://www.airbnb.com/rooms/..."
+            )
+            
+            // VRBO Listing
+            ListingURLField(
+                label: "VRBO",
+                text: $property.vrboListingURL,
+                isLocked: isLocked,
+                placeholder: "https://www.vrbo.com/..."
+            )
+            
+            // Booking.com Listing
+            ListingURLField(
+                label: "Booking.com",
+                text: $property.bookingComListingURL,
+                isLocked: isLocked,
+                placeholder: "https://www.booking.com/..."
+            )
+        }
+        .padding()
+        .background(Color.white)
+        .padding(.top, 8)
+        .padding(.bottom, 20)
+    }
+    
+    private var colorPickerPanel: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Color")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.gray)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 8)
+            
+            HStack(spacing: 16) {
+                // Color square with picker
+                ColorPicker("", selection: Binding(
+                    get: { property.color },
+                    set: { newColor in
+                        property.colorHex = newColor.toHex() ?? property.colorHex
+                    }
+                ))
+                .labelsHidden()
+                .frame(width: 60, height: 60)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(property.color)
+                )
+                .disabled(isLocked)
+                
+                Spacer()
+                
+                // Live preview of occupancy bar
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(property.color)
+                        .frame(height: 32)
+                    
+                    Text(property.shortName)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                        .padding(.trailing, 8)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .padding(.horizontal)
+        }
+        .padding()
+        .background(Color.white)
+        .padding(.top, 8)
+        .padding(.bottom, 20)
+    }
+    
     private func saveChanges() {
         // Save property changes to PropertyService
         propertyService.updateProperty(property)
@@ -236,7 +362,7 @@ struct FormField: View {
         HStack(spacing: 8) {
             Text(label)
                 .font(.system(size: 14, weight: .semibold))
-                .frame(width: 80, alignment: .leading)
+                .frame(width: 100, alignment: .leading)
             
             if isLocked {
                 if isLink && !text.isEmpty {
@@ -271,26 +397,51 @@ struct FormField: View {
     }
 }
 
-struct iCalField: View {
+// NEW - Listing URL Field with clickable link
+struct ListingURLField: View {
     let label: String
-    let url: String
+    @Binding var text: String
     let isLocked: Bool
+    let placeholder: String
     
     var body: some View {
         HStack(spacing: 8) {
             Text(label)
                 .font(.system(size: 14, weight: .semibold))
-                .frame(width: 80, alignment: .leading)
+                .frame(width: 100, alignment: .leading)
             
-            Text(url.isEmpty ? "\(label) iCal" : url)
-                .font(.system(size: 12))
-                .foregroundColor(url.isEmpty ? .gray : .primary)
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(8)
-                .background(Color(.systemGray6))
-                .cornerRadius(4)
+            if isLocked {
+                if !text.isEmpty, let url = URL(string: text) {
+                    Button(action: {
+                        UIApplication.shared.open(url)
+                    }) {
+                        Text(text)
+                            .font(.system(size: 12))
+                            .foregroundColor(.blue)
+                            .underline()
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(8)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(4)
+                    }
+                } else {
+                    Text(placeholder)
+                        .font(.system(size: 12))
+                        .foregroundColor(.gray)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(8)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(4)
+                }
+            } else {
+                TextField(placeholder, text: $text)
+                    .font(.system(size: 12))
+                    .keyboardType(.URL)
+                    .autocapitalization(.none)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
         }
     }
 }
@@ -366,3 +517,20 @@ struct SinglePropertyCalendarView: View {
         }
     }
 }
+
+// MARK: - Color Extension
+extension Color {
+    func toHex() -> String? {
+        guard let components = UIColor(self).cgColor.components else { return nil }
+        
+        let r = components[0]
+        let g = components[1]
+        let b = components[2]
+        
+        return String(format: "%02X%02X%02X",
+                     Int(r * 255),
+                     Int(g * 255),
+                     Int(b * 255))
+    }
+}
+

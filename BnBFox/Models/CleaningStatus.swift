@@ -79,16 +79,23 @@ class CleaningStatusManager: ObservableObject {
     
     /// Create or update status for a property
     func setStatus(propertyName: String, date: Date, bookingId: String, status: CleaningStatus.Status) {
-        if let index = statuses.firstIndex(where: { $0.propertyName == propertyName && Calendar.current.isDate($0.date, inSameDayAs: date) }) {
-            statuses[index].updateStatus(status)
-        } else {
-            let newStatus = CleaningStatus(propertyName: propertyName, date: date, bookingId: bookingId, status: status)
-            statuses.append(newStatus)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            if let index = self.statuses.firstIndex(where: {
+                $0.propertyName == propertyName &&
+                Calendar.current.isDate($0.date, inSameDayAs: date)
+            }) {
+                self.statuses[index].updateStatus(status)
+            } else {
+                let newStatus = CleaningStatus(propertyName: propertyName, date: date, bookingId: bookingId, status: status)
+                self.statuses.append(newStatus)
+            }
+            self.saveStatuses()
+            
+            // Update app badge to reflect pending count
+            BadgeManager.shared.updateBadge()
         }
-        saveStatuses()
-        
-        // Update app badge to reflect pending count
-        BadgeManager.shared.updateBadge()
     }
     
     /// Get all statuses that need attention (todo or inProgress)
@@ -99,9 +106,12 @@ class CleaningStatusManager: ObservableObject {
     
     /// Clean up old statuses (older than 30 days)
     func cleanupOldStatuses() {
-        let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
-        statuses.removeAll { $0.date < thirtyDaysAgo }
-        saveStatuses()
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+            self.statuses.removeAll { $0.date < thirtyDaysAgo }
+            self.saveStatuses()
+        }
     }
     
     private func loadStatuses() {
@@ -116,6 +126,6 @@ class CleaningStatusManager: ObservableObject {
         if let encoded = try? JSONEncoder().encode(statuses) {
             UserDefaults.standard.set(encoded, forKey: storageKey)
         }
-        objectWillChange.send()
     }
 }
+

@@ -13,6 +13,10 @@ struct CalendarView: View {
     @State private var showingAdminPanel = false
     @State private var showingSettings = false
     @State private var selectedProperty: Property?
+    @State private var showingNotificationCenter = false
+    @State private var selectedDate: Date?
+    @State private var dayDetailItem: DayDetailItem?  // NEW - for showing day detail
+    @ObservedObject var statusManager = CleaningStatusManager.shared
     
     var body: some View {
         NavigationView {
@@ -62,11 +66,26 @@ struct CalendarView: View {
                                 }
                             }
                         }
-                        .onChange(of: viewModel.monthsToShow) { newValue in
-                            // When expanding to full calendar, scroll to current month (position 6)
-                            if newValue > 1 {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                    proxy.scrollTo(viewModel.currentMonth.startOfMonth(), anchor: .top)
+                        .onAppear {
+                            // Scroll to current month when view appears
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                proxy.scrollTo(viewModel.currentMonth.startOfMonth(), anchor: .top)
+                            }
+                        }
+                        .onChange(of: selectedDate) { newDate in
+                            if let date = newDate {
+                                // Scroll to the month
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    proxy.scrollTo(date.startOfMonth(), anchor: .top)
+                                }
+                                
+                                // Then open the day detail view
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    let activities = getActivitiesForDate(date)
+                                    if !activities.isEmpty {
+                                        dayDetailItem = DayDetailItem(date: date, activities: activities)
+                                    }
+                                    selectedDate = nil  // Reset for next time
                                 }
                             }
                         }
@@ -76,8 +95,6 @@ struct CalendarView: View {
             .navigationBarHidden(true)
             .task {
                 await viewModel.loadBookings()
-                // After data loads, expand to show all months
-                viewModel.expandMonthsAfterInitialLoad()
             }
             .refreshable {
                 await viewModel.loadBookings()
@@ -91,17 +108,79 @@ struct CalendarView: View {
                         }
                     }
             }
+            /*           .sheet(item: $selectedProperty) { property in
+             PropertyDetailView(
+             property: property,
+             bookings: viewModel.bookings
+             )
+             .environmentObject(PropertyService.shared)
+             }
+             */
+            // NEW CODE - Replace with this:
             .sheet(item: $selectedProperty) { property in
                 PropertyDetailView(
-                    property: property,
+                    propertyId: property.id,  // Pass ID instead of full property
                     bookings: viewModel.bookings
                 )
                 .environmentObject(PropertyService.shared)
             }
+            
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
             }
+            .sheet(isPresented: $showingNotificationCenter) {
+                NotificationCenterView { date in
+                    showingNotificationCenter = false  // Close notification center first
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        selectedDate = date  // Then trigger navigation
+                    }
+                }
+            }
+            .sheet(item: $dayDetailItem) { item in  // NEW - show day detail
+                DayDetailView(date: item.date, activities: item.activities)
+            }
         }
+    }
+    
+    // NEW - Helper function to get activities for a date
+    private func getActivitiesForDate(_ date: Date) -> [PropertyActivity] {
+        let calendar = Calendar.current
+        let dayStart = calendar.startOfDay(for: date)
+        var activities: [PropertyActivity] = []
+        
+        for property in viewModel.properties {
+            let propertyBookings = viewModel.bookings.filter { $0.propertyId == property.id }
+            
+            var checkin: BookingInfo?
+            var checkout: BookingInfo?
+            
+            for booking in propertyBookings {
+                let bookingStart = calendar.startOfDay(for: booking.startDate)
+                let bookingEnd = calendar.startOfDay(for: booking.endDate)
+                
+                // Check-in on this date
+                if calendar.isDate(bookingStart, inSameDayAs: dayStart) {
+                    checkin = BookingInfo(guestName: booking.guestName, booking: booking)
+                }
+                
+                // Check-out on this date
+                if calendar.isDate(bookingEnd, inSameDayAs: dayStart) {
+                    checkout = BookingInfo(guestName: booking.guestName, booking: booking)
+                }
+            }
+            
+            // Only add if there's activity
+            if checkin != nil || checkout != nil {
+                activities.append(PropertyActivity(
+                    property: property,
+                    checkin: checkin,
+                    checkout: checkout
+                ))
+            }
+        }
+        
+        // Sort by property name
+        return activities.sorted { $0.property.displayName < $1.property.displayName }
     }
     
     private var headerView: some View {
@@ -120,10 +199,33 @@ struct CalendarView: View {
                 Spacer()
                 
                 // Title
-                Text("Kawama Calendar")
+                Text("BnBFox")
                     .font(.system(size: 20, weight: .semibold))
                 
                 Spacer()
+                
+                // Notification Center button with badge
+                Button(action: {
+                    showingNotificationCenter = true
+                }) {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "envelope")
+                            .font(.system(size: 20))
+                            .foregroundColor(.primary)
+                            .frame(width: 44, height: 44)
+                        
+                        let pendingCount = statusManager.getPendingStatuses().count
+                        if pendingCount > 0 {
+                            Text("\(pendingCount)")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(minWidth: 18, minHeight: 18)
+                                .background(Color.red)
+                                .clipShape(Circle())
+                                .offset(x: 8, y: 4)
+                        }
+                    }
+                }
                 
                 // Refresh button
                 Button(action: {
@@ -156,30 +258,33 @@ struct CalendarView: View {
     }
     
     private var legendView: some View {
-        HStack(spacing: 16) {
-            ForEach(viewModel.properties) { property in
-                Button(action: {
-                    selectedProperty = property
-                }) {
-                    HStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(property.color)
-                            .frame(width: 20, height: 12)
-                        Text(property.shortName)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.blue)
-                            .underline()
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(viewModel.properties) { property in
+                    Button(action: {
+                        selectedProperty = property
+                    }) {
+                        VStack(spacing: 4) {
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(property.color)
+                                .frame(width: 40, height: 20)
+                            Text(property.shortName)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.blue)
+                                .underline()
+                        }
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .buttonStyle(PlainButtonStyle())
             }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 16)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 16)
         .background(Color(UIColor.systemBackground))
     }
 }
 
+    
 // MARK: - Animated Loading Screen with Video
 struct AnimatedLoadingScreen: View {
     @State private var player: AVPlayer?
@@ -267,3 +372,6 @@ struct CalendarView_Previews: PreviewProvider {
         CalendarView()
     }
 }
+
+
+
