@@ -48,13 +48,13 @@ class AppSettings: ObservableObject {
         self.alertSoundEnabled = UserDefaults.standard.object(forKey: "alertSoundEnabled") as? Bool ?? true
         self.newBookingAlertsEnabled = UserDefaults.standard.object(forKey: "newBookingAlertsEnabled") as? Bool ?? true
         
-        // Default alert time: 8:00 AM
+        // Default alert time: 9:00 AM (changed from 8:00 AM)
         if let savedTime = UserDefaults.standard.object(forKey: "alertTime") as? Date {
             self.alertTime = savedTime
         } else {
             let calendar = Calendar.current
             var components = calendar.dateComponents([.year, .month, .day], from: Date())
-            components.hour = 8
+            components.hour = 9  // Changed to 9 AM
             components.minute = 0
             self.alertTime = calendar.date(from: components) ?? Date()
         }
@@ -69,3 +69,4 @@ class AppSettings: ObservableObject {
         NotificationService.shared.cancelAllCleaningAlerts()
     }
 }
+

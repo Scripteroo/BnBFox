@@ -11,7 +11,8 @@ struct CleaningStatusButtons: View {
     let propertyName: String
     let date: Date
     let bookingId: String
-    @Binding var showTooltip: Bool
+    @Binding var showYellowTooltip: Bool
+    @Binding var showGreenTooltip: Bool
     
     @ObservedObject private var statusManager = CleaningStatusManager.shared
     
@@ -67,13 +68,13 @@ struct CleaningStatusButtons: View {
                     )
                     BadgeManager.shared.updateBadge()
                     
-                    // Show tooltip
+                    // Show yellow tooltip
                     withAnimation {
-                        showTooltip = true
+                        showYellowTooltip = true
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                         withAnimation {
-                            showTooltip = false
+                            showYellowTooltip = false
                         }
                     }
                 }
@@ -96,15 +97,39 @@ struct CleaningStatusButtons: View {
                         status: .done
                     )
                     BadgeManager.shared.updateBadge()
+                    
+                    // Show green tooltip
+                    withAnimation {
+                        showGreenTooltip = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        withAnimation {
+                            showGreenTooltip = false
+                        }
+                    }
                 }
             }
         }
         .overlay(
-            // Tooltip overlay
+            // Tooltip overlays
             Group {
-                if showTooltip {
+                if showYellowTooltip {
                     VStack {
                         Text("I'm on my way! 🚗")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.black.opacity(0.8))
+                            .cornerRadius(8)
+                            .offset(y: -60)
+                    }
+                    .transition(.opacity)
+                }
+                
+                if showGreenTooltip {
+                    VStack {
+                        Text("Clean and Ready! ✨")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.white)
                             .padding(.horizontal, 16)

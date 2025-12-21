@@ -15,130 +15,55 @@ struct CleaningStatusDot: View {
     
     @ObservedObject var statusManager = CleaningStatusManager.shared
     
-    var body: some View {
-        // Only show dot if this date is in the cleaning period
-        if shouldShowDot(), let checkoutDate = getCurrentGapCheckoutDate() {
-            // Use status from the checkout date for ALL days in the gap
-            if let status = statusManager.getStatus(propertyName: propertyName, date: checkoutDate) {
-                Circle()
-                    .fill(statusColor(status.status))
-                    .frame(width: 8, height: 8)
-            } else {
-                // Default to red (dirty/todo) if no status set yet
-                Circle()
-                    .fill(Color.red)
-                    .frame(width: 8, height: 8)
-            }
-        }
+    // Cache the current gap (the one containing TODAY)
+    private var currentGapInfo: GapInfo? {
+        CleaningGapCache.shared.getCurrentGapInfo(propertyId: propertyId, bookings: allBookings)
     }
     
-    private func getCurrentGapCheckoutDate() -> Date? {
-        let calendar = Calendar.current
-        let now = calendar.startOfDay(for: Date())
-        
-        let propertyBookings = allBookings
-            .filter { $0.propertyId == propertyId }
-            .sorted { $0.endDate < $1.endDate }
-        
-        // Find the checkout that creates a gap containing TODAY
-        for i in 0..<propertyBookings.count {
-            let checkoutDate = calendar.startOfDay(for: propertyBookings[i].endDate)
+    var body: some View {
+        // Only show dot if this date is in the CURRENT gap (containing today)
+        if let gap = currentGapInfo {
+            let calendar = Calendar.current
+            let dayStart = calendar.startOfDay(for: date)
+            let now = calendar.startOfDay(for: Date())
             
-            // Find next checkin after this checkout
-            var nextCheckin: Date?
-            for j in 0..<propertyBookings.count {
-                let checkinDate = calendar.startOfDay(for: propertyBookings[j].startDate)
-                if checkinDate > checkoutDate {
-                    if nextCheckin == nil || checkinDate < nextCheckin! {
-                        nextCheckin = checkinDate
+            // Only show dot if:
+            // 1. This date is in the gap range
+            // 2. This date is today or earlier (not future)
+            // 3. This date is not during an active booking
+            if dayStart >= gap.gapStart && dayStart <= gap.gapEnd && dayStart <= now {
+                if !isDuringActiveBooking(date: dayStart) {
+                    // Use status from the checkout date for ALL days in the gap
+                    if let status = statusManager.getStatus(propertyName: propertyName, date: gap.checkoutDate) {
+                        Circle()
+                            .fill(statusColor(status.status))
+                            .frame(width: 8, height: 8)
+                    } else {
+                        // Default to red (dirty/todo) if no status set yet
+                        Circle()
+                            .fill(Color.red)
+                            .frame(width: 8, height: 8)
                     }
                 }
             }
-            
-            // Check if TODAY falls in this gap
-            if let checkin = nextCheckin {
-                // Gap extends through checkin day until next morning (after first night)
-                let dayAfterCheckin = calendar.date(byAdding: .day, value: 1, to: checkin) ?? checkin
-                if now >= checkoutDate && now < dayAfterCheckin {
-                    return checkoutDate
-                }
-            } else {
-                // No next booking - gap extends 7 days
-                let weekLater = calendar.date(byAdding: .day, value: 7, to: checkoutDate) ?? checkoutDate
-                if now >= checkoutDate && now <= weekLater {
-                    return checkoutDate
-                }
-            }
         }
-        
-        return nil
     }
     
-    private func shouldShowDot() -> Bool {
+    private func isDuringActiveBooking(date: Date) -> Bool {
         let calendar = Calendar.current
         let dayStart = calendar.startOfDay(for: date)
-        let now = calendar.startOfDay(for: Date())
         
-        // Get all bookings for this property
         let propertyBookings = allBookings.filter { $0.propertyId == propertyId }
         
-        // DON'T show dots on days that have an active booking
         for booking in propertyBookings {
             let bookingStart = calendar.startOfDay(for: booking.startDate)
             let bookingEnd = calendar.startOfDay(for: booking.endDate)
             // Check if this day is DURING a booking (day AFTER checkin through day before checkout)
-            // Checkin day is NOT considered active booking (guests arrive at 4 PM, cleaning happens before)
             if dayStart > bookingStart && dayStart < bookingEnd {
-                return false  // Active booking, no dot
+                return true
             }
         }
-        
-        // Find the checkout that creates a gap containing TODAY
-        var currentGapCheckout: Date?
-        var currentGapCheckin: Date?
-        
-        for booking in propertyBookings {
-            let checkoutDate = calendar.startOfDay(for: booking.endDate)
-            
-            // Find next checkin after this checkout
-            var nextCheckin: Date?
-            for nextBooking in propertyBookings {
-                let checkinDate = calendar.startOfDay(for: nextBooking.startDate)
-                if checkinDate > checkoutDate {
-                    if nextCheckin == nil || checkinDate < nextCheckin! {
-                        nextCheckin = checkinDate
-                    }
-                }
-            }
-            
-            // Check if TODAY falls in this gap
-            if let checkin = nextCheckin {
-                // Gap extends through checkin day until next morning
-                let dayAfterCheckin = calendar.date(byAdding: .day, value: 1, to: checkin) ?? checkin
-                if now >= checkoutDate && now < dayAfterCheckin {
-                    currentGapCheckout = checkoutDate
-                    currentGapCheckin = checkin  // Store actual checkin, not day after
-                    break
-                }
-            } else {
-                // No next booking - gap extends 7 days
-                let weekLater = calendar.date(byAdding: .day, value: 7, to: checkoutDate) ?? checkoutDate
-                if now >= checkoutDate && now <= weekLater {
-                    currentGapCheckout = checkoutDate
-                    currentGapCheckin = weekLater
-                    break
-                }
-            }
-        }
-        
-        // Only show dot if we found a current gap AND this day is in it
-        guard let gapStart = currentGapCheckout, let gapEnd = currentGapCheckin else {
-            return false
-        }
-        
-        // Show dot from checkout day through checkin day (inclusive)
-        // BUT only show dots on dates that are today or in the past (not future dates)
-        return dayStart >= gapStart && dayStart <= gapEnd && dayStart <= now
+        return false
     }
     
     private func statusColor(_ status: CleaningStatus.Status) -> Color {
@@ -155,5 +80,88 @@ struct CleaningStatusDot: View {
     }
 }
 
+// Cache structure to avoid recalculating gaps for every dot
+struct GapInfo {
+    let checkoutDate: Date
+    let gapStart: Date
+    let gapEnd: Date
+}
 
+class CleaningGapCache {
+    static let shared = CleaningGapCache()
+    
+    private var currentGapCache: [String: GapInfo?] = [:]
+    private var lastBookingsHash: [String: Int] = [:]
+    
+    private init() {}
+    
+    // Get the CURRENT gap (the one containing TODAY) for a property
+    func getCurrentGapInfo(propertyId: UUID, bookings: [Booking]) -> GapInfo? {
+        let calendar = Calendar.current
+        let now = calendar.startOfDay(for: Date())
+        let cacheKey = propertyId.uuidString
+        
+        // Get property bookings
+        let propertyBookings = bookings
+            .filter { $0.propertyId == propertyId }
+            .sorted { $0.endDate < $1.endDate }
+        
+        // Check if bookings changed - if so, invalidate cache for this property
+        let bookingsHash = propertyBookings.map { "\($0.id)" }.joined().hashValue
+        if lastBookingsHash[cacheKey] != bookingsHash {
+            currentGapCache[cacheKey] = nil
+            lastBookingsHash[cacheKey] = bookingsHash
+        }
+        
+        // Check cache first
+        if let cached = currentGapCache[cacheKey] {
+            return cached
+        }
+        
+        // Find the gap that contains TODAY
+        for i in 0..<propertyBookings.count {
+            let checkoutDate = calendar.startOfDay(for: propertyBookings[i].endDate)
+            
+            // Find next checkin after this checkout
+            var nextCheckin: Date?
+            for j in 0..<propertyBookings.count {
+                let checkinDate = calendar.startOfDay(for: propertyBookings[j].startDate)
+                if checkinDate > checkoutDate {
+                    if nextCheckin == nil || checkinDate < nextCheckin! {
+                        nextCheckin = checkinDate
+                    }
+                }
+            }
+            
+            // Calculate gap range
+            let gapStart = checkoutDate
+            let gapEnd: Date
+            
+            if let checkin = nextCheckin {
+                // Gap extends through checkin day until next morning
+                gapEnd = checkin
+            } else {
+                // No next booking - gap extends 7 days
+                gapEnd = calendar.date(byAdding: .day, value: 7, to: checkoutDate) ?? checkoutDate
+            }
+            
+            // Check if TODAY falls in this gap
+            if now >= gapStart && now <= gapEnd {
+                let gapInfo = GapInfo(checkoutDate: checkoutDate, gapStart: gapStart, gapEnd: gapEnd)
+                currentGapCache[cacheKey] = gapInfo
+                return gapInfo
+            }
+        }
+        
+        // No current gap found
+        currentGapCache[cacheKey] = nil
+        return nil
+    }
+    
+    // Call this when bookings are refreshed to clear cache
+    func invalidateCache() {
+        currentGapCache.removeAll()
+        lastBookingsHash.removeAll()
+    }
+}
 

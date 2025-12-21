@@ -186,16 +186,6 @@ struct CalendarView: View {
     private var headerView: some View {
         VStack(spacing: 0) {
             HStack {
-                // Menu button - opens settings
-                Button(action: {
-                    showingSettings = true
-                }) {
-                    Image(systemName: "line.3.horizontal")
-                        .font(.system(size: 20))
-                        .foregroundColor(.primary)
-                        .frame(width: 44, height: 44)
-                }
-                
                 Spacer()
                 
                 // Title
@@ -203,29 +193,6 @@ struct CalendarView: View {
                     .font(.system(size: 20, weight: .semibold))
                 
                 Spacer()
-                
-                // Notification Center button with badge
-                Button(action: {
-                    showingNotificationCenter = true
-                }) {
-                    ZStack(alignment: .topTrailing) {
-                        Image(systemName: "envelope")
-                            .font(.system(size: 20))
-                            .foregroundColor(.primary)
-                            .frame(width: 44, height: 44)
-                        
-                        let pendingCount = statusManager.getPendingStatuses().count
-                        if pendingCount > 0 {
-                            Text("\(pendingCount)")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(minWidth: 18, minHeight: 18)
-                                .background(Color.red)
-                                .clipShape(Circle())
-                                .offset(x: 8, y: 4)
-                        }
-                    }
-                }
                 
                 // Refresh button
                 Button(action: {
@@ -372,6 +339,7 @@ struct CalendarView_Previews: PreviewProvider {
         CalendarView()
     }
 }
+
 
 
 

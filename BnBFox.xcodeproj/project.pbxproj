@@ -16,6 +16,8 @@
 		4446E3162EF5EB240003CE05 /* CleaningStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3152EF5EB240003CE05 /* CleaningStatus.swift */; };
 		4446E3182EF60F9F0003CE05 /* CleaningStatusDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3172EF60F9F0003CE05 /* CleaningStatusDot.swift */; };
 		4446E31A2EF60FDA0003CE05 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4446E3192EF60FDA0003CE05 /* ToastView.swift */; };
+		445A91382EF6793D00C37B62 /* cleaning-supplies.mov in Resources */ = {isa = PBXBuildFile; fileRef = 445A91372EF6793D00C37B62 /* cleaning-supplies.mov */; };
+		445F709F2EF64425003B6D28 /* OwnerInfoPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445F709E2EF64425003B6D28 /* OwnerInfoPanelView.swift */; };
 		A1000001000000000000001 /* BnBFoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002000000000000001 /* BnBFoxApp.swift */; };
 		A1000003000000000000001 /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004000000000000001 /* Platform.swift */; };
 		A1000005000000000000001 /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006000000000000001 /* Property.swift */; };
@@ -47,6 +49,8 @@
 		4446E3152EF5EB240003CE05 /* CleaningStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningStatus.swift; sourceTree = "<group>"; };
 		4446E3172EF60F9F0003CE05 /* CleaningStatusDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningStatusDot.swift; sourceTree = "<group>"; };
 		4446E3192EF60FDA0003CE05 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
+		445A91372EF6793D00C37B62 /* cleaning-supplies.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "cleaning-supplies.mov"; sourceTree = "<group>"; };
+		445F709E2EF64425003B6D28 /* OwnerInfoPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerInfoPanelView.swift; sourceTree = "<group>"; };
 		A1000000000000000000001 /* BnBFox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BnBFox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000002000000000000001 /* BnBFoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BnBFoxApp.swift; sourceTree = "<group>"; };
 		A1000004000000000000001 /* Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
@@ -101,6 +105,7 @@
 		A1000035000000000000001 /* BnBFox */ = {
 			isa = PBXGroup;
 			children = (
+				445A91372EF6793D00C37B62 /* cleaning-supplies.mov */,
 				4446E30B2EF5E8C00003CE05 /* Actions */,
 				A1000002000000000000001 /* BnBFoxApp.swift */,
 				A1000037000000000000001 /* Models */,
@@ -156,7 +161,6 @@
 		A1000040000000000000001 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				4446E3192EF60FDA0003CE05 /* ToastView.swift */,
 				A1000026000000000000001 /* AdminPanelView.swift */,
 				A1000020000000000000001 /* CalendarView.swift */,
 				4446E3172EF60F9F0003CE05 /* CleaningStatusDot.swift */,
@@ -164,8 +168,10 @@
 				A1000024000000000000001 /* DayDetailView.swift */,
 				A1000022000000000000001 /* MonthView.swift */,
 				4446E3102EF5EADE0003CE05 /* NotificationCenterView.swift */,
+				445F709E2EF64425003B6D28 /* OwnerInfoPanelView.swift */,
 				A1000028000000000000001 /* PropertyDetailView.swift */,
 				A1000064000000000000001 /* SettingsView.swift */,
+				4446E3192EF60FDA0003CE05 /* ToastView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -237,6 +243,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				445A91382EF6793D00C37B62 /* cleaning-supplies.mov in Resources */,
 				A1000031000000000000001 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -257,6 +264,7 @@
 				A1000013000000000000001 /* BookingService.swift in Sources */,
 				A1000015000000000000001 /* PropertyService.swift in Sources */,
 				4446E3182EF60F9F0003CE05 /* CleaningStatusDot.swift in Sources */,
+				445F709F2EF64425003B6D28 /* OwnerInfoPanelView.swift in Sources */,
 				A1000017000000000000001 /* CalendarViewModel.swift in Sources */,
 				A1000019000000000000001 /* CalendarView.swift in Sources */,
 				A1000021000000000000001 /* MonthView.swift in Sources */,
@@ -411,6 +419,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Kawama Calendar";
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -445,6 +456,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Kawama Calendar";
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

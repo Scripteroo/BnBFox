@@ -12,7 +12,6 @@ struct DayDetailView: View {
     let date: Date
     let activities: [PropertyActivity]
     @Environment(\.dismiss) var dismiss
-    @State private var showTooltip = false
     
     var body: some View {
         NavigationView {
@@ -35,8 +34,7 @@ struct DayDetailView: View {
                         ForEach(activities) { activity in
                             PropertyActivityCard(
                                 activity: activity,
-                                date: date,
-                                showTooltip: $showTooltip
+                                date: date
                             )
                         }
                         
@@ -70,7 +68,10 @@ struct DayDetailView: View {
 struct PropertyActivityCard: View {
     let activity: PropertyActivity
     let date: Date
-    @Binding var showTooltip: Bool
+    
+    // Each property card now has its own tooltip states
+    @State private var showYellowTooltip = false
+    @State private var showGreenTooltip = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -124,7 +125,8 @@ struct PropertyActivityCard: View {
                         propertyName: activity.property.displayName,
                         date: date,
                         bookingId: activity.checkout?.booking.id ?? "",
-                        showTooltip: $showTooltip
+                        showYellowTooltip: $showYellowTooltip,
+                        showGreenTooltip: $showGreenTooltip
                     )
                 }
                 .padding(.top, 4)
@@ -183,3 +185,4 @@ struct BookingInfo {
     let guestName: String?
     let booking: Booking
 }
+
