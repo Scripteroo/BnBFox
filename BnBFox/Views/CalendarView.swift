@@ -10,7 +10,6 @@ import AVKit
 
 struct CalendarView: View {
     @StateObject private var viewModel = CalendarViewModel()
-    @State private var showingAdminPanel = false
     @State private var showingSettings = false
     @State private var selectedProperty: Property?
     @State private var showingNotificationCenter = false
@@ -98,15 +97,6 @@ struct CalendarView: View {
             }
             .refreshable {
                 await viewModel.loadBookings()
-            }
-            .sheet(isPresented: $showingAdminPanel) {
-                AdminPanelView()
-                    .environmentObject(PropertyService.shared)
-                    .onDisappear {
-                        Task {
-                            await viewModel.loadBookings()
-                        }
-                    }
             }
             /*           .sheet(item: $selectedProperty) { property in
              PropertyDetailView(
@@ -201,16 +191,6 @@ struct CalendarView: View {
                     }
                 }) {
                     Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 20))
-                        .foregroundColor(.primary)
-                        .frame(width: 44, height: 44)
-                }
-                
-                // Settings button
-                Button(action: {
-                    showingAdminPanel = true
-                }) {
-                    Image(systemName: "gearshape")
                         .font(.system(size: 20))
                         .foregroundColor(.primary)
                         .frame(width: 44, height: 44)
@@ -339,6 +319,7 @@ struct CalendarView_Previews: PreviewProvider {
         CalendarView()
     }
 }
+
 
 
 

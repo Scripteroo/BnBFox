@@ -16,11 +16,19 @@ struct AdminPanelView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     // Header
-                    Text("Kawama Maintenance\nAdministration Panel")
-                        .font(.system(size: 20, weight: .bold))
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 20)
-                        .padding(.bottom, 24)
+                    VStack(spacing: 8) {
+                        Text("iCal Connect")
+                            .font(.system(size: 24, weight: .bold))
+                            .multilineTextAlignment(.center)
+                        
+                        Text("Connect your AirBnB, VRBO and Booking.com Calendars")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
+                    }
+                    .padding(.top, 20)
+                    .padding(.bottom, 24)
                     
                     // Property list
                     VStack(spacing: 16) {
@@ -56,14 +64,6 @@ struct AdminPanelView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        viewModel.saveChanges()
-                        dismiss()
-                    }
-                }
-            }
         }
     }
 }
@@ -325,3 +325,5 @@ class AdminPanelViewModel: ObservableObject {
         return 1
     }
 }
+
+

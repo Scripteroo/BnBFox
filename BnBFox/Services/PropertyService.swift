@@ -37,7 +37,19 @@ class PropertyService: ObservableObject {
                         platform: .airbnb,
                         url: URL(string: "https://www.airbnb.com/calendar/ical/778254930255723354.ics?s=c0d103adb18b28b018a6c6484a5f04ee")!
                     )
-                ]
+                ],
+                ownerName: "Daniel DelPercio",
+                ownerPhone: "+19144860800",
+                ownerEmail: "ddelpercio@gmail.com",
+                doorCode: "1157",
+                bikeLocks: "1157",
+                camera: "",
+                thermostat: "",
+                other: "",
+                airbnbListingURL: "https://airbnb.com/h/kawama-c2",
+                vrboListingURL: "https://vrbo.com/3058755",
+                bookingComListingURL: "",
+                notes: ""
             ),
             Property(
                 name: "kawama-e5",
@@ -53,7 +65,19 @@ class PropertyService: ObservableObject {
                         platform: .airbnb,
                         url: URL(string: "https://www.airbnb.com/calendar/ical/634088790463336883.ics?s=aa7722940a08ab86e82b802120481e3d")!
                     )
-                ]
+                ],
+                ownerName: "Daniel DelPercio",
+                ownerPhone: "+19144860800",
+                ownerEmail: "ddelpercio@gmail.com",
+                doorCode: "8578",
+                bikeLocks: "8578",
+                camera: "",
+                thermostat: "",
+                other: "",
+                airbnbListingURL: "https://airbnb.com/h/kawama-e5",
+                vrboListingURL: "https://vrbo.com/2659755",
+                bookingComListingURL: "",
+                notes: ""
             ),
             Property(
                 name: "kawama-c5",

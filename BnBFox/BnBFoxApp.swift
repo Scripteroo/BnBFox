@@ -126,15 +126,6 @@ struct ContentView: View {
             .tag(0)
             
             NavigationStack {
-                Text("Properties")
-                    .font(.largeTitle)
-            }
-            .tabItem {
-                Label("Properties", systemImage: "house.fill")
-            }
-            .tag(1)
-            
-            NavigationStack {
                 NotificationCenterView(onNotificationTap: { date in
                     // When notification is tapped, navigate to that date
                     navigationState.selectedDate = date
@@ -146,6 +137,14 @@ struct ContentView: View {
                 Label("Alerts", systemImage: "bell.fill")
             }
             .badge(statusManager.getPendingStatuses().count)
+            .tag(1)
+            
+            NavigationStack {
+                AdminPanelView()
+            }
+            .tabItem {
+                Label("Properties", systemImage: "house.fill")
+            }
             .tag(2)
             
             NavigationStack {
@@ -222,3 +221,4 @@ struct ContentView: View {
         return activities.sorted { $0.property.displayName < $1.property.displayName }
     }
 }
+

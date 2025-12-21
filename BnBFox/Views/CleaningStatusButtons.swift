@@ -30,12 +30,12 @@ struct CleaningStatusButtons: View {
     
     var body: some View {
         HStack(spacing: 20) {
-            // Red button (To do / Sucio)
+            // Red button (Dirty / Sucio)
             StatusButton(
                 imageName: "red-cleaning-button",
-                label: "Sucio",
-                sublabel: "To do",
-                labelColor: .red,
+                label: "Dirty",
+                sublabel: "Sucio",
+                labelColor: .black,
                 isSelected: currentStatus == .todo,
                 isDisabled: isFutureCheckout
             ) {
@@ -50,12 +50,12 @@ struct CleaningStatusButtons: View {
                 }
             }
             
-            // Yellow button (In Progress / Limpiando)
+            // Amber button (Cleaning / Limpiando)
             StatusButton(
                 imageName: "amber-cleaning-button",
-                label: "Limpiando",
-                sublabel: "Doing",
-                labelColor: .orange,
+                label: "Cleaning",
+                sublabel: "Limpiando",
+                labelColor: .black,
                 isSelected: currentStatus == .inProgress,
                 isDisabled: isFutureCheckout
             ) {
@@ -80,12 +80,12 @@ struct CleaningStatusButtons: View {
                 }
             }
             
-            // Green button (Done / Limpio)
+            // Green button (Clean / Limpio)
             StatusButton(
                 imageName: "green-cleaning-button",
-                label: "Limpio",
-                sublabel: "Done!",
-                labelColor: .green,
+                label: "Clean",
+                sublabel: "Limpio",
+                labelColor: .black,
                 isSelected: currentStatus == .done,
                 isDisabled: isFutureCheckout
             ) {
@@ -166,7 +166,7 @@ struct StatusButton: View {
                 
                 VStack(spacing: 2) {
                     Text(label)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(isDisabled ? .gray : (isSelected ? labelColor : .primary))
                     
                     Text(sublabel)
