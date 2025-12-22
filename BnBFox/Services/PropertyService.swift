@@ -3,6 +3,7 @@
 //  BnBFox
 //
 //  Created on 12/11/2025.
+//  Updated with address fields
 //
 
 import Foundation
@@ -38,17 +39,27 @@ class PropertyService: ObservableObject {
                         url: URL(string: "https://www.airbnb.com/calendar/ical/778254930255723354.ics?s=c0d103adb18b28b018a6c6484a5f04ee")!
                     )
                 ],
+                // ADDRESS FIELDS
+                streetAddress: "",
+                unit: "",
+                city: "",
+                state: "",
+                zipCode: "",
+                // OWNER INFO
                 ownerName: "Daniel DelPercio",
-                ownerPhone: "+19144860800",
-                ownerEmail: "ddelpercio@gmail.com",
+                ownerPhone: "",
+                ownerEmail: "",
+                // ACCESS CODES
                 doorCode: "1157",
-                bikeLocks: "1157",
+                bikeLocks: "",
                 camera: "",
                 thermostat: "",
                 other: "",
-                airbnbListingURL: "https://airbnb.com/h/kawama-c2",
-                vrboListingURL: "https://vrbo.com/3058755",
+                // LISTING URLS
+                airbnbListingURL: "",
+                vrboListingURL: "",
                 bookingComListingURL: "",
+                // NOTES
                 notes: ""
             ),
             Property(
@@ -66,17 +77,27 @@ class PropertyService: ObservableObject {
                         url: URL(string: "https://www.airbnb.com/calendar/ical/634088790463336883.ics?s=aa7722940a08ab86e82b802120481e3d")!
                     )
                 ],
+                // ADDRESS FIELDS
+                streetAddress: "",
+                unit: "",
+                city: "",
+                state: "",
+                zipCode: "",
+                // OWNER INFO
                 ownerName: "Daniel DelPercio",
-                ownerPhone: "+19144860800",
-                ownerEmail: "ddelpercio@gmail.com",
+                ownerPhone: "",
+                ownerEmail: "",
+                // ACCESS CODES
                 doorCode: "8578",
-                bikeLocks: "8578",
+                bikeLocks: "",
                 camera: "",
                 thermostat: "",
                 other: "",
-                airbnbListingURL: "https://airbnb.com/h/kawama-e5",
-                vrboListingURL: "https://vrbo.com/2659755",
+                // LISTING URLS
+                airbnbListingURL: "",
+                vrboListingURL: "",
                 bookingComListingURL: "",
+                // NOTES
                 notes: ""
             ),
             Property(
@@ -93,7 +114,29 @@ class PropertyService: ObservableObject {
                         platform: .airbnb,
                         url: URL(string: "https://www.airbnb.com/calendar/ical/1329041307852345218.ics?s=380d406f0019dfb3fe07b61f94f8f0fa&locale=en")!
                     )
-                ]
+                ],
+                // ADDRESS FIELDS
+                streetAddress: "",
+                unit: "",
+                city: "",
+                state: "",
+                zipCode: "",
+                // OWNER INFO
+                ownerName: "Daniel DelPercio",
+                ownerPhone: "",
+                ownerEmail: "",
+                // ACCESS CODES
+                doorCode: "",
+                bikeLocks: "",
+                camera: "",
+                thermostat: "",
+                other: "",
+                // LISTING URLS
+                airbnbListingURL: "",
+                vrboListingURL: "",
+                bookingComListingURL: "",
+                // NOTES
+                notes: ""
             )
         ]
     }
@@ -118,6 +161,14 @@ class PropertyService: ObservableObject {
     
     func getAllProperties() -> [Property] {
         return properties
+    }
+    
+    func updateProperty(_ propertyId: UUID, with updater: (Property) -> Property) {
+        if let index = properties.firstIndex(where: { $0.id == propertyId }) {
+            properties[index] = updater(properties[index])
+            saveProperties()
+            NotificationCenter.default.post(name: .propertiesDidChange, object: nil)
+        }
     }
     
     func updateProperty(_ updatedProperty: Property) {
@@ -177,7 +228,24 @@ class PropertyService: ObservableObject {
                 displayName: config.displayName,
                 shortName: shortName,
                 colorHex: config.color.toHex(),
-                sources: sources
+                sources: sources,
+                streetAddress: "",
+                unit: "",
+                city: "",
+                state: "",
+                zipCode: "",
+                ownerName: "",
+                ownerPhone: "",
+                ownerEmail: "",
+                doorCode: "",
+                bikeLocks: "",
+                camera: "",
+                thermostat: "",
+                other: "",
+                airbnbListingURL: "",
+                vrboListingURL: "",
+                bookingComListingURL: "",
+                notes: ""
             )
         }
         
@@ -188,7 +256,7 @@ class PropertyService: ObservableObject {
     }
 }
 
-// Codable wrapper for Property - UPDATED WITH NEW FIELDS
+// Codable wrapper for Property
 struct PropertyData: Codable {
     let id: String
     let name: String
@@ -196,17 +264,32 @@ struct PropertyData: Codable {
     let shortName: String
     let colorHex: String
     let sources: [CalendarSourceData]
+    
+    // Address fields
+    let streetAddress: String
+    let unit: String
+    let city: String
+    let state: String
+    let zipCode: String
+    
+    // Owner info
     let ownerName: String
     let ownerPhone: String
     let ownerEmail: String
+    
+    // Access codes
     let doorCode: String
     let bikeLocks: String
-    let camera: String              // NEW
-    let thermostat: String          // NEW
-    let other: String               // NEW
-    let airbnbListingURL: String    // NEW
-    let vrboListingURL: String      // NEW
-    let bookingComListingURL: String // NEW
+    let camera: String
+    let thermostat: String
+    let other: String
+    
+    // Listing URLs
+    let airbnbListingURL: String
+    let vrboListingURL: String
+    let bookingComListingURL: String
+    
+    // Notes
     let notes: String
     
     init(from property: Property) {
@@ -216,17 +299,32 @@ struct PropertyData: Codable {
         self.shortName = property.shortName
         self.colorHex = property.colorHex
         self.sources = property.sources.map { CalendarSourceData(from: $0) }
+        
+        // Address
+        self.streetAddress = property.streetAddress
+        self.unit = property.unit
+        self.city = property.city
+        self.state = property.state
+        self.zipCode = property.zipCode
+        
+        // Owner
         self.ownerName = property.ownerName
         self.ownerPhone = property.ownerPhone
         self.ownerEmail = property.ownerEmail
+        
+        // Access
         self.doorCode = property.doorCode
         self.bikeLocks = property.bikeLocks
-        self.camera = property.camera                       // NEW
-        self.thermostat = property.thermostat               // NEW
-        self.other = property.other                         // NEW
-        self.airbnbListingURL = property.airbnbListingURL   // NEW
-        self.vrboListingURL = property.vrboListingURL       // NEW
-        self.bookingComListingURL = property.bookingComListingURL // NEW
+        self.camera = property.camera
+        self.thermostat = property.thermostat
+        self.other = property.other
+        
+        // Listings
+        self.airbnbListingURL = property.airbnbListingURL
+        self.vrboListingURL = property.vrboListingURL
+        self.bookingComListingURL = property.bookingComListingURL
+        
+        // Notes
         self.notes = property.notes
     }
     
@@ -238,17 +336,22 @@ struct PropertyData: Codable {
             shortName: shortName,
             colorHex: colorHex,
             sources: sources.map { $0.toCalendarSource() },
+            streetAddress: streetAddress,
+            unit: unit,
+            city: city,
+            state: state,
+            zipCode: zipCode,
             ownerName: ownerName,
             ownerPhone: ownerPhone,
             ownerEmail: ownerEmail,
             doorCode: doorCode,
             bikeLocks: bikeLocks,
-            camera: camera,                         // NEW
-            thermostat: thermostat,                 // NEW
-            other: other,                           // NEW
-            airbnbListingURL: airbnbListingURL,     // NEW
-            vrboListingURL: vrboListingURL,         // NEW
-            bookingComListingURL: bookingComListingURL, // NEW
+            camera: camera,
+            thermostat: thermostat,
+            other: other,
+            airbnbListingURL: airbnbListingURL,
+            vrboListingURL: vrboListingURL,
+            bookingComListingURL: bookingComListingURL,
             notes: notes
         )
     }
@@ -323,3 +426,4 @@ struct PropertyConfig: Identifiable, Codable {
 }
 
 // Color init(hex:) extension is defined in DateExtensions.swift
+

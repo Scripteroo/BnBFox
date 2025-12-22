@@ -2,7 +2,7 @@
 //  BookingService.swift
 //  BnBFox
 //
-//  Created on 12/11/2025.
+//  Updated with public getCachedBookings method
 //
 
 import Foundation
@@ -22,7 +22,7 @@ class BookingService: ObservableObject {
         let cacheKey = property.id.uuidString
         if let cached = cache[cacheKey],
            Date().timeIntervalSince(cached.timestamp) < cacheExpiration {
-            // Using cached bookings for \(property.shortName)
+            print("Using cached bookings for \(property.shortName)")
             return cached.bookings
         }
         
@@ -57,8 +57,18 @@ class BookingService: ObservableObject {
         
         // Cache the results
         cache[cacheKey] = (bookings: sortedBookings, timestamp: Date())
-        // Cached bookings for property \(cacheKey)
+        print("Cached bookings for \(property.shortName)")
+        
         return sortedBookings
+    }
+    
+    // Public method to get cached bookings synchronously
+    func getCachedBookings(for property: Property) -> [Booking] {
+        let cacheKey = property.id.uuidString
+        if let cached = cache[cacheKey] {
+            return cached.bookings
+        }
+        return []
     }
     
     func getBookings(for date: Date, from bookings: [Booking]) -> [Booking] {

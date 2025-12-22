@@ -108,11 +108,8 @@ struct CalendarView: View {
              */
             // NEW CODE - Replace with this:
             .sheet(item: $selectedProperty) { property in
-                PropertyDetailView(
-                    propertyId: property.id,  // Pass ID instead of full property
-                    bookings: viewModel.bookings
-                )
-                .environmentObject(PropertyService.shared)
+                PropertyDetailView(property: property)
+                    .environmentObject(PropertyService.shared)
             }
             
             .sheet(isPresented: $showingSettings) {

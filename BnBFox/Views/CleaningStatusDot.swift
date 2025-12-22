@@ -14,6 +14,7 @@ struct CleaningStatusDot: View {
     let allBookings: [Booking]
     
     @ObservedObject var statusManager = CleaningStatusManager.shared
+    @State private var refreshID = UUID()
     
     // Cache the current gap (the one containing TODAY)
     private var currentGapInfo: GapInfo? {
@@ -21,31 +22,38 @@ struct CleaningStatusDot: View {
     }
     
     var body: some View {
-        // Only show dot if this date is in the CURRENT gap (containing today)
-        if let gap = currentGapInfo {
-            let calendar = Calendar.current
-            let dayStart = calendar.startOfDay(for: date)
-            let now = calendar.startOfDay(for: Date())
-            
-            // Only show dot if:
-            // 1. This date is in the gap range
-            // 2. This date is today or earlier (not future)
-            // 3. This date is not during an active booking
-            if dayStart >= gap.gapStart && dayStart <= gap.gapEnd && dayStart <= now {
-                if !isDuringActiveBooking(date: dayStart) {
-                    // Use status from the checkout date for ALL days in the gap
-                    if let status = statusManager.getStatus(propertyName: propertyName, date: gap.checkoutDate) {
-                        Circle()
-                            .fill(statusColor(status.status))
-                            .frame(width: 8, height: 8)
-                    } else {
-                        // Default to red (dirty/todo) if no status set yet
-                        Circle()
-                            .fill(Color.red)
-                            .frame(width: 8, height: 8)
+        Group {
+            // Only show dot if this date is in the CURRENT gap (containing today)
+            if let gap = currentGapInfo {
+                let calendar = Calendar.current
+                let dayStart = calendar.startOfDay(for: date)
+                let now = calendar.startOfDay(for: Date())
+                
+                // Only show dot if:
+                // 1. This date is in the gap range
+                // 2. This date is today or earlier (not future)
+                // 3. This date is not during an active booking
+                if dayStart >= gap.gapStart && dayStart <= gap.gapEnd && dayStart <= now {
+                    if !isDuringActiveBooking(date: dayStart) {
+                        // Use status from the checkout date for ALL days in the gap
+                        if let status = statusManager.getStatus(propertyName: propertyName, date: gap.checkoutDate) {
+                            Circle()
+                                .fill(statusColor(status.status))
+                                .frame(width: 8, height: 8)
+                        } else {
+                            // Default to red (dirty/todo) if no status set yet
+                            Circle()
+                                .fill(Color.red)
+                                .frame(width: 8, height: 8)
+                        }
                     }
                 }
             }
+        }
+        .id(refreshID)
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("CleaningStatusChanged"))) { _ in
+            // Force view to refresh when cleaning status changes
+            refreshID = UUID()
         }
     }
     
@@ -164,4 +172,5 @@ class CleaningGapCache {
         lastBookingsHash.removeAll()
     }
 }
+
 
