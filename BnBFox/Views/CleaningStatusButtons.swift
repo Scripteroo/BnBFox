@@ -1,6 +1,6 @@
 //
 //  CleaningStatusButtons.swift
-//  BnBFox
+//  BnBShift
 //
 //  Created on 12/16/2025.
 //
@@ -14,6 +14,7 @@ struct CleaningStatusButtons: View {
     let currentStatus: CleaningStatus.Status
     @Binding var showYellowTooltip: Bool
     @Binding var showGreenTooltip: Bool
+    var onCleanTapped: (() -> Void)? = nil
     
     // Check if this checkout is in the future
     private var isFutureCheckout: Bool {
@@ -105,6 +106,9 @@ struct CleaningStatusButtons: View {
                             showGreenTooltip = false
                         }
                     }
+                    
+                    // Trigger checklist panel
+                    onCleanTapped?()
                 }
             }
         }
@@ -176,5 +180,4 @@ struct StatusButton: View {
         .disabled(isDisabled)
     }
 }
-
 

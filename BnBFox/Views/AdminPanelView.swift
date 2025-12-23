@@ -1,6 +1,6 @@
 //
 //  AdminPanelView.swift
-//  BnBFox
+//  BnBShift
 //
 //  Created on 12/12/2025.
 //
@@ -15,12 +15,27 @@ struct AdminPanelView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 0) {
-                    // Header
-                    Text("Kawama Maintenance\nAdministration Panel")
-                        .font(.system(size: 20, weight: .bold))
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 20)
-                        .padding(.bottom, 24)
+                    // Header with logo and title
+                    HStack(spacing: 12) {
+                        Image("bnbshift-logo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 60, height: 60)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Property Administration")
+                                .font(.system(size: 22, weight: .bold))
+                            
+                            Text("Connect your AirBnB, VRBO and Booking.com Calendars")
+                                .font(.system(size: 13))
+                                .foregroundColor(.gray)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 24)
                     
                     // Property list
                     VStack(spacing: 16) {
@@ -55,7 +70,6 @@ struct AdminPanelView: View {
                     .padding(.bottom, 32)
                 }
             }
-            .navigationTitle("Properties")
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -69,9 +83,12 @@ struct PropertyConfigCard: View {
     
     @State private var complexName: String
     @State private var unitName: String
-    @State private var airbnbURL: String
-    @State private var vrboURL: String
-    @State private var bookingURL: String
+    @State private var streetAddress: String
+    @State private var unit: String
+    @State private var city: String
+    @State private var state: String
+    @State private var zipCode: String
+    @State private var iCalFeeds: [ICalFeed]
     @State private var showDeleteConfirmation = false
     
     init(property: PropertyConfig, onUpdate: @escaping (PropertyConfig) -> Void, onDelete: @escaping () -> Void, onToggleLock: @escaping () -> Void) {
@@ -81,9 +98,12 @@ struct PropertyConfigCard: View {
         self.onToggleLock = onToggleLock
         _complexName = State(initialValue: property.complexName)
         _unitName = State(initialValue: property.unitName)
-        _airbnbURL = State(initialValue: property.airbnbURL)
-        _vrboURL = State(initialValue: property.vrboURL)
-        _bookingURL = State(initialValue: property.bookingURL)
+        _streetAddress = State(initialValue: property.streetAddress)
+        _unit = State(initialValue: property.unit)
+        _city = State(initialValue: property.city)
+        _state = State(initialValue: property.state)
+        _zipCode = State(initialValue: property.zipCode)
+        _iCalFeeds = State(initialValue: property.iCalFeeds)
     }
     
     var body: some View {
@@ -146,28 +166,98 @@ struct PropertyConfigCard: View {
             Divider()
                 .padding(.vertical, 4)
             
-            // iCal URL fields - disabled when locked
+            // Address fields - disabled when locked
+            if !property.isLocked {
+                VStack(spacing: 6) {
+                    TextField("Street Address", text: $streetAddress)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .font(.caption)
+                        .onChange(of: streetAddress) { _ in updateProperty() }
+                    
+                    TextField("Unit", text: $unit)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .font(.caption)
+                        .onChange(of: unit) { _ in updateProperty() }
+                    
+                    HStack(spacing: 6) {
+                        TextField("City", text: $city)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.caption)
+                            .onChange(of: city) { _ in updateProperty() }
+                        
+                        TextField("State", text: $state)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.caption)
+                            .frame(width: 60)
+                            .onChange(of: state) { _ in updateProperty() }
+                        
+                        TextField("ZIP", text: $zipCode)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.caption)
+                            .frame(width: 80)
+                            .onChange(of: zipCode) { _ in updateProperty() }
+                    }
+                }
+                .padding(.bottom, 8)
+            }
+            
+            // Instructional text with hyperlink
+            HStack(spacing: 4) {
+                Text("Enter iCal information below.")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                
+                Button(action: {
+                    // TODO: Link to instruction page
+                    print("Open iCal instructions")
+                }) {
+                    Text("Where to find iCal information...")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        .underline()
+                }
+            }
+            .padding(.bottom, 4)
+            
+            // Dynamic iCal URL fields
             VStack(spacing: 8) {
-                URLTextField(
-                    placeholder: property.isLocked ? airbnbURL : "AirBnB iCal",
-                    text: $airbnbURL,
-                    isDisabled: property.isLocked,
-                    onChange: { updateProperty() }
-                )
+                ForEach($iCalFeeds) { $feed in
+                    HStack(spacing: 8) {
+                        DynamicURLTextField(
+                            feed: $feed,
+                            isDisabled: property.isLocked,
+                            onChange: { updateProperty() }
+                        )
+                        
+                        // Delete button for custom feeds (not default ones)
+                        if !property.isLocked && !feed.isDefault {
+                            Button(action: {
+                                deleteFeed(feed)
+                            }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+                }
                 
-                URLTextField(
-                    placeholder: property.isLocked ? vrboURL : "VRBO iCal",
-                    text: $vrboURL,
-                    isDisabled: property.isLocked,
-                    onChange: { updateProperty() }
-                )
-                
-                URLTextField(
-                    placeholder: property.isLocked ? bookingURL : "Booking.com iCal",
-                    text: $bookingURL,
-                    isDisabled: property.isLocked,
-                    onChange: { updateProperty() }
-                )
+                // Add button for new custom feeds
+                if !property.isLocked {
+                    Button(action: {
+                        addCustomFeed()
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(.blue)
+                            Text("Add Custom iCal Feed")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    .padding(.top, 4)
+                }
             }
         }
         .padding(16)
@@ -189,39 +279,81 @@ struct PropertyConfigCard: View {
         var updated = property
         updated.complexName = complexName
         updated.unitName = unitName
-        updated.airbnbURL = airbnbURL
-        updated.vrboURL = vrboURL
-        updated.bookingURL = bookingURL
+        updated.streetAddress = streetAddress
+        updated.unit = unit
+        updated.city = city
+        updated.state = state
+        updated.zipCode = zipCode
+        updated.iCalFeeds = iCalFeeds
         onUpdate(updated)
+    }
+    
+    private func addCustomFeed() {
+        let newFeed = ICalFeed(platformName: "Custom", url: "", isDefault: false)
+        iCalFeeds.append(newFeed)
+        updateProperty()
+    }
+    
+    private func deleteFeed(_ feed: ICalFeed) {
+        iCalFeeds.removeAll { $0.id == feed.id }
+        updateProperty()
     }
 }
 
-struct URLTextField: View {
-    let placeholder: String
-    @Binding var text: String
+struct DynamicURLTextField: View {
+    @Binding var feed: ICalFeed
     let isDisabled: Bool
     let onChange: () -> Void
     
     var body: some View {
-        if isDisabled {
-            // Show as read-only text when locked
-            Text(text.isEmpty ? placeholder : text)
-                .font(.system(size: 14))
-                .foregroundColor(text.isEmpty ? .gray.opacity(0.5) : .primary)
+        VStack(spacing: 4) {
+            if isDisabled {
+                // Show as read-only text when locked
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(feed.platformName)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.gray)
+                    
+                    Text(feed.url.isEmpty ? "No URL" : feed.url)
+                        .font(.system(size: 14))
+                        .foregroundColor(feed.url.isEmpty ? .gray.opacity(0.5) : .primary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 8)
                 .background(Color.gray.opacity(0.1))
                 .cornerRadius(5)
-        } else {
-            // Editable when unlocked
-            TextField(placeholder, text: $text)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
-                .onChange(of: text) { _ in
-                    onChange()
+            } else {
+                // Editable when unlocked
+                VStack(spacing: 4) {
+                    // Platform name field (editable for custom feeds)
+                    if feed.isDefault {
+                        Text(feed.platformName)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        TextField("Platform Name", text: $feed.platformName)
+                            .font(.system(size: 11, weight: .medium))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: feed.platformName) { _ in
+                                onChange()
+                            }
+                    }
+                    
+                    // URL field
+                    TextField(feed.isDefault ? "\(feed.platformName) iCal URL" : "Custom iCal URL", text: $feed.url)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .font(.system(size: 14))
+                        .onChange(of: feed.url) { _ in
+                            onChange()
+                        }
                 }
+            }
         }
     }
 }
@@ -250,13 +382,58 @@ class AdminPanelViewModel: ObservableObject {
         let existingProperties = PropertyService.shared.getAllProperties()
         
         properties = existingProperties.map { property in
-            PropertyConfig(
+            // Convert CalendarSource array to ICalFeed array
+            var feeds: [ICalFeed] = []
+            
+            // Add default feeds with URLs if they exist
+            let airbnbSource = property.sources.first(where: { $0.platform == .airbnb })
+            feeds.append(ICalFeed(
+                platformName: "AirBnB",
+                url: airbnbSource?.url.absoluteString ?? "",
+                isDefault: true
+            ))
+            
+            let vrboSource = property.sources.first(where: { $0.platform == .vrbo })
+            feeds.append(ICalFeed(
+                platformName: "VRBO",
+                url: vrboSource?.url.absoluteString ?? "",
+                isDefault: true
+            ))
+            
+            let bookingSource = property.sources.first(where: { $0.platform == .bookingCom })
+            feeds.append(ICalFeed(
+                platformName: "Booking.com",
+                url: bookingSource?.url.absoluteString ?? "",
+                isDefault: true
+            ))
+            
+            // Add any additional custom sources
+            let customSources = property.sources.filter { source in
+                // Count how many times this source appears in default feeds
+                let isAirbnb = source.platform == .airbnb && airbnbSource != nil
+                let isVrbo = source.platform == .vrbo && vrboSource != nil
+                let isBooking = source.platform == .bookingCom && bookingSource != nil
+                return !isAirbnb && !isVrbo && !isBooking
+            }
+            
+            for customSource in customSources {
+                feeds.append(ICalFeed(
+                    platformName: "Custom",
+                    url: customSource.url.absoluteString,
+                    isDefault: false
+                ))
+            }
+            
+            return PropertyConfig(
                 id: property.id.uuidString,
                 complexName: property.complexName,
                 unitName: property.unitName,
-                airbnbURL: property.sources.first(where: { $0.platform == .airbnb })?.url.absoluteString ?? "",
-                vrboURL: property.sources.first(where: { $0.platform == .vrbo })?.url.absoluteString ?? "",
-                bookingURL: property.sources.first(where: { $0.platform == .bookingCom })?.url.absoluteString ?? "",
+                streetAddress: property.streetAddress,
+                unit: property.unit,
+                city: property.city,
+                state: property.state,
+                zipCode: property.zipCode,
+                iCalFeeds: feeds,
                 isLocked: true, // All properties locked by default
                 color: property.color
             )
@@ -283,6 +460,9 @@ class AdminPanelViewModel: ObservableObject {
     func updateProperty(_ updated: PropertyConfig) {
         if let index = properties.firstIndex(where: { $0.id == updated.id }) {
             properties[index] = updated
+            
+            // Sync to PropertyService for bidirectional updates
+            PropertyService.shared.updatePropertyFromConfig(updated)
         }
     }
     

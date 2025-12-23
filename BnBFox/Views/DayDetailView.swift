@@ -1,6 +1,6 @@
 //
 //  DayDetailView.swift
-//  BnBFox
+//  BnBShift
 //
 //  Created on 12/12/2025.
 //  Updated on 12/17/2025 - Added Actions section
@@ -37,15 +37,7 @@ struct DayDetailView: View {
                                 date: date
                             )
                         }
-                        
-                        // NEW - Actions Section (only show if there's at least one activity)
-                        if !activities.isEmpty, let firstActivity = activities.first {
-                            PropertyActionsView(
-                                property: firstActivity.property,
-                                date: date
-                            )
-                            .padding(.top, 8)
-                        }
+
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 40)
@@ -73,6 +65,7 @@ struct PropertyActivityCard: View {
     @State private var showYellowTooltip = false
     @State private var showGreenTooltip = false
     @State private var refreshID = UUID()
+    @State private var showChecklistPanel = false
     
     private var currentStatus: CleaningStatus.Status {
         CleaningStatusManager.shared.getStatus(propertyName: activity.property.displayName, date: date)?.status ?? .todo
@@ -132,11 +125,25 @@ struct PropertyActivityCard: View {
                         bookingId: activity.checkout?.booking.id ?? "",
                         currentStatus: currentStatus,
                         showYellowTooltip: $showYellowTooltip,
-                        showGreenTooltip: $showGreenTooltip
+                        showGreenTooltip: $showGreenTooltip,
+                        onCleanTapped: {
+                            showChecklistPanel = true
+                        }
                     )
                     .id(refreshID)
                     .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("CleaningStatusChanged"))) { _ in
                         refreshID = UUID()
+                    }
+                    
+                    // Cleaning Checklist Panel (expands when green button clicked)
+                    if showChecklistPanel {
+                        CleaningChecklistPanel(
+                            property: activity.property,
+                            date: date,
+                            isExpanded: $showChecklistPanel
+                        )
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                        .animation(.easeInOut, value: showChecklistPanel)
                     }
                 }
                 .padding(.top, 4)
@@ -195,5 +202,4 @@ struct BookingInfo {
     let guestName: String?
     let booking: Booking
 }
-
 

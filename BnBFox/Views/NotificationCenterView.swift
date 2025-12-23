@@ -1,6 +1,6 @@
 //
 //  NotificationCenterView.swift
-//  BnBFox
+//  BnBShift
 //
 //  Optimized version using Copilot's architecture recommendations
 //  - Uses @StateObject for persistent view model
@@ -367,25 +367,67 @@ struct UpcomingEventRow: View {
     let event: UpcomingEvent
     let currentTime: Date
     
-    var body: some View {
-        HStack {
-            Image(systemName: event.eventType == .checkout ? "arrow.right.circle.fill" : "arrow.left.circle.fill")
-                .foregroundColor(event.eventType == .checkout ? .red : .green)
-            
-            VStack(alignment: .leading) {
-                Text(event.propertyName)
-                    .font(.headline)
-                Text(event.eventType == .checkout ? "Check-out" : "Check-in")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Spacer()
-            
-            Text(event.eventDate, style: .time)
-                .font(.subheadline)
+    // Calculate if we should show this row based on deadline
+    private var shouldShow: Bool {
+        let calendar = Calendar.current
+        let deadline: Date
+        
+        if event.eventType == .checkout {
+            // Checkout deadline is 10:00 AM
+            deadline = calendar.date(bySettingHour: 10, minute: 0, second: 0, of: event.eventDate) ?? event.eventDate
+        } else {
+            // Checkin deadline is 4:00 PM (16:00)
+            deadline = calendar.date(bySettingHour: 16, minute: 0, second: 0, of: event.eventDate) ?? event.eventDate
         }
-        .padding(.vertical, 4)
+        
+        return currentTime < deadline
+    }
+    
+    // Calculate time remaining until deadline
+    private var timeRemaining: String {
+        let calendar = Calendar.current
+        let deadline: Date
+        
+        if event.eventType == .checkout {
+            deadline = calendar.date(bySettingHour: 10, minute: 0, second: 0, of: event.eventDate) ?? event.eventDate
+        } else {
+            deadline = calendar.date(bySettingHour: 16, minute: 0, second: 0, of: event.eventDate) ?? event.eventDate
+        }
+        
+        let components = calendar.dateComponents([.hour, .minute], from: currentTime, to: deadline)
+        let hours = max(0, components.hour ?? 0)
+        let minutes = max(0, components.minute ?? 0)
+        
+        return String(format: "%02d:%02d", hours, minutes)
+    }
+    
+    var body: some View {
+        if shouldShow {
+            HStack {
+                Image(systemName: event.eventType == .checkout ? "arrow.right.circle.fill" : "arrow.left.circle.fill")
+                    .foregroundColor(event.eventType == .checkout ? .red : .green)
+                
+                VStack(alignment: .leading) {
+                    Text(event.propertyName)
+                        .font(.headline)
+                    Text(event.eventType == .checkout ? "Check-out" : "Check-in")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(event.eventType == .checkout ? "Time until check-out:" : "Time until check-in:")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text(timeRemaining)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+            }
+            .padding(.vertical, 4)
+        }
     }
 }
 
@@ -422,4 +464,3 @@ struct UpcomingCleaningListRow: View {
         .padding(.vertical, 4)
     }
 }
-

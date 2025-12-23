@@ -1,9 +1,8 @@
 //
 //  PropertyService.swift
-//  BnBFox
+//  BnBShift
 //
 //  Created on 12/11/2025.
-//  Updated with address fields
 //
 
 import Foundation
@@ -39,27 +38,22 @@ class PropertyService: ObservableObject {
                         url: URL(string: "https://www.airbnb.com/calendar/ical/778254930255723354.ics?s=c0d103adb18b28b018a6c6484a5f04ee")!
                     )
                 ],
-                // ADDRESS FIELDS
-                streetAddress: "",
-                unit: "",
-                city: "",
-                state: "",
-                zipCode: "",
-                // OWNER INFO
                 ownerName: "Daniel DelPercio",
-                ownerPhone: "",
-                ownerEmail: "",
-                // ACCESS CODES
+                ownerPhone: "+19144860800",
+                ownerEmail: "ddelpercio@gmail.com",
+                streetAddress: "123 Kawama Lane",
+                unit: "C-2",
+                city: "Key West",
+                state: "FL",
+                zipCode: "33040",
                 doorCode: "1157",
-                bikeLocks: "",
+                bikeLocks: "1157",
                 camera: "",
                 thermostat: "",
                 other: "",
-                // LISTING URLS
-                airbnbListingURL: "",
-                vrboListingURL: "",
+                airbnbListingURL: "https://airbnb.com/h/kawama-c2",
+                vrboListingURL: "https://vrbo.com/3058755",
                 bookingComListingURL: "",
-                // NOTES
                 notes: ""
             ),
             Property(
@@ -77,27 +71,22 @@ class PropertyService: ObservableObject {
                         url: URL(string: "https://www.airbnb.com/calendar/ical/634088790463336883.ics?s=aa7722940a08ab86e82b802120481e3d")!
                     )
                 ],
-                // ADDRESS FIELDS
+                ownerName: "Daniel DelPercio",
+                ownerPhone: "+19144860800",
+                ownerEmail: "ddelpercio@gmail.com",
                 streetAddress: "",
                 unit: "",
                 city: "",
                 state: "",
                 zipCode: "",
-                // OWNER INFO
-                ownerName: "Daniel DelPercio",
-                ownerPhone: "",
-                ownerEmail: "",
-                // ACCESS CODES
                 doorCode: "8578",
-                bikeLocks: "",
+                bikeLocks: "8578",
                 camera: "",
                 thermostat: "",
                 other: "",
-                // LISTING URLS
-                airbnbListingURL: "",
-                vrboListingURL: "",
+                airbnbListingURL: "https://airbnb.com/h/kawama-e5",
+                vrboListingURL: "https://vrbo.com/2659755",
                 bookingComListingURL: "",
-                // NOTES
                 notes: ""
             ),
             Property(
@@ -115,27 +104,22 @@ class PropertyService: ObservableObject {
                         url: URL(string: "https://www.airbnb.com/calendar/ical/1329041307852345218.ics?s=380d406f0019dfb3fe07b61f94f8f0fa&locale=en")!
                     )
                 ],
-                // ADDRESS FIELDS
+                ownerName: "",
+                ownerPhone: "",
+                ownerEmail: "",
                 streetAddress: "",
                 unit: "",
                 city: "",
                 state: "",
                 zipCode: "",
-                // OWNER INFO
-                ownerName: "Daniel DelPercio",
-                ownerPhone: "",
-                ownerEmail: "",
-                // ACCESS CODES
                 doorCode: "",
                 bikeLocks: "",
                 camera: "",
                 thermostat: "",
                 other: "",
-                // LISTING URLS
                 airbnbListingURL: "",
                 vrboListingURL: "",
                 bookingComListingURL: "",
-                // NOTES
                 notes: ""
             )
         ]
@@ -161,14 +145,6 @@ class PropertyService: ObservableObject {
     
     func getAllProperties() -> [Property] {
         return properties
-    }
-    
-    func updateProperty(_ propertyId: UUID, with updater: (Property) -> Property) {
-        if let index = properties.firstIndex(where: { $0.id == propertyId }) {
-            properties[index] = updater(properties[index])
-            saveProperties()
-            NotificationCenter.default.post(name: .propertiesDidChange, object: nil)
-        }
     }
     
     func updateProperty(_ updatedProperty: Property) {
@@ -206,18 +182,24 @@ class PropertyService: ObservableObject {
     // Update properties from admin panel
     func updateProperties(_ configs: [PropertyConfig]) {
         properties = configs.map { config in
-            var sources: [CalendarSource] = []
-            
-            if !config.airbnbURL.isEmpty, let url = URL(string: config.airbnbURL) {
-                sources.append(CalendarSource(platform: .airbnb, url: url))
-            }
-            
-            if !config.vrboURL.isEmpty, let url = URL(string: config.vrboURL) {
-                sources.append(CalendarSource(platform: .vrbo, url: url))
-            }
-            
-            if !config.bookingURL.isEmpty, let url = URL(string: config.bookingURL) {
-                sources.append(CalendarSource(platform: .bookingCom, url: url))
+            // Convert iCalFeeds array to CalendarSource array
+            let sources = config.iCalFeeds.compactMap { feed -> CalendarSource? in
+                guard !feed.url.isEmpty, let url = URL(string: feed.url) else { return nil }
+                
+                // Map platform name to Platform enum
+                let platform: Platform
+                switch feed.platformName.lowercased() {
+                case "airbnb":
+                    platform = .airbnb
+                case "vrbo":
+                    platform = .vrbo
+                case "booking.com":
+                    platform = .bookingCom
+                default:
+                    platform = .airbnb // Default for custom feeds
+                }
+                
+                return CalendarSource(platform: platform, url: url)
             }
             
             let shortName = config.unitName
@@ -229,14 +211,14 @@ class PropertyService: ObservableObject {
                 shortName: shortName,
                 colorHex: config.color.toHex(),
                 sources: sources,
-                streetAddress: "",
-                unit: "",
-                city: "",
-                state: "",
-                zipCode: "",
                 ownerName: "",
                 ownerPhone: "",
                 ownerEmail: "",
+                streetAddress: config.streetAddress,
+                unit: config.unit,
+                city: config.city,
+                state: config.state,
+                zipCode: config.zipCode,
                 doorCode: "",
                 bikeLocks: "",
                 camera: "",
@@ -254,9 +236,67 @@ class PropertyService: ObservableObject {
         // Post notification to refresh calendar
         NotificationCenter.default.post(name: .propertiesDidChange, object: nil)
     }
+    
+    // NEW: Update a single property from PropertyConfig (for bidirectional sync)
+    func updatePropertyFromConfig(_ config: PropertyConfig) {
+        guard let existingProperty = properties.first(where: { $0.id.uuidString == config.id }) else {
+            return
+        }
+        
+        // Convert iCalFeeds array to CalendarSource array
+        let sources = config.iCalFeeds.compactMap { feed -> CalendarSource? in
+            guard !feed.url.isEmpty, let url = URL(string: feed.url) else { return nil }
+            
+            // Map platform name to Platform enum
+            let platform: Platform
+            switch feed.platformName.lowercased() {
+            case "airbnb":
+                platform = .airbnb
+            case "vrbo":
+                platform = .vrbo
+            case "booking.com":
+                platform = .bookingCom
+            default:
+                platform = .airbnb // Default for custom feeds
+            }
+            
+            return CalendarSource(platform: platform, url: url)
+        }
+        
+        let shortName = config.unitName
+        let name = config.displayName.lowercased().replacingOccurrences(of: " ", with: "-")
+        
+        let updatedProperty = Property(
+            id: existingProperty.id,
+            name: name,
+            displayName: config.displayName,
+            shortName: shortName,
+            colorHex: config.color.toHex(),
+            sources: sources,
+            ownerName: existingProperty.ownerName,
+            ownerPhone: existingProperty.ownerPhone,
+            ownerEmail: existingProperty.ownerEmail,
+            streetAddress: config.streetAddress,
+            unit: config.unit,
+            city: config.city,
+            state: config.state,
+            zipCode: config.zipCode,
+            doorCode: existingProperty.doorCode,
+            bikeLocks: existingProperty.bikeLocks,
+            camera: existingProperty.camera,
+            thermostat: existingProperty.thermostat,
+            other: existingProperty.other,
+            airbnbListingURL: existingProperty.airbnbListingURL,
+            vrboListingURL: existingProperty.vrboListingURL,
+            bookingComListingURL: existingProperty.bookingComListingURL,
+            notes: existingProperty.notes
+        )
+        
+        updateProperty(updatedProperty)
+    }
 }
 
-// Codable wrapper for Property
+// Codable wrapper for Property - UPDATED WITH NEW FIELDS
 struct PropertyData: Codable {
     let id: String
     let name: String
@@ -264,33 +304,24 @@ struct PropertyData: Codable {
     let shortName: String
     let colorHex: String
     let sources: [CalendarSourceData]
-    
-    // Address fields
+    let ownerName: String
+    let ownerPhone: String
+    let ownerEmail: String
     let streetAddress: String
     let unit: String
     let city: String
     let state: String
     let zipCode: String
-    
-    // Owner info
-    let ownerName: String
-    let ownerPhone: String
-    let ownerEmail: String
-    
-    // Access codes
     let doorCode: String
     let bikeLocks: String
-    let camera: String
-    let thermostat: String
-    let other: String
-    
-    // Listing URLs
-    let airbnbListingURL: String
-    let vrboListingURL: String
-    let bookingComListingURL: String
-    
-    // Notes
+    let camera: String              // NEW
+    let thermostat: String          // NEW
+    let other: String               // NEW
+    let airbnbListingURL: String    // NEW
+    let vrboListingURL: String      // NEW
+    let bookingComListingURL: String // NEW
     let notes: String
+    let frontPhotoData: Data?       // NEW - Property photo
     
     init(from property: Property) {
         self.id = property.id.uuidString
@@ -299,33 +330,24 @@ struct PropertyData: Codable {
         self.shortName = property.shortName
         self.colorHex = property.colorHex
         self.sources = property.sources.map { CalendarSourceData(from: $0) }
-        
-        // Address
+        self.ownerName = property.ownerName
+        self.ownerPhone = property.ownerPhone
+        self.ownerEmail = property.ownerEmail
         self.streetAddress = property.streetAddress
         self.unit = property.unit
         self.city = property.city
         self.state = property.state
         self.zipCode = property.zipCode
-        
-        // Owner
-        self.ownerName = property.ownerName
-        self.ownerPhone = property.ownerPhone
-        self.ownerEmail = property.ownerEmail
-        
-        // Access
         self.doorCode = property.doorCode
         self.bikeLocks = property.bikeLocks
-        self.camera = property.camera
-        self.thermostat = property.thermostat
-        self.other = property.other
-        
-        // Listings
-        self.airbnbListingURL = property.airbnbListingURL
-        self.vrboListingURL = property.vrboListingURL
-        self.bookingComListingURL = property.bookingComListingURL
-        
-        // Notes
+        self.camera = property.camera                       // NEW
+        self.thermostat = property.thermostat               // NEW
+        self.other = property.other                         // NEW
+        self.airbnbListingURL = property.airbnbListingURL   // NEW
+        self.vrboListingURL = property.vrboListingURL       // NEW
+        self.bookingComListingURL = property.bookingComListingURL // NEW
         self.notes = property.notes
+        self.frontPhotoData = property.frontPhotoData       // NEW
     }
     
     func toProperty() -> Property {
@@ -336,23 +358,24 @@ struct PropertyData: Codable {
             shortName: shortName,
             colorHex: colorHex,
             sources: sources.map { $0.toCalendarSource() },
+            ownerName: ownerName,
+            ownerPhone: ownerPhone,
+            ownerEmail: ownerEmail,
             streetAddress: streetAddress,
             unit: unit,
             city: city,
             state: state,
             zipCode: zipCode,
-            ownerName: ownerName,
-            ownerPhone: ownerPhone,
-            ownerEmail: ownerEmail,
             doorCode: doorCode,
             bikeLocks: bikeLocks,
-            camera: camera,
-            thermostat: thermostat,
-            other: other,
-            airbnbListingURL: airbnbListingURL,
-            vrboListingURL: vrboListingURL,
-            bookingComListingURL: bookingComListingURL,
-            notes: notes
+            camera: camera,                         // NEW
+            thermostat: thermostat,                 // NEW
+            other: other,                           // NEW
+            airbnbListingURL: airbnbListingURL,     // NEW
+            vrboListingURL: vrboListingURL,         // NEW
+            bookingComListingURL: bookingComListingURL, // NEW
+            notes: notes,
+            frontPhotoData: frontPhotoData          // NEW
         )
     }
 }
@@ -394,14 +417,32 @@ extension Notification.Name {
     static let propertiesDidChange = Notification.Name("propertiesDidChange")
 }
 
-// Import PropertyConfig from AdminPanelView
+// iCal Feed struct for dynamic feeds
+struct ICalFeed: Identifiable, Codable, Equatable {
+    let id: String
+    var platformName: String
+    var url: String
+    let isDefault: Bool // true for AirBnB, VRBO, Booking.com
+    
+    init(id: String = UUID().uuidString, platformName: String, url: String = "", isDefault: Bool = false) {
+        self.id = id
+        self.platformName = platformName
+        self.url = url
+        self.isDefault = isDefault
+    }
+}
+
+// PropertyConfig with DYNAMIC iCAL FEEDS
 struct PropertyConfig: Identifiable, Codable {
     let id: String
     var complexName: String
     var unitName: String
-    var airbnbURL: String
-    var vrboURL: String
-    var bookingURL: String
+    var streetAddress: String
+    var unit: String
+    var city: String
+    var state: String
+    var zipCode: String
+    var iCalFeeds: [ICalFeed]
     var isLocked: Bool
     let colorHex: String
     
@@ -413,17 +454,38 @@ struct PropertyConfig: Identifiable, Codable {
         "\(complexName) \(unitName)"
     }
     
-    init(id: String, complexName: String, unitName: String, airbnbURL: String = "", vrboURL: String = "", bookingURL: String = "", isLocked: Bool = true, color: Color) {
+    init(id: String,
+         complexName: String,
+         unitName: String,
+         streetAddress: String = "",
+         unit: String = "",
+         city: String = "",
+         state: String = "",
+         zipCode: String = "",
+         iCalFeeds: [ICalFeed]? = nil,
+         isLocked: Bool = true,
+         color: Color) {
         self.id = id
         self.complexName = complexName
         self.unitName = unitName
-        self.airbnbURL = airbnbURL
-        self.vrboURL = vrboURL
-        self.bookingURL = bookingURL
+        self.streetAddress = streetAddress
+        self.unit = unit
+        self.city = city
+        self.state = state
+        self.zipCode = zipCode
+        
+        // Default 3 feeds if none provided
+        self.iCalFeeds = iCalFeeds ?? [
+            ICalFeed(platformName: "AirBnB", isDefault: true),
+            ICalFeed(platformName: "VRBO", isDefault: true),
+            ICalFeed(platformName: "Booking.com", isDefault: true)
+        ]
+        
         self.isLocked = isLocked
         self.colorHex = color.toHex()
     }
 }
 
 // Color init(hex:) extension is defined in DateExtensions.swift
+
 

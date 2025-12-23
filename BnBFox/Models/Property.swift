@@ -1,6 +1,6 @@
 //
 //  Property.swift
-//  BnBFox
+//  BnBShift
 //
 //  Created on 12/11/2025.
 //
@@ -16,6 +16,11 @@ struct Property: Identifiable, Codable, Hashable {
     var colorHex: String  // Changed from 'let' to 'var' to allow color updates
     let sources: [CalendarSource]
     
+    // Owner information
+    var ownerName: String
+    var ownerPhone: String
+    var ownerEmail: String
+    
     // Address information
     var streetAddress: String
     var unit: String
@@ -23,28 +28,23 @@ struct Property: Identifiable, Codable, Hashable {
     var state: String
     var zipCode: String
     
-    // Owner information
-    var ownerName: String
-    var ownerPhone: String
-    var ownerEmail: String
-    
     // Access codes and property info
     var doorCode: String
     var bikeLocks: String
-    var camera: String
-    var thermostat: String
-    var other: String
+    var camera: String          // NEW
+    var thermostat: String      // NEW
+    var other: String           // NEW
     
     // Listing URLs
-    var airbnbListingURL: String
-    var vrboListingURL: String
-    var bookingComListingURL: String
+    var airbnbListingURL: String      // NEW
+    var vrboListingURL: String        // NEW
+    var bookingComListingURL: String  // NEW
     
     // Notes
     var notes: String
     
-    // Cleaning status: "clean", "in-progress", "needs-cleaning"
-    var cleaningStatus: String
+    // Property photo
+    var frontPhotoData: Data?
     
     var color: Color {
         Color(hex: colorHex) ?? .blue
@@ -62,46 +62,23 @@ struct Property: Identifiable, Codable, Hashable {
         return components.count > 1 ? components.dropFirst().joined(separator: " ") : displayName
     }
     
-    // Full address for display
     var fullAddress: String {
-        var address = ""
-        if !streetAddress.isEmpty {
-            address += streetAddress
-        }
-        if !unit.isEmpty {
-            address += "\n" + unit
-        }
+        // Compute full address from components
+        var parts: [String] = []
+        if !streetAddress.isEmpty { parts.append(streetAddress) }
+        if !unit.isEmpty { parts.append(unit) }
         if !city.isEmpty || !state.isEmpty || !zipCode.isEmpty {
-            address += "\n"
-            if !city.isEmpty {
-                address += city
-            }
-            if !state.isEmpty {
-                if !city.isEmpty {
-                    address += ", "
-                }
-                address += state
-            }
-            if !zipCode.isEmpty {
-                if !city.isEmpty || !state.isEmpty {
-                    address += " "
-                }
-                address += zipCode
-            }
+            let cityStateZip = [city, state, zipCode].filter { !$0.isEmpty }.joined(separator: " ")
+            if !cityStateZip.isEmpty { parts.append(cityStateZip) }
         }
-        return address.isEmpty ? "No address set" : address
+        return parts.joined(separator: ", ")
     }
     
-    // Maps URL for opening in Maps app
     var mapsURL: URL? {
-        let addressComponents = [streetAddress, unit, city, state, zipCode]
-            .filter { !$0.isEmpty }
-            .joined(separator: ", ")
-        
-        guard !addressComponents.isEmpty else { return nil }
-        
-        let encodedAddress = addressComponents.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        return URL(string: "maps://?address=\(encodedAddress)")
+        // Generate Apple Maps URL from address
+        guard !fullAddress.isEmpty else { return nil }
+        let encodedAddress = fullAddress.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        return URL(string: "http://maps.apple.com/?address=\(encodedAddress)")
     }
     
     init(
@@ -111,14 +88,14 @@ struct Property: Identifiable, Codable, Hashable {
         shortName: String,
         colorHex: String,
         sources: [CalendarSource],
+        ownerName: String = "",
+        ownerPhone: String = "",
+        ownerEmail: String = "",
         streetAddress: String = "",
         unit: String = "",
         city: String = "",
         state: String = "",
         zipCode: String = "",
-        ownerName: String = "",
-        ownerPhone: String = "",
-        ownerEmail: String = "",
         doorCode: String = "",
         bikeLocks: String = "",
         camera: String = "",
@@ -128,7 +105,7 @@ struct Property: Identifiable, Codable, Hashable {
         vrboListingURL: String = "",
         bookingComListingURL: String = "",
         notes: String = "",
-        cleaningStatus: String = "needs-cleaning"
+        frontPhotoData: Data? = nil
     ) {
         self.id = id
         self.name = name
@@ -136,14 +113,14 @@ struct Property: Identifiable, Codable, Hashable {
         self.shortName = shortName
         self.colorHex = colorHex
         self.sources = sources
+        self.ownerName = ownerName
+        self.ownerPhone = ownerPhone
+        self.ownerEmail = ownerEmail
         self.streetAddress = streetAddress
         self.unit = unit
         self.city = city
         self.state = state
         self.zipCode = zipCode
-        self.ownerName = ownerName
-        self.ownerPhone = ownerPhone
-        self.ownerEmail = ownerEmail
         self.doorCode = doorCode
         self.bikeLocks = bikeLocks
         self.camera = camera
@@ -153,7 +130,7 @@ struct Property: Identifiable, Codable, Hashable {
         self.vrboListingURL = vrboListingURL
         self.bookingComListingURL = bookingComListingURL
         self.notes = notes
-        self.cleaningStatus = cleaningStatus
+        self.frontPhotoData = frontPhotoData
     }
     
     static func == (lhs: Property, rhs: Property) -> Bool {
@@ -164,4 +141,5 @@ struct Property: Identifiable, Codable, Hashable {
         hasher.combine(id)
     }
 }
+
 

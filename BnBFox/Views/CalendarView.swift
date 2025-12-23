@@ -1,6 +1,6 @@
 //
 //  CalendarView.swift
-//  BnBFox
+//  BnBShift
 //
 //  Created on 12/11/2025.
 //
@@ -15,7 +15,7 @@ struct CalendarView: View {
     @State private var showingNotificationCenter = false
     @State private var selectedDate: Date?
     @State private var dayDetailItem: DayDetailItem?  // NEW - for showing day detail
-    //@ObservedObject var statusManager = CleaningStatusManager.shared // removed extraneous and slow!
+    @State private var showingInfo = false  // NEW - for info view
     
     var body: some View {
         NavigationView {
@@ -106,7 +106,6 @@ struct CalendarView: View {
              .environmentObject(PropertyService.shared)
              }
              */
-            // NEW CODE - Replace with this:
             .sheet(item: $selectedProperty) { property in
                 PropertyDetailView(property: property)
                     .environmentObject(PropertyService.shared)
@@ -125,6 +124,9 @@ struct CalendarView: View {
             }
             .sheet(item: $dayDetailItem) { item in  // NEW - show day detail
                 DayDetailView(date: item.date, activities: item.activities)
+            }
+            .sheet(isPresented: $showingInfo) {  // NEW - info sheet
+                InfoView()
             }
         }
     }
@@ -173,15 +175,26 @@ struct CalendarView: View {
     private var headerView: some View {
         VStack(spacing: 0) {
             HStack {
+                // Info button (left)
+                Button(action: {
+                    showingInfo = true
+                }) {
+                    Image("info")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 28, height: 28)
+                        .padding(8)
+                }
+                
                 Spacer()
                 
                 // Title
-                Text("BnBFox")
+                Text("BnBShift")
                     .font(.system(size: 20, weight: .semibold))
                 
                 Spacer()
                 
-                // Refresh button
+                // Refresh button (right)
                 Button(action: {
                     Task {
                         await viewModel.loadBookings()
@@ -261,7 +274,7 @@ struct AnimatedLoadingScreen: View {
                 
                 // Text overlay at bottom
                 VStack(spacing: 12) {
-                    Text("Loading your Kawama Calendar")
+                    Text("Loading your Calendar")
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.5), radius: 4, x: 0, y: 2)
@@ -316,6 +329,7 @@ struct CalendarView_Previews: PreviewProvider {
         CalendarView()
     }
 }
+
 
 
 

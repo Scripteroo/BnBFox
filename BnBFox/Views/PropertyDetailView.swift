@@ -1,3 +1,10 @@
+//
+//  PropertyDetailView.swift
+//  BnBShift
+//
+//  Created on 12/11/2025.
+//
+
 import SwiftUI
 
 struct PropertyDetailView: View {
@@ -43,6 +50,13 @@ struct PropertyDetailView: View {
     
     @State private var showingAdminPanel = false
     
+    // Photo picker states
+    @State private var showingImagePicker = false
+    @State private var showingPhotoSourceSheet = false
+    @State private var photoSourceType: UIImagePickerController.SourceType = .photoLibrary
+    @State private var selectedImage: UIImage?
+    @State private var showingDeletePhotoConfirmation = false
+    
     init(property: Property) {
         self.property = property
         self._currentProperty = State(initialValue: property)
@@ -57,6 +71,9 @@ struct PropertyDetailView: View {
                     
                     // CALENDAR: Compact version with shorter rows
                     calendarSection
+                    
+                    // PROPERTY PHOTO
+                    propertyPhotoSection
                     
                     // ACCESS CODES & INFO
                     accessSection
@@ -201,21 +218,27 @@ struct PropertyDetailView: View {
                         }
                     }
                 } else {
-                    VStack(alignment: .leading, spacing: 2) {
-                        if !currentProperty.streetAddress.isEmpty {
-                            Text(currentProperty.streetAddress).font(.subheadline)
+                    if currentProperty.fullAddress.isEmpty {
+                        // Show instruction text when address is empty
+                        Text("Click lock to set property address →")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .italic()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        // Show actual address when set
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(currentProperty.streetAddress)
+                                .font(.subheadline)
+                            if !currentProperty.unit.isEmpty {
+                                Text(currentProperty.unit).font(.subheadline)
+                            }
+                            if !currentProperty.city.isEmpty || !currentProperty.state.isEmpty || !currentProperty.zipCode.isEmpty {
+                                Text("\(currentProperty.city), \(currentProperty.state) \(currentProperty.zipCode)").font(.subheadline)
+                            }
                         }
-                        if !currentProperty.unit.isEmpty {
-                            Text(currentProperty.unit).font(.subheadline)
-                        }
-                        if !currentProperty.city.isEmpty || !currentProperty.state.isEmpty || !currentProperty.zipCode.isEmpty {
-                            Text("\(currentProperty.city), \(currentProperty.state) \(currentProperty.zipCode)").font(.subheadline)
-                        }
-                        if currentProperty.fullAddress.isEmpty {
-                            Text("No address set").font(.caption).foregroundColor(.secondary)
-                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
                 // Lock button on far right
@@ -277,6 +300,98 @@ struct PropertyDetailView: View {
         }
         .padding()
         .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+    }
+    
+    // MARK: - Property Photo Section
+    
+    private var propertyPhotoSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Photo of front of property (Optional)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .italic()
+                
+                Spacer()
+                
+                Button(action: {
+                    showingPhotoSourceSheet = true
+                }) {
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 28))
+                        .foregroundColor(.gray)
+                }
+            }
+            
+            if let photoData = currentProperty.frontPhotoData,
+               let uiImage = UIImage(data: photoData) {
+                // Display existing photo
+                ZStack(alignment: .topTrailing) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 200)
+                        .cornerRadius(8)
+                    
+                    // Delete button
+                    Button(action: {
+                        showingDeletePhotoConfirmation = true
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.red)
+                            .background(Circle().fill(Color.white))
+                    }
+                    .padding(8)
+                }
+            } else {
+                // Placeholder when no photo
+                HStack {
+                    Spacer()
+                    VStack(spacing: 8) {
+                        Image(systemName: "photo")
+                            .font(.system(size: 40))
+                            .foregroundColor(.gray.opacity(0.5))
+                        Text("No photo added")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 40)
+                    Spacer()
+                }
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(8)
+            }
+        }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+        .confirmationDialog("Choose Photo Source", isPresented: $showingPhotoSourceSheet) {
+            Button("Take Photo") {
+                photoSourceType = .camera
+                showingImagePicker = true
+            }
+            Button("Choose from Library") {
+                photoSourceType = .photoLibrary
+                showingImagePicker = true
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker(image: $selectedImage, sourceType: photoSourceType)
+                .onDisappear {
+                    if let image = selectedImage {
+                        savePhoto(image)
+                    }
+                }
+        }
+        .alert("Delete Photo?", isPresented: $showingDeletePhotoConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                deletePhoto()
+            }
+        } message: {
+            Text("Are you sure you want to delete this property photo? This action cannot be undone.")
+        }
     }
     
     // MARK: - Access Section
@@ -637,6 +752,24 @@ struct PropertyDetailView: View {
         currentProperty = updated
         propertyService.updateProperty(updated)
         isEditingName = false
+    }
+    
+    private func savePhoto(_ image: UIImage) {
+        // Compress image to reasonable size
+        guard let imageData = image.jpegData(compressionQuality: 0.7) else { return }
+        
+        var updated = currentProperty
+        updated.frontPhotoData = imageData
+        currentProperty = updated
+        propertyService.updateProperty(updated)
+        selectedImage = nil
+    }
+    
+    private func deletePhoto() {
+        var updated = currentProperty
+        updated.frontPhotoData = nil
+        currentProperty = updated
+        propertyService.updateProperty(updated)
     }
     
     private func startEditingAddress() {
@@ -1034,4 +1167,5 @@ struct BlinkingModifier: ViewModifier {
             }
     }
 }
+
 
