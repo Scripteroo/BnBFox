@@ -12,22 +12,10 @@ struct MonthView: View {
     let bookings: [Booking]
     var showMonthTitle: Bool = true  // Allow hiding the title to prevent duplicates
     var showDayHeaders: Bool = true  // Allow hiding day headers to prevent duplicates
+    var showPlatformLabels: Bool = false  // Show platform labels (Airbnb/VRBO/Booking) - only for OwnerInfoPanelView
     
-    private let daysOfWeek = [
-        DayOfWeek(id: 0, label: "S"),
-        DayOfWeek(id: 1, label: "M"),
-        DayOfWeek(id: 2, label: "T"),
-        DayOfWeek(id: 3, label: "W"),
-        DayOfWeek(id: 4, label: "T"),
-        DayOfWeek(id: 5, label: "F"),
-        DayOfWeek(id: 6, label: "S")
-    ]
+    private let daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"]
     private let propertyService = PropertyService.shared
-    
-    private struct DayOfWeek: Identifiable {
-        let id: Int
-        let label: String
-    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -42,10 +30,10 @@ struct MonthView: View {
             // Day headers (optional)
             if showDayHeaders {
                 HStack(spacing: 0) {
-                    ForEach(daysOfWeek) { day in
-                        Text(day.label)
-                            .font(.system(size: 13, weight: day.id == 0 ? .regular : .bold))
-                            .foregroundColor(day.id == 0 ? .red : .black)
+                    ForEach(Array(daysOfWeek.enumerated()), id: \.offset) { index, day in
+                        Text(day)
+                            .font(.system(size: 13, weight: index == 0 ? .regular : .bold))
+                            .foregroundColor(index == 0 ? .red : .black)
                             .frame(maxWidth: .infinity)
                     }
                 }
@@ -58,7 +46,8 @@ struct MonthView: View {
                     week: week,
                     bookings: bookings,
                     currentMonth: month,
-                    properties: propertyService.getAllProperties()
+                    properties: propertyService.getAllProperties(),
+                    showPlatformLabels: showPlatformLabels
                 )
             }
         }
@@ -122,6 +111,7 @@ struct WeekSection: View {
     let bookings: [Booking]
     let currentMonth: Date
     let properties: [Property]
+    var showPlatformLabels: Bool = false
     
     @State private var dayDetailItem: DayDetailItem?
     
@@ -190,8 +180,8 @@ struct WeekSection: View {
                             property: property,
                             week: week,
                             bookings: getBookingsForProperty(property),
-                            allBookings: bookings,
-                            currentMonth: currentMonth
+                            currentMonth: currentMonth,
+                            showPlatformLabels: showPlatformLabels
                         )
                     }
                 }
@@ -320,8 +310,8 @@ struct PropertyRow: View {
     let property: Property
     let week: [Date?]
     let bookings: [Booking]
-    let allBookings: [Booking]
     let currentMonth: Date
+    var showPlatformLabels: Bool = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -336,8 +326,8 @@ struct PropertyRow: View {
                         property: property,
                         week: week,
                         cellWidth: cellWidth,
-                        allBookings: allBookings,
-                        currentMonth: currentMonth
+                        currentMonth: currentMonth,
+                        showPlatformLabels: showPlatformLabels
                     )
                 }
                 
@@ -348,7 +338,7 @@ struct PropertyRow: View {
                             propertyName: property.displayName,
                             propertyId: property.id,
                             date: date,
-                            allBookings: allBookings
+                            allBookings: bookings
                         )
                         .offset(x: CGFloat(index) * cellWidth + cellWidth / 2 - 4) // Center in day cell
                     }
@@ -364,8 +354,8 @@ struct ContinuousBookingBar: View {
     let property: Property
     let week: [Date?]
     let cellWidth: CGFloat
-    let allBookings: [Booking]
     let currentMonth: Date
+    var showPlatformLabels: Bool = false
     
     var body: some View {
         let barGeometry = calculateBarGeometry()
@@ -397,15 +387,28 @@ struct ContinuousBookingBar: View {
                 .stroke(Color.black, lineWidth: 1.5)
             )
             .overlay(
-                // Property label on the right end
-                HStack(spacing: 2) {
+                // Show platform label OR property label (not both)
+                HStack(spacing: 4) {
                     Spacer()
                     
-                    Text(property.shortName)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(textColor(for: property.color))
+                    if showPlatformLabels {
+                        // Platform label only (Airbnb/VRBO/Booking)
+                        Text(booking.platform.shortName)
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(booking.platform.color)
+                            .cornerRadius(4)
+                            .padding(.trailing, 4)
+                    } else {
+                        // Property label only (C-2, E-5, etc.)
+                        Text(property.shortName)
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(textColor(for: property.color))
+                            .padding(.trailing, 6)
+                    }
                 }
-                .padding(.trailing, 6)
             )
             .offset(x: barGeometry.offset)
         }
@@ -522,6 +525,4 @@ struct DayDetailItem: Identifiable {
     let date: Date
     let activities: [PropertyActivity]
 }
-
-
 

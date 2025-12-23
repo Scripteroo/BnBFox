@@ -3,7 +3,7 @@
 //  BnBFox
 //
 //  Created on 12/17/2025.
-//  Updated with TabView, auto-create cleaning tasks, and notification handling
+//  Updated to use NavigationStack (iOS 16+) with correct DayDetailView initializer
 //
 
 import SwiftUI
@@ -17,20 +17,6 @@ struct BnBFoxApp: App {
         // Set up notification delegate
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
         NotificationDelegate.shared.navigationState = NavigationState.shared
-        
-        // Clear old cleaning statuses and recreate only today's tasks
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            Task {
-                // Clear all old statuses
-                await MainActor.run {
-                    CleaningStatusManager.shared.clearAll()
-                }
-                
-                // Recreate only today's tasks
-                await CleaningStatusManager.shared.autoCreateCleaningTasks()
-                print("✅ Cleared old statuses and recreated today's tasks only")
-            }
-        }
     }
     
     var body: some Scene {
@@ -107,17 +93,16 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     }
 }
 
-// MARK: - Content View with TabView
+// MARK: - Content View with Navigation
 
 struct ContentView: View {
     @EnvironmentObject var navigationState: NavigationState
     @StateObject private var calendarViewModel = CalendarViewModel()
-    @ObservedObject var statusManager = CleaningStatusManager.shared
     @State private var selectedTab = 0
+    @State private var badgeCount = 0
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            // CALENDAR TAB
             NavigationStack(path: $navigationState.navigationPath) {
                 CalendarView()
                     .navigationDestination(isPresented: $navigationState.shouldNavigateToDayDetail) {
@@ -140,22 +125,23 @@ struct ContentView: View {
             }
             .tag(0)
             
-            // ALERTS TAB
             NavigationStack {
-                NotificationCenterView { date in
+                NotificationCenterView(onNotificationTap: { date in
                     // When notification is tapped, navigate to that date
                     navigationState.selectedDate = date
                     navigationState.shouldNavigateToDayDetail = true
                     selectedTab = 0  // Switch to calendar tab
-                }
+                })
             }
             .tabItem {
                 Label("Alerts", systemImage: "bell.fill")
             }
-            .badge(statusManager.getPendingStatuses().count)
+            .badge(badgeCount)
             .tag(1)
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("CleaningStatusChanged"))) { _ in
+                badgeCount = CleaningStatusManager.shared.getPendingStatuses().count
+            }
             
-            // PROPERTIES TAB
             NavigationStack {
                 AdminPanelView()
             }
@@ -164,7 +150,6 @@ struct ContentView: View {
             }
             .tag(2)
             
-            // SETTINGS TAB
             NavigationStack {
                 SettingsView()
             }
@@ -182,10 +167,13 @@ struct ContentView: View {
         .task {
             // Load bookings when app starts
             await calendarViewModel.loadBookings()
+            // Initialize badge count
+            badgeCount = CleaningStatusManager.shared.getPendingStatuses().count
         }
     }
     
     // Build activities array for DayDetailView
+    // This follows the same pattern as CalendarView's getActivitiesForDay
     private func getActivitiesForDay(date: Date) -> [PropertyActivity] {
         let calendar = Calendar.current
         let dayStart = calendar.startOfDay(for: date)

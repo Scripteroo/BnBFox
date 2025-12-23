@@ -63,6 +63,7 @@ class CleaningStatusManager: ObservableObject {
     @Published private(set) var statuses: [CleaningStatus] = []
     
     private let storageKey = "cleaningStatuses"
+    private var badgeUpdateTask: Task<Void, Never>?
     
     private init() {
         loadStatuses()
@@ -77,8 +78,9 @@ class CleaningStatusManager: ObservableObject {
         }
     }
     
-    /// Create or update status for a property
-    func setStatus(propertyName: String, date: Date, bookingId: String, status: CleaningStatus.Status) {
+    /// Create or update status for a property (async to prevent blocking)
+    @MainActor
+    func setStatus(propertyName: String, date: Date, bookingId: String, status: CleaningStatus.Status) async {
         let startTime = CFAbsoluteTimeGetCurrent()
         print("⏱️ setStatus START for \(propertyName)")
         
@@ -91,25 +93,54 @@ class CleaningStatusManager: ObservableObject {
         }
         print("⏱️ After array update: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
         
-        // Notify views FIRST - this will trigger @ObservedObject updates
+        // Notify views - this will trigger @ObservedObject updates
         objectWillChange.send()
         print("⏱️ After objectWillChange: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
         
-        // Invalidate cache so calendar dots recalculate
-        CleaningGapCache.shared.invalidateCache()
-        print("⏱️ After cache invalidate: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
-        
-        // Post notification for CleaningStatusDot to refresh
+        // Immediately notify calendar dots to refresh (on main thread)
         NotificationCenter.default.post(name: NSNotification.Name("CleaningStatusChanged"), object: nil)
-        print("⏱️ After notification post: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
+        print("⏱️ After notification: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
         
-        // Save to disk (fast - UserDefaults is cached in memory)
-        saveStatuses()
-        print("⏱️ After save: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
+        // Do heavy work off main thread (fire and forget - don't wait)
+        Task.detached(priority: .userInitiated) {
+            // Invalidate cache so calendar dots recalculate
+            //CleaningGapCache.shared.invalidateCache()
+            
+            // Save to disk
+            await MainActor.run {
+                self.saveStatuses()
+            }
+        }
         
-        // Update badge
-        BadgeManager.shared.updateBadge()
+        print("⏱️ After async work: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
+        
+        // Badge updates are debounced and handled separately
+        scheduleBadgeUpdate()
+        
         print("⏱️ setStatus COMPLETE: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
+    }
+    
+    /// Schedule a debounced badge update
+    /// Cancels any pending update and schedules a new one after 1 second
+    /// This prevents the expensive BadgeManager.updateBadge() from blocking on every status change
+    private func scheduleBadgeUpdate() {
+        // Cancel any pending badge update
+        badgeUpdateTask?.cancel()
+        
+        // Schedule a new badge update after 1 second
+        badgeUpdateTask = Task {
+            do {
+                try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+                // Only update if not cancelled
+                if !Task.isCancelled {
+                    await MainActor.run {
+                        BadgeManager.shared.updateBadge()
+                    }
+                }
+            } catch {
+                // Task was cancelled, do nothing
+            }
+        }
     }
     
     /// Get all statuses that need attention (todo or inProgress)
@@ -180,14 +211,12 @@ class CleaningStatusManager: ObservableObject {
                     // Use the first booking's ID
                     let bookingId = bookingsOnDate.first?.id ?? "unknown"
                     
-                    await MainActor.run {
-                        setStatus(
-                            propertyName: property.displayName,
-                            date: checkoutDate,
-                            bookingId: bookingId,
-                            status: .todo
-                        )
-                    }
+                    await setStatus(
+                        propertyName: property.displayName,
+                        date: checkoutDate,
+                        bookingId: bookingId,
+                        status: .todo
+                    )
                     
                     tasksCreated += 1
                     print("✅ Created cleaning task for \(property.shortName) on \(checkoutDate)")

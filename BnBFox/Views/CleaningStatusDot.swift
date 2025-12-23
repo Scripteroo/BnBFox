@@ -30,29 +30,32 @@ struct CleaningStatusDot: View {
                 let now = calendar.startOfDay(for: Date())
                 
                 // Only show dot if:
-                // 1. This date is in the gap range
-                // 2. This date is today or earlier (not future)
+                // 1. This date is in the gap range (checkout to check-in)
+                // 2. Today is on or before the check-in day (show history until check-in)
                 // 3. This date is not during an active booking
-                if dayStart >= gap.gapStart && dayStart <= gap.gapEnd && dayStart <= now {
+                // 4. This date is not in the future
+                if dayStart >= gap.gapStart && dayStart <= gap.gapEnd && now <= gap.gapEnd && dayStart <= now {
                     if !isDuringActiveBooking(date: dayStart) {
                         // Use status from the checkout date for ALL days in the gap
                         if let status = statusManager.getStatus(propertyName: propertyName, date: gap.checkoutDate) {
-                            Circle()
-                                .fill(statusColor(status.status))
-                                .frame(width: 8, height: 8)
+                            PulsingDot(color: statusColor(status.status), isPulsing: status.status == .inProgress)
                         } else {
                             // Default to red (dirty/todo) if no status set yet
-                            Circle()
-                                .fill(Color.red)
-                                .frame(width: 8, height: 8)
+                            PulsingDot(color: .red, isPulsing: false)
                         }
                     }
                 }
             }
         }
         .id(refreshID)
+        .onAppear {
+            // Refresh when dot appears (e.g., switching to calendar tab)
+            print("👁️ CleaningStatusDot appeared for \(propertyName) on \(date)")
+            refreshID = UUID()
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("CleaningStatusChanged"))) { _ in
             // Force view to refresh when cleaning status changes
+            print("🔵 CleaningStatusDot received notification for \(propertyName) on \(date)")
             refreshID = UUID()
         }
     }
@@ -85,6 +88,30 @@ struct CleaningStatusDot: View {
         case .done:
             return .green
         }
+    }
+}
+
+// Pulsing dot view for in-progress status
+struct PulsingDot: View {
+    let color: Color
+    let isPulsing: Bool
+    @State private var scale: CGFloat = 1.0
+    
+    var body: some View {
+        Circle()
+            .fill(color)
+            .frame(width: 8, height: 8)
+            .scaleEffect(isPulsing ? scale : 1.0)
+            .onAppear {
+                if isPulsing {
+                    withAnimation(
+                        Animation.easeInOut(duration: 1.0)
+                            .repeatForever(autoreverses: true)
+                    ) {
+                        scale = 1.5
+                    }
+                }
+            }
     }
 }
 
@@ -130,11 +157,11 @@ class CleaningGapCache {
         for i in 0..<propertyBookings.count {
             let checkoutDate = calendar.startOfDay(for: propertyBookings[i].endDate)
             
-            // Find next checkin after this checkout
+            // Find next checkin after this checkout (including same-day turnovers)
             var nextCheckin: Date?
             for j in 0..<propertyBookings.count {
                 let checkinDate = calendar.startOfDay(for: propertyBookings[j].startDate)
-                if checkinDate > checkoutDate {
+                if checkinDate >= checkoutDate {
                     if nextCheckin == nil || checkinDate < nextCheckin! {
                         nextCheckin = checkinDate
                     }

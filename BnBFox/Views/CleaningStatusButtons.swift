@@ -11,10 +11,9 @@ struct CleaningStatusButtons: View {
     let propertyName: String
     let date: Date
     let bookingId: String
+    let currentStatus: CleaningStatus.Status
     @Binding var showYellowTooltip: Bool
     @Binding var showGreenTooltip: Bool
-    
-    @ObservedObject private var statusManager = CleaningStatusManager.shared
     
     // Check if this checkout is in the future
     private var isFutureCheckout: Bool {
@@ -22,10 +21,6 @@ struct CleaningStatusButtons: View {
         let checkoutDay = calendar.startOfDay(for: date)
         let today = calendar.startOfDay(for: Date())
         return checkoutDay > today
-    }
-    
-    private var currentStatus: CleaningStatus.Status {
-        statusManager.getStatus(propertyName: propertyName, date: date)?.status ?? .todo
     }
     
     var body: some View {
@@ -40,13 +35,14 @@ struct CleaningStatusButtons: View {
                 isDisabled: isFutureCheckout
             ) {
                 if !isFutureCheckout {
-                    statusManager.setStatus(
-                        propertyName: propertyName,
-                        date: date,
-                        bookingId: bookingId,
-                        status: .todo
-                    )
-                    BadgeManager.shared.updateBadge()
+                    Task {
+                        await CleaningStatusManager.shared.setStatus(
+                            propertyName: propertyName,
+                            date: date,
+                            bookingId: bookingId,
+                            status: .todo
+                        )
+                    }
                 }
             }
             
@@ -60,13 +56,14 @@ struct CleaningStatusButtons: View {
                 isDisabled: isFutureCheckout
             ) {
                 if !isFutureCheckout {
-                    statusManager.setStatus(
-                        propertyName: propertyName,
-                        date: date,
-                        bookingId: bookingId,
-                        status: .inProgress
-                    )
-                    BadgeManager.shared.updateBadge()
+                    Task {
+                        await CleaningStatusManager.shared.setStatus(
+                            propertyName: propertyName,
+                            date: date,
+                            bookingId: bookingId,
+                            status: .inProgress
+                        )
+                    }
                     
                     // Show yellow tooltip
                     withAnimation {
@@ -90,13 +87,14 @@ struct CleaningStatusButtons: View {
                 isDisabled: isFutureCheckout
             ) {
                 if !isFutureCheckout {
-                    statusManager.setStatus(
-                        propertyName: propertyName,
-                        date: date,
-                        bookingId: bookingId,
-                        status: .done
-                    )
-                    BadgeManager.shared.updateBadge()
+                    Task {
+                        await CleaningStatusManager.shared.setStatus(
+                            propertyName: propertyName,
+                            date: date,
+                            bookingId: bookingId,
+                            status: .done
+                        )
+                    }
                     
                     // Show green tooltip
                     withAnimation {
@@ -178,4 +176,5 @@ struct StatusButton: View {
         .disabled(isDisabled)
     }
 }
+
 

@@ -72,6 +72,11 @@ struct PropertyActivityCard: View {
     // Each property card now has its own tooltip states
     @State private var showYellowTooltip = false
     @State private var showGreenTooltip = false
+    @State private var refreshID = UUID()
+    
+    private var currentStatus: CleaningStatus.Status {
+        CleaningStatusManager.shared.getStatus(propertyName: activity.property.displayName, date: date)?.status ?? .todo
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -125,9 +130,14 @@ struct PropertyActivityCard: View {
                         propertyName: activity.property.displayName,
                         date: date,
                         bookingId: activity.checkout?.booking.id ?? "",
+                        currentStatus: currentStatus,
                         showYellowTooltip: $showYellowTooltip,
                         showGreenTooltip: $showGreenTooltip
                     )
+                    .id(refreshID)
+                    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("CleaningStatusChanged"))) { _ in
+                        refreshID = UUID()
+                    }
                 }
                 .padding(.top, 4)
             }
@@ -185,4 +195,5 @@ struct BookingInfo {
     let guestName: String?
     let booking: Booking
 }
+
 

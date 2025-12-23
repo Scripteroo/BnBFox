@@ -15,7 +15,7 @@ struct CalendarView: View {
     @State private var showingNotificationCenter = false
     @State private var selectedDate: Date?
     @State private var dayDetailItem: DayDetailItem?  // NEW - for showing day detail
-    @ObservedObject var statusManager = CleaningStatusManager.shared
+    //@ObservedObject var statusManager = CleaningStatusManager.shared // removed extraneous and slow!
     
     var body: some View {
         NavigationView {
