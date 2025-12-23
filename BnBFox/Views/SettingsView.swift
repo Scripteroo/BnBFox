@@ -43,19 +43,7 @@ struct SettingsView: View {
                         }
                     }
                     
-                    Button(action: {
-                        Task {
-                            await sendTestNotification()
-                        }
-                    }) {
-                        HStack {
-                            Image(systemName: "bell.badge")
-                            Text("Send Test Notification")
-                            Spacer()
-                            Image(systemName: "paperplane")
-                        }
-                    }
-                    
+
                     Button(action: {
                         Task {
                             await listScheduledNotifications()
@@ -140,38 +128,7 @@ struct SettingsView: View {
                     }
                 }
                 
-                // Product Backlog Section
-                Section(header: Text("Coming Soon")) {
-                    HStack {
-                        Image(systemName: "camera.fill")
-                            .foregroundColor(.gray)
-                        Text("Completion Photos")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("Planned")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.orange.opacity(0.2))
-                            .cornerRadius(4)
-                    }
-                    
-                    HStack {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.gray)
-                        Text("Damage Reporting")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("Planned")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.orange.opacity(0.2))
-                            .cornerRadius(4)
-                    }
-                }
+
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -357,5 +314,6 @@ struct CleaningDayRow: View {
         }
     }
 }
+
 
 

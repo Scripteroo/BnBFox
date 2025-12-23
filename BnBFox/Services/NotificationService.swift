@@ -84,6 +84,10 @@ class NotificationService {
                     let today = calendar.startOfDay(for: Date())
                     guard checkoutDate >= today else { continue }
                     
+                    // Only schedule alerts for next 60 days
+                    guard let maxDate = calendar.date(byAdding: .day, value: 60, to: today),
+                          checkoutDate <= maxDate else { continue }
+                    
                     // Check if there's a same-day turnover (checkout and checkin on same day)
                     let hasCheckin = bookings.contains { booking in
                         booking.propertyId == propertyId &&
@@ -109,10 +113,7 @@ class NotificationService {
                 }
             }
             
-            print("✅ Scheduled \(scheduledCount) cleaning notifications")
-            
-            // List all pending notifications for debugging
-            await listPendingNotifications()
+            print("✅ Scheduled \(scheduledCount) cleaning notifications (next 60 days)")
         }
     }
     
@@ -156,7 +157,6 @@ class NotificationService {
         // Check if notification time has already passed today
         if let notificationDateTime = calendar.date(from: notificationDate),
            notificationDateTime <= Date() {
-            print("⏭️  Skipping notification for \(property.shortName) - time has passed")
             return false
         }
         
@@ -172,11 +172,7 @@ class NotificationService {
         do {
             try await UNUserNotificationCenter.current().add(request)
             
-            if let notificationDateTime = calendar.date(from: notificationDate) {
-                let formatter = DateFormatter()
-                formatter.dateFormat = "MMM d 'at' h:mm a"
-                print("✅ Scheduled: \(property.shortName) - \(formatter.string(from: notificationDateTime))")
-            }
+            // Verbose logging removed for performance
             
             return true
         } catch {
@@ -335,4 +331,5 @@ class NotificationService {
         }
     }
 }
+
 

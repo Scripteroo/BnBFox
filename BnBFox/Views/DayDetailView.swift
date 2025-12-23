@@ -109,45 +109,43 @@ struct PropertyActivityCard: View {
             }
             .padding(.leading, 24)
             
-            // Cleaning Status Buttons (only show if there's a checkout)
-            if activity.checkout != nil {
-                Divider()
-                    .padding(.vertical, 8)
+            // Cleaning Status Buttons (always show, grayed out if no checkout)
+            Divider()
+                .padding(.vertical, 8)
+            
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Cleaning Status")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.gray)
                 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Cleaning Status")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.gray)
-                    
-                    CleaningStatusButtons(
-                        propertyName: activity.property.displayName,
-                        date: date,
-                        bookingId: activity.checkout?.booking.id ?? "",
-                        currentStatus: currentStatus,
-                        showYellowTooltip: $showYellowTooltip,
-                        showGreenTooltip: $showGreenTooltip,
-                        onCleanTapped: {
-                            showChecklistPanel = true
-                        }
-                    )
-                    .id(refreshID)
-                    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("CleaningStatusChanged"))) { _ in
-                        refreshID = UUID()
+                CleaningStatusButtons(
+                    propertyName: activity.property.displayName,
+                    date: date,
+                    bookingId: activity.checkout?.booking.id,
+                    currentStatus: currentStatus,
+                    showYellowTooltip: $showYellowTooltip,
+                    showGreenTooltip: $showGreenTooltip,
+                    onCleanTapped: {
+                        showChecklistPanel = true
                     }
-                    
-                    // Cleaning Checklist Panel (expands when green button clicked)
-                    if showChecklistPanel {
-                        CleaningChecklistPanel(
-                            property: activity.property,
-                            date: date,
-                            isExpanded: $showChecklistPanel
-                        )
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                        .animation(.easeInOut, value: showChecklistPanel)
-                    }
+                )
+                .id(refreshID)
+                .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("CleaningStatusChanged"))) { _ in
+                    refreshID = UUID()
                 }
-                .padding(.top, 4)
+                
+                // Cleaning Checklist Panel (expands when green button clicked)
+                if showChecklistPanel {
+                    CleaningChecklistPanel(
+                        property: activity.property,
+                        date: date,
+                        isExpanded: $showChecklistPanel
+                    )
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .animation(.easeInOut, value: showChecklistPanel)
+                }
             }
+            .padding(.top, 4)
         }
         .padding(16)
         .background(Color.gray.opacity(0.05))
@@ -202,4 +200,5 @@ struct BookingInfo {
     let guestName: String?
     let booking: Booking
 }
+
 
