@@ -544,3 +544,4 @@ struct DayDetailItem: Identifiable {
     let activities: [PropertyActivity]
 }
 
+

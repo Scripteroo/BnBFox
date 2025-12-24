@@ -214,11 +214,11 @@ struct InfoView: View {
                         
                         VStack(spacing: 12) {
                             NavigationLink(destination: TermsOfServiceView()) {
-                                LegalLinkView(title: "Terms of Service", icon: "doc.text")
+                                LegalLinkView(title: NSLocalizedString("terms_of_service", comment: "Link"), icon: "doc.text")
                             }
                             
                             NavigationLink(destination: PrivacyPolicyView()) {
-                                LegalLinkView(title: "Privacy Policy", icon: "lock.shield")
+                                LegalLinkView(title: NSLocalizedString("privacy_policy", comment: "Link"), icon: "lock.shield")
                             }
                             
                             NavigationLink(destination: SupportView()) {
@@ -812,4 +812,5 @@ struct AboutView: View {
 #Preview {
     InfoView()
 }
+
 

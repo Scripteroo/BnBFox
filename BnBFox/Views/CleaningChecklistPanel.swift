@@ -39,7 +39,7 @@ struct CleaningChecklistPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Header
-            Text("Finishing Checklist")
+            Text(NSLocalizedString("finishing_checklist", comment: "Title"))
                 .font(.title2)
                 .fontWeight(.bold)
                 .padding(.top)
@@ -49,23 +49,23 @@ struct CleaningChecklistPanel: View {
             
             // Finishing Checklist Section
             VStack(alignment: .leading, spacing: 12) {
-                ChecklistItem(text: "Towels - 6 bath, 2 hand, 6 beach", isChecked: $checklist.towelsChecked)
-                ChecklistItem(text: "Toilet paper 2 + 2 rolls", isChecked: $checklist.toiletPaperChecked)
-                ChecklistItem(text: "Paper towels 1 roll in kitchen", isChecked: $checklist.paperTowelsChecked)
-                ChecklistItem(text: "Hand soap", isChecked: $checklist.handSoapChecked)
-                ChecklistItem(text: "Dish soap & dishwasher soap", isChecked: $checklist.dishSoapChecked)
-                ChecklistItem(text: "Laundry detergent", isChecked: $checklist.laundryDetergentChecked)
+                ChecklistItem(text: NSLocalizedString("towels_checklist", comment: "Checklist item"), isChecked: $checklist.towelsChecked)
+                ChecklistItem(text: NSLocalizedString("toilet_paper_checklist", comment: "Checklist item"), isChecked: $checklist.toiletPaperChecked)
+                ChecklistItem(text: NSLocalizedString("paper_towels_checklist", comment: "Checklist item"), isChecked: $checklist.paperTowelsChecked)
+                ChecklistItem(text: NSLocalizedString("hand_soap", comment: "Checklist item"), isChecked: $checklist.handSoapChecked)
+                ChecklistItem(text: NSLocalizedString("dish_soap", comment: "Checklist item"), isChecked: $checklist.dishSoapChecked)
+                ChecklistItem(text: NSLocalizedString("laundry_detergent", comment: "Checklist item"), isChecked: $checklist.laundryDetergentChecked)
             }
             
             Divider()
             
             // Actions Section
             VStack(alignment: .leading, spacing: 12) {
-                Text("Actions")
+                Text(NSLocalizedString("actions", comment: "Section header"))
                     .font(.headline)
                 
                 HStack {
-                    Text("Log photo of completed\ncleaning from inside front door.")
+                    Text(NSLocalizedString("log_cleaning_photo", comment: "Action description"))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -86,7 +86,7 @@ struct CleaningChecklistPanel: View {
             
             // Damage Report Section
             VStack(alignment: .leading, spacing: 12) {
-                Text("Damage report")
+                Text(NSLocalizedString("damage_report", comment: "Section header"))
                     .font(.headline)
                 
                 TextEditor(text: $checklist.damageReportText)
@@ -113,14 +113,14 @@ struct CleaningChecklistPanel: View {
             
             // Pest Control Section
             VStack(alignment: .leading, spacing: 12) {
-                Text("Pest Control")
+                Text(NSLocalizedString("pest_control", comment: "Section header"))
                     .font(.headline)
                 
-                ChecklistItem(text: "Termites", isChecked: $checklist.termitesChecked)
-                ChecklistItem(text: "Cockroaches", isChecked: $checklist.cockroachesChecked)
-                ChecklistItem(text: "Bedbugs", isChecked: $checklist.bedbugsChecked)
-                ChecklistItem(text: "Mice", isChecked: $checklist.miceChecked)
-                ChecklistItem(text: "Other", isChecked: $checklist.otherPestsChecked)
+                ChecklistItem(text: NSLocalizedString("termites", comment: "Pest type"), isChecked: $checklist.termitesChecked)
+                ChecklistItem(text: NSLocalizedString("cockroaches", comment: "Pest type"), isChecked: $checklist.cockroachesChecked)
+                ChecklistItem(text: NSLocalizedString("bedbugs", comment: "Pest type"), isChecked: $checklist.bedbugsChecked)
+                ChecklistItem(text: NSLocalizedString("mice", comment: "Pest type"), isChecked: $checklist.miceChecked)
+                ChecklistItem(text: NSLocalizedString("other", comment: "Pest type"), isChecked: $checklist.otherPestsChecked)
                 
                 HStack {
                     Image(systemName: "ant.fill")
@@ -144,21 +144,21 @@ struct CleaningChecklistPanel: View {
             
             // Supplies Section
             VStack(alignment: .leading, spacing: 12) {
-                Text("Supplies")
+                Text(NSLocalizedString("supplies", comment: "Section header"))
                     .font(.headline)
                 
                 HStack(spacing: 20) {
                     VStack(alignment: .leading, spacing: 8) {
-                        ChecklistItem(text: "Toilet Paper", isChecked: $checklist.toiletPaperSupply)
-                        ChecklistItem(text: "Towels", isChecked: $checklist.towelsSupply)
-                        ChecklistItem(text: "AC Filters", isChecked: $checklist.acFiltersSupply)
-                        ChecklistItem(text: "Cleaning Supplies", isChecked: $checklist.cleaningSuppliesSupply)
+                        ChecklistItem(text: NSLocalizedString("toilet_paper_supply", comment: "Supply item"), isChecked: $checklist.toiletPaperSupply)
+                        ChecklistItem(text: NSLocalizedString("towels_supply", comment: "Supply item"), isChecked: $checklist.towelsSupply)
+                        ChecklistItem(text: NSLocalizedString("ac_filters", comment: "Supply item"), isChecked: $checklist.acFiltersSupply)
+                        ChecklistItem(text: NSLocalizedString("cleaning_supplies", comment: "Supply item"), isChecked: $checklist.cleaningSuppliesSupply)
                     }
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        ChecklistItem(text: "Paper Towels", isChecked: $checklist.paperTowelsSupply)
-                        ChecklistItem(text: "Detergent", isChecked: $checklist.detergentSupply)
-                        ChecklistItem(text: "Light Bulbs", isChecked: $checklist.lightBulbsSupply)
+                        ChecklistItem(text: NSLocalizedString("paper_towels_supply", comment: "Supply item"), isChecked: $checklist.paperTowelsSupply)
+                        ChecklistItem(text: NSLocalizedString("detergent", comment: "Supply item"), isChecked: $checklist.detergentSupply)
+                        ChecklistItem(text: NSLocalizedString("light_bulbs", comment: "Supply item"), isChecked: $checklist.lightBulbsSupply)
                     }
                 }
             }
@@ -267,7 +267,7 @@ struct PeriodicTasksSection: View {
     var body: some View {
         if !dueTasks.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Maintenance Tasks")
+                Text(NSLocalizedString("maintenance_tasks", comment: "Section header"))
                     .font(.headline)
                     .foregroundColor(.orange)
                 
@@ -320,4 +320,5 @@ struct PeriodicTaskItem: View {
         .buttonStyle(PlainButtonStyle())
     }
 }
+
 

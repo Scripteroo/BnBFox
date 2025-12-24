@@ -28,7 +28,7 @@ struct NotificationCenterView: View {
             List {
                 // COMING UP TODAY Section
                 if !upcomingToday.isEmpty {
-                    Section(header: Text("Coming up today...").font(.subheadline).foregroundColor(.secondary)) {
+                    Section(header: Text(NSLocalizedString("coming_up_today", comment: "")).font(.subheadline).foregroundColor(.secondary)) {
                         ForEach(upcomingToday) { event in
                             UpcomingEventRow(event: event, currentTime: currentTime)
                                 .contentShape(Rectangle())
@@ -41,15 +41,15 @@ struct NotificationCenterView: View {
                 }
                 
                 // PENDING TASKS Section
-                Section(header: Text("Pending Tasks").font(.subheadline).foregroundColor(.secondary)) {
+                Section(header: Text(NSLocalizedString("pending_tasks", comment: "")).font(.subheadline).foregroundColor(.secondary)) {
                     if viewModel.rowViewModels.isEmpty && upcomingToday.isEmpty {
                         VStack(spacing: 16) {
                             Image(systemName: "checkmark.circle")
                                 .font(.system(size: 60))
                                 .foregroundColor(.green)
-                            Text("All caught up!")
+                            Text(NSLocalizedString("all_caught_up", comment: ""))
                                 .font(.headline)
-                            Text("No pending cleaning tasks")
+                            Text(NSLocalizedString("no_pending_cleaning_tasks", comment: ""))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
@@ -57,7 +57,7 @@ struct NotificationCenterView: View {
                         .padding(.vertical, 40)
                         .listRowBackground(Color.clear)
                     } else if viewModel.rowViewModels.isEmpty {
-                        Text("No pending tasks")
+                        Text(NSLocalizedString("no_pending_tasks", comment: ""))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .center)
@@ -75,11 +75,11 @@ struct NotificationCenterView: View {
                 }
                 
                 // UPCOMING CLEANINGS Section (Next 30 Days)
-                Section(header: Text("Upcoming Cleanings (Next 30 Days)").font(.subheadline).foregroundColor(.secondary)) {
+                Section(header: Text(NSLocalizedString("upcoming_cleanings_30_days", comment: "")).font(.subheadline).foregroundColor(.secondary)) {
                     let upcomingCleanings = getUpcomingCleanings()
                     
                     if upcomingCleanings.isEmpty {
-                        Text("No upcoming cleanings")
+                        Text(NSLocalizedString("no_upcoming_cleanings", comment: ""))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .center)
@@ -96,7 +96,7 @@ struct NotificationCenterView: View {
                     }
                 }
             }
-            .navigationTitle("Cleaning Tasks")
+            .navigationTitle(NSLocalizedString("cleaning_tasks", comment: ""))
             .navigationBarTitleDisplayMode(.large)
             .onAppear {
                 Task {
@@ -234,7 +234,7 @@ struct NotificationRow: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                    Text("Check-out/Check-in")
+                    Text(NSLocalizedString("checkout_checkin", comment: ""))
                         .font(.caption)
                         .foregroundColor(.secondary)
                         
@@ -243,7 +243,7 @@ struct NotificationRow: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                    Text("Check-in")
+                    Text(NSLocalizedString("check_in", comment: ""))
                         .font(.caption)
                         .foregroundColor(.secondary)
                         
@@ -252,14 +252,14 @@ struct NotificationRow: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                    Text("Check-out")
+                    Text(NSLocalizedString("check_out", comment: ""))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
             
             // Cleaning Status Buttons
-            Text("Cleaning Status")
+            Text(NSLocalizedString("cleaning_status", comment: ""))
                 .font(.caption)
                 .foregroundColor(.secondary)
             
@@ -267,8 +267,8 @@ struct NotificationRow: View {
                 Spacer()
                 CleaningStatusButton(
                     imageName: "red-cleaning-button",
-                    label: "Dirty",
-                    sublabel: "Sucio",
+                    label: NSLocalizedString("dirty", comment: ""),
+                    sublabel: NSLocalizedString("dirty_spanish", comment: ""),
                     isSelected: rowViewModel.currentStatus == .todo,
                     action: {
                         Task {
@@ -281,8 +281,8 @@ struct NotificationRow: View {
                 
                 CleaningStatusButton(
                     imageName: "amber-cleaning-button",
-                    label: "Cleaning",
-                    sublabel: "Limpiando",
+                    label: NSLocalizedString("cleaning", comment: ""),
+                    sublabel: NSLocalizedString("cleaning_spanish", comment: ""),
                     isSelected: rowViewModel.currentStatus == .inProgress,
                     action: {
                         Task {
@@ -295,8 +295,8 @@ struct NotificationRow: View {
                 
                 CleaningStatusButton(
                     imageName: "green-cleaning-button",
-                    label: "Clean",
-                    sublabel: "Limpio",
+                    label: NSLocalizedString("clean", comment: ""),
+                    sublabel: NSLocalizedString("clean_spanish", comment: ""),
                     isSelected: rowViewModel.currentStatus == .done,
                     action: {
                         Task {
@@ -410,7 +410,7 @@ struct UpcomingEventRow: View {
                 VStack(alignment: .leading) {
                     Text(event.propertyName)
                         .font(.headline)
-                    Text(event.eventType == .checkout ? "Check-out" : "Check-in")
+                    Text(event.eventType == .checkout ? NSLocalizedString("check_out", comment: "") : NSLocalizedString("check_in", comment: ""))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -418,7 +418,7 @@ struct UpcomingEventRow: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(event.eventType == .checkout ? "Time until check-out:" : "Time until check-in:")
+                    Text(event.eventType == .checkout ? NSLocalizedString("time_until_checkout", comment: "") : NSLocalizedString("time_until_checkin", comment: ""))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Text(timeRemaining)
@@ -448,7 +448,7 @@ struct UpcomingCleaningListRow: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                 if cleaning.isSameDayTurnover {
-                    Text("SAME-DAY TURNOVER")
+                    Text(NSLocalizedString("same_day_turnover", comment: ""))
                         .font(.caption2)
                         .fontWeight(.bold)
                         .foregroundColor(.red)
@@ -457,10 +457,11 @@ struct UpcomingCleaningListRow: View {
             
             Spacer()
             
-            Text("\(cleaning.daysUntil) days")
+            Text("\(cleaning.daysUntil) \(NSLocalizedString("days", comment: ""))")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
         .padding(.vertical, 4)
     }
 }
+

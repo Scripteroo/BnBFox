@@ -1,0 +1,220 @@
+/* CRITICAL: Loading Screen strings - MUST be at top for app startup */
+"error_loading_bookings" = "Błąd ładowania rezerwacji";
+"retry" = "Ponów próbę";
+"loading_calendar" = "Ładowanie kalendarza";
+"fetching_booking_data" = "Pobieranie danych rezerwacji...";
+
+/* CalendarView strings */
+"calendar" = "Kalendarz";
+"today" = "Dzisiaj";
+
+/* SettingsView strings */
+"settings" = "Ustawienia";
+"checking" = "Sprawdzanie...";
+"notification_status" = "Status powiadomień";
+"permission_status" = "Status uprawnień";
+"authorized" = "Autoryzowany";
+"denied" = "Odmowa";
+"not_requested" = "Nie zażądano";
+"provisional" = "Tymczasowy";
+"ephemeral" = "Tymczasowy";
+"unknown" = "Nieznany";
+"open_settings_to_enable" = "Otwórz ustawienia, aby włączyć";
+"view_scheduled_notifications" = "Zobacz zaplanowane powiadomienia";
+"cleaning_day_alerts" = "Alerty dnia sprzątania";
+"enable_alerts" = "Włącz alerty";
+"alert_sound" = "Dźwięk alertu";
+"alert_time" = "Czas alertu";
+"pending_alerts" = "Oczekujące alerty";
+"reschedule_all_notifications" = "Przeplanuj wszystkie powiadomienia";
+"new_booking_alerts" = "Alerty nowych rezerwacji";
+"enable_new_booking_alerts" = "Włącz alerty nowych rezerwacji";
+"new_booking_alerts_description" = "Otrzymuj powiadomienia, gdy pojawią się nowe rezerwacje w bieżącym miesiącu";
+"maintenance_tasks" = "Zadania konserwacyjne";
+"add_custom_task" = "Dodaj niestandardowe zadanie";
+"upcoming_cleanings_30_days" = "Nadchodzące sprzątania (następne 30 dni)";
+"test_notification_sent" = "Testowe powiadomienie wysłane";
+"ok" = "OK";
+"test_notification_message" = "Testowe powiadomienie pojawi się za 5 sekund. Upewnij się, że aplikacja jest w tle, aby je zobaczyć.";
+"same_day_turnover" = "TAKŻE DNIA";
+"tomorrow" = "Jutro";
+"task_details" = "Szczegóły zadania";
+"task_name" = "Nazwa zadania";
+"frequency" = "Częstotliwość";
+"start_date" = "Data rozpoczęcia";
+"apply_to" = "Zastosuj do";
+"scope" = "Zakres";
+"all_properties" = "Wszystkie nieruchomości";
+"specific_property" = "Konkretna nieruchomość";
+"property" = "Nieruchomość";
+"select_property" = "Wybierz nieruchomość";
+"app_language" = "Język aplikacji";
+"notifications" = "Powiadomienia";
+"enable_notifications" = "Włącz powiadomienia";
+"notification_time" = "Czas powiadomienia";
+"about" = "O aplikacji";
+"version" = "Wersja";
+"privacy_policy" = "Polityka prywatności";
+"terms_of_service" = "Warunki korzystania";
+
+/* PropertyDetailView strings */
+"property_details" = "Szczegóły nieruchomości";
+"bookings" = "Rezerwacje";
+"no_bookings" = "Brak rezerwacji dla tej nieruchomości";
+"check_in" = "Zameldowanie";
+"check_out" = "Wymeldowanie";
+"guest_name" = "Imię gościa";
+"platform" = "Platforma";
+"ical_feed_url" = "URL kanału iCal";
+"paste_ical_url_here" = "Wklej tutaj URL iCal";
+"are_you_sure" = "Czy na pewno?";
+"delete_property_message" = "To spowoduje trwałe usunięcie tej nieruchomości i wszystkich jej rezerwacji.";
+
+/* MonthView strings */
+"no_bookings_this_month" = "Brak rezerwacji w tym miesiącu";
+
+/* DayDetailView strings */
+"day_details" = "Szczegóły dnia";
+"no_events" = "Brak wydarzeń na ten dzień";
+"guest" = "Gość:";
+"cleaning_status" = "Status sprzątania";
+"owner_info" = "Informacje o właścicielu";
+"done" = "Gotowe";
+
+/* CleaningChecklistPanel strings */
+"cleaning_checklist" = "Lista kontrolna sprzątania";
+"kitchen" = "Kuchnia";
+"clean_countertops" = "Wyczyść blaty i fartuch kuchenny";
+"clean_sink" = "Wyczyść zlew i kran";
+"clean_appliances" = "Wyczyść urządzenia (mikrofalówka, kuchenka, piekarnik, lodówka)";
+"empty_trash" = "Opróżnij kosz na śmieci i wymień worek";
+"sweep_mop_floor" = "Zamiataj i mopuj podłogę";
+"bathroom" = "Łazienka";
+"clean_toilet" = "Wyczyść i zdezynfekuj toaletę";
+"clean_shower" = "Wyczyść prysznic/wannę i płytki";
+"clean_sink_mirror" = "Wyczyść zlew, kran i lustro";
+"restock_supplies" = "Uzupełnij papier toaletowy, mydło i ręczniki";
+"empty_trash_bathroom" = "Opróżnij kosz";
+"bedroom" = "Sypialnia";
+"change_linens" = "Zmień pościel i pościel łóżko";
+"dust_surfaces" = "Odkurz wszystkie powierzchnie";
+"vacuum_floor" = "Odkurz podłogę i pod łóżkiem";
+"check_closet" = "Sprawdź szafę pod kątem pozostawionych rzeczy";
+"living_areas" = "Pomieszczenia dzienne";
+"dust_furniture" = "Odkurz meble i dekoracje";
+"vacuum_carpets" = "Odkurz dywany i wykładziny";
+"clean_windows" = "Wyczyść okna i lustra";
+"arrange_furniture" = "Ułóż meble i napusz poduszki";
+"general" = "Ogólne";
+"check_lights" = "Sprawdź wszystkie światła i wymień żarówki, jeśli potrzeba";
+"check_hvac" = "Sprawdź ustawienia HVAC/termostatu";
+"restock_amenities" = "Uzupełnij udogodnienia (kawa, herbata itp.)";
+"final_walkthrough" = "Ostateczna kontrola i zamknięcie";
+"mark_all_complete" = "Oznacz wszystko jako ukończone";
+"reset_checklist" = "Resetuj listę kontrolną";
+"mark_all_as_done" = "Oznacz wszystkie jako wykonane";
+"clear_all" = "Wyczyść wszystko";
+"finishing_checklist" = "Kończenie listy kontrolnej";
+"actions" = "Akcje";
+"damage_report" = "Raport szkód";
+"pest_control" = "Zwalczanie szkodników";
+"supplies" = "Zaopatrzenie";
+"towels_checklist" = "Ręczniki - 6 kąpielowych, 2 do rąk, 6 plażowych";
+"toilet_paper_checklist" = "Papier toaletowy 2 + 2 rolki";
+"paper_towels_checklist" = "Ręczniki papierowe 1 rolka w kuchni";
+"hand_soap" = "Mydło do rąk";
+"dish_soap" = "Płyn do naczyń i do zmywarki";
+"laundry_detergent" = "Proszek do prania";
+"log_cleaning_photo" = "Zaloguj zdjęcie wykonanego\nsprzątania od strony drzwi wejściowych.";
+"termites" = "Termity";
+"cockroaches" = "Karaluchy";
+"bedbugs" = "Pluskwy";
+"mice" = "Myszy";
+"other" = "Inne";
+"toilet_paper_supply" = "Papier toaletowy";
+"towels_supply" = "Ręczniki";
+"ac_filters" = "Filtry klimatyzacji";
+"cleaning_supplies" = "Środki czystości";
+"paper_towels_supply" = "Ręczniki papierowe";
+"detergent" = "Detergent";
+"light_bulbs" = "Żarówki";
+
+/* OwnerInfoPanelView strings */
+"owner_information" = "Informacje o właścicielu";
+"contact_owner" = "Skontaktuj się z właścicielem";
+"call" = "Zadzwoń";
+"text" = "Wyślij SMS";
+"email" = "E-mail";
+
+/* NotificationCenterView strings */
+"notifications_title" = "Powiadomienia";
+"no_notifications" = "Brak powiadomień";
+"mark_as_read" = "Oznacz jako przeczytane";
+
+/* AdminPanelView strings */
+"property_administration" = "Administracja nieruchomością";
+"connect_calendars_subtitle" = "Połącz swoje kalendarze AirBnB, VRBO i Booking.com";
+"complex" = "Kompleks";
+"unit_name" = "Nazwa jednostki";
+"street_address" = "Adres ulicy";
+"unit" = "Jednostka";
+"city" = "Miasto";
+"state" = "Województwo";
+"zip" = "Kod pocztowy";
+"add_custom_ical" = "Dodaj niestandardowy kanał iCal";
+"delete_unit_confirmation" = "Czy na pewno chcesz usunąć tę jednostkę?";
+"cancel" = "Anuluj";
+"delete" = "Usuń";
+"no_url" = "Brak URL";
+"platform_name" = "Nazwa platformy";
+"ical_url" = "URL iCal";
+"custom_ical_url" = "Niestandardowy URL iCal";
+"feed_already_used" = "Ten kanał iCal jest używany przez %@. Sprawdź swoje źródła.";
+"wrong_feed_vrbo_for_airbnb" = "To jest kanał VRBO - potrzebujesz kanału AirBnB dla tego pola.";
+"wrong_feed_booking_for_airbnb" = "To jest kanał Booking.com - potrzebujesz kanału AirBnB dla tego pola.";
+"wrong_feed_airbnb_for_vrbo" = "To jest kanał AirBnB - potrzebujesz kanału VRBO dla tego pola.";
+"wrong_feed_booking_for_vrbo" = "To jest kanał Booking.com - potrzebujesz kanału VRBO dla tego pola.";
+"wrong_feed_airbnb_for_booking" = "To jest kanał AirBnB - potrzebujesz kanału Booking.com dla tego pola.";
+"wrong_feed_vrbo_for_booking" = "To jest kanał VRBO - potrzebujesz kanału Booking.com dla tego pola.";
+"admin_panel" = "Panel administratora";
+"delete_all_properties" = "Usuń wszystkie nieruchomości";
+"clear_all_cleaning_status" = "Wyczyść statusy sprzątania";
+"reset_all_notifications" = "Zresetuj wszystkie powiadomienia";
+"export_database" = "Eksportuj bazę danych";
+"import_database" = "Importuj bazę danych";
+"action_cannot_be_undone" = "Tej akcji nie można cofnąć.";
+
+/* InfoView strings */
+"info" = "Informacje";
+"app_info" = "Informacje o aplikacji";
+"help" = "Pomoc";
+"contact_support" = "Kontakt z pomocą techniczną";
+"about_bnbfox" = "O BnBFox";
+"rate_on_app_store" = "Oceń w App Store";
+
+/* CleaningStatusButtons strings */
+"turnaround_completed_on" = "Sprzątanie zakończone dnia";
+"done_exclamation" = "ZROBIONE!";
+"unit_completed_past" = "Ta jednostka została ukończona w przeszłości. Sprawdź datę.";
+"on_my_way" = "Jadę! 🚗";
+"clean_and_ready" = "Czysto i gotowe! ✨";
+
+/* NotificationCenterView (Cleaning Tasks / Alerts Tab) strings */
+"cleaning_tasks" = "Zadania sprzątania";
+"coming_up_today" = "Dziś nadchodzi...";
+"pending_tasks" = "Oczekujące zadania";
+"all_caught_up" = "Wszystko na bieżąco!";
+"no_pending_cleaning_tasks" = "Brak oczekujących zadań sprzątania";
+"no_pending_tasks" = "Brak oczekujących zadań";
+"no_upcoming_cleanings" = "Brak nadchodzących sprzątań";
+"checkout_checkin" = "Wymeldowanie/Zameldowanie";
+"dirty" = "Brudne";
+"dirty_spanish" = "Sucio";
+"cleaning" = "Sprzątanie";
+"cleaning_spanish" = "Limpiando";
+"clean" = "Czyste";
+"clean_spanish" = "Limpio";
+"time_until_checkout" = "Czas do wymeldowania:";
+"time_until_checkin" = "Czas do zameldowania:";
+"days" = "dni";
+

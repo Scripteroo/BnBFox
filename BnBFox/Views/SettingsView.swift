@@ -14,7 +14,7 @@ struct SettingsView: View {
     
     @State private var pendingAlertsCount = 0
     @State private var upcomingCleanings: [CleaningDay] = []
-    @State private var notificationStatus = "Checking..."
+    @State private var notificationStatus = NSLocalizedString("checking", comment: "Status")
     @State private var showingTestAlert = false
     @State private var showingAddTask = false
     
@@ -22,15 +22,15 @@ struct SettingsView: View {
         NavigationView {
             Form {
                 // Notification Status Section
-                Section(header: Text("Notification Status")) {
+                Section(header: Text(NSLocalizedString("notification_status", comment: "Section header"))) {
                     HStack {
-                        Text("Permission Status")
+                        Text(NSLocalizedString("permission_status", comment: "Label"))
                         Spacer()
                         Text(notificationStatus)
-                            .foregroundColor(notificationStatus == "Authorized" ? .green : .red)
+                            .foregroundColor(notificationStatus == NSLocalizedString("authorized", comment: "Status") ? .green : .red)
                     }
                     
-                    if notificationStatus != "Authorized" {
+                    if notificationStatus != NSLocalizedString("authorized", comment: "Status") {
                         Button(action: {
                             if let url = URL(string: UIApplication.openSettingsURLString) {
                                 UIApplication.shared.open(url)
@@ -38,7 +38,7 @@ struct SettingsView: View {
                         }) {
                             HStack {
                                 Image(systemName: "gear")
-                                Text("Open Settings to Enable")
+                                Text(NSLocalizedString("open_settings_to_enable", comment: "Button"))
                                 Spacer()
                                 Image(systemName: "arrow.up.right.square")
                             }
@@ -53,7 +53,7 @@ struct SettingsView: View {
                     }) {
                         HStack {
                             Image(systemName: "list.bullet")
-                            Text("View Scheduled Notifications")
+                            Text(NSLocalizedString("view_scheduled_notifications", comment: "Button"))
                             Spacer()
                             Image(systemName: "eye")
                         }
@@ -61,19 +61,19 @@ struct SettingsView: View {
                 }
                 
                 // Cleaning Alerts Section
-                Section(header: Text("Cleaning Day Alerts")) {
-                    Toggle("Enable Alerts", isOn: $settings.cleaningAlertsEnabled)
+                Section(header: Text(NSLocalizedString("cleaning_day_alerts", comment: "Section header"))) {
+                    Toggle(NSLocalizedString("enable_alerts", comment: "Toggle"), isOn: $settings.cleaningAlertsEnabled)
                         .onChange(of: settings.cleaningAlertsEnabled) { _ in
                             Task {
                                 await updatePendingCount()
                             }
                         }
                     
-                    Toggle("Alert Sound", isOn: $settings.alertSoundEnabled)
+                    Toggle(NSLocalizedString("alert_sound", comment: "Toggle"), isOn: $settings.alertSoundEnabled)
                         .disabled(!settings.cleaningAlertsEnabled)
                     
                     DatePicker(
-                        "Alert Time",
+                        NSLocalizedString("alert_time", comment: "Label"),
                         selection: $settings.alertTime,
                         displayedComponents: .hourAndMinute
                     )
@@ -87,7 +87,7 @@ struct SettingsView: View {
                     
                     if settings.cleaningAlertsEnabled {
                         HStack {
-                            Text("Pending Alerts")
+                            Text(NSLocalizedString("pending_alerts", comment: "Label"))
                             Spacer()
                             Text("\(pendingAlertsCount)")
                                 .foregroundColor(.secondary)
@@ -100,21 +100,21 @@ struct SettingsView: View {
                         }) {
                             HStack {
                                 Image(systemName: "arrow.clockwise")
-                                Text("Reschedule All Notifications")
+                                Text(NSLocalizedString("reschedule_all_notifications", comment: "Button"))
                             }
                         }
                     }
                 }
                 
                 // New Booking Alerts Section
-                Section(header: Text("New Booking Alerts")) {
-                    Toggle("Enable New Booking Alerts", isOn: $settings.newBookingAlertsEnabled)
+                Section(header: Text(NSLocalizedString("new_booking_alerts", comment: "Section header"))) {
+                    Toggle(NSLocalizedString("enable_new_booking_alerts", comment: "Toggle"), isOn: $settings.newBookingAlertsEnabled)
                     
                     if settings.newBookingAlertsEnabled {
                         HStack {
                             Image(systemName: "info.circle")
                                 .foregroundColor(.blue)
-                            Text("Get notified when new bookings appear in the current month")
+                            Text(NSLocalizedString("new_booking_alerts_description", comment: "Description"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -122,7 +122,7 @@ struct SettingsView: View {
                 }
                 
                 // Maintenance Tasks Section
-                Section(header: Text("Maintenance Tasks")) {
+                Section(header: Text(NSLocalizedString("maintenance_tasks", comment: "Section header"))) {
                     // Add Custom Task Button
                     Button(action: {
                         showingAddTask = true
@@ -130,7 +130,7 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "plus.circle.fill")
                                 .foregroundColor(.green)
-                            Text("Add Custom Task")
+                            Text(NSLocalizedString("add_custom_task", comment: "Button"))
                             Spacer()
                         }
                     }
@@ -149,7 +149,7 @@ struct SettingsView: View {
                 
                 // Upcoming Cleanings Section
                 if settings.cleaningAlertsEnabled && !upcomingCleanings.isEmpty {
-                    Section(header: Text("Upcoming Cleanings (Next 30 Days)")) {
+                    Section(header: Text(NSLocalizedString("upcoming_cleanings_30_days", comment: "Section header"))) {
                         ForEach(upcomingCleanings) { cleaning in
                             CleaningDayRow(cleaning: cleaning)
                         }
@@ -157,7 +157,7 @@ struct SettingsView: View {
                 }
 
             }
-            .navigationTitle("Settings")
+            .navigationTitle(NSLocalizedString("settings", comment: "Title"))
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 Task {
@@ -166,10 +166,10 @@ struct SettingsView: View {
                     loadUpcomingCleanings()
                 }
             }
-            .alert("Test Notification Sent", isPresented: $showingTestAlert) {
-                Button("OK", role: .cancel) { }
+            .alert(NSLocalizedString("test_notification_sent", comment: "Alert title"), isPresented: $showingTestAlert) {
+                Button(NSLocalizedString("ok", comment: "Button"), role: .cancel) { }
             } message: {
-                Text("A test notification will appear in 5 seconds. Make sure the app is in the background to see it.")
+                Text(NSLocalizedString("test_notification_message", comment: "Alert message"))
             }
             .sheet(isPresented: $showingAddTask) {
                 AddCustomTaskView()
@@ -184,17 +184,17 @@ struct SettingsView: View {
         await MainActor.run {
             switch settings.authorizationStatus {
             case .authorized:
-                notificationStatus = "Authorized"
+                notificationStatus = NSLocalizedString("authorized", comment: "Status")
             case .denied:
-                notificationStatus = "Denied"
+                notificationStatus = NSLocalizedString("denied", comment: "Status")
             case .notDetermined:
-                notificationStatus = "Not Requested"
+                notificationStatus = NSLocalizedString("not_requested", comment: "Status")
             case .provisional:
-                notificationStatus = "Provisional"
+                notificationStatus = NSLocalizedString("provisional", comment: "Status")
             case .ephemeral:
-                notificationStatus = "Ephemeral"
+                notificationStatus = NSLocalizedString("ephemeral", comment: "Status")
             @unknown default:
-                notificationStatus = "Unknown"
+                notificationStatus = NSLocalizedString("unknown", comment: "Status")
             }
         }
     }
@@ -309,7 +309,7 @@ struct CleaningDayRow: View {
                         .foregroundColor(.secondary)
                     
                     if cleaning.isSameDayTurnover {
-                        Text("• SAME-DAY TURNOVER")
+                        Text(NSLocalizedString("same_day_turnover", comment: "Label"))
                             .font(.caption)
                             .foregroundColor(.red)
                     }
@@ -336,9 +336,9 @@ struct CleaningDayRow: View {
         let days = calendar.dateComponents([.day], from: today, to: cleaning.date).day ?? 0
         
         if days == 0 {
-            return "Today"
+            return NSLocalizedString("today", comment: "Date")
         } else if days == 1 {
-            return "Tomorrow"
+            return NSLocalizedString("tomorrow", comment: "Date")
         } else {
             return "\(days) days"
         }
@@ -415,28 +415,28 @@ struct AddCustomTaskView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Task Details")) {
-                    TextField("Task Name", text: $taskName)
+                Section(header: Text(NSLocalizedString("task_details", comment: "Section header"))) {
+                    TextField(NSLocalizedString("task_name", comment: "Placeholder"), text: $taskName)
                     
-                    Picker("Frequency", selection: $selectedFrequency) {
+                    Picker(NSLocalizedString("frequency", comment: "Label"), selection: $selectedFrequency) {
                         ForEach(TaskFrequency.allCases, id: \.self) { frequency in
                             Text(frequency.rawValue).tag(frequency)
                         }
                     }
                     
-                    DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
+                    DatePicker(NSLocalizedString("start_date", comment: "Label"), selection: $startDate, displayedComponents: .date)
                 }
                 
-                Section(header: Text("Apply To")) {
-                    Picker("Scope", selection: $selectedScope) {
-                        Text("All Properties").tag(TaskScope.global)
-                        Text("Specific Property").tag(TaskScope.propertySpecific)
+                Section(header: Text(NSLocalizedString("apply_to", comment: "Section header"))) {
+                    Picker(NSLocalizedString("scope", comment: "Label"), selection: $selectedScope) {
+                        Text(NSLocalizedString("all_properties", comment: "Option")).tag(TaskScope.global)
+                        Text(NSLocalizedString("specific_property", comment: "Option")).tag(TaskScope.propertySpecific)
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     
                     if selectedScope == .propertySpecific {
-                        Picker("Property", selection: $selectedPropertyId) {
-                            Text("Select Property").tag(nil as UUID?)
+                        Picker(NSLocalizedString("property", comment: "Label"), selection: $selectedPropertyId) {
+                            Text(NSLocalizedString("select_property", comment: "Placeholder")).tag(nil as UUID?)
                             ForEach(propertyService.getAllProperties()) { property in
                                 Text(property.displayName).tag(property.id as UUID?)
                             }
@@ -444,7 +444,7 @@ struct AddCustomTaskView: View {
                     }
                 }
             }
-            .navigationTitle("Add Custom Task")
+            .navigationTitle(NSLocalizedString("add_custom_task", comment: "Button"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -478,5 +478,6 @@ struct AddCustomTaskView: View {
         dismiss()
     }
 }
+
 
 

@@ -23,10 +23,10 @@ struct AdminPanelView: View {
                             .frame(width: 60, height: 60)
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Property Administration")
+                            Text(NSLocalizedString("property_administration", comment: ""))
                                 .font(.system(size: 22, weight: .bold))
                             
-                            Text("Connect your AirBnB, VRBO and Booking.com Calendars")
+                            Text(NSLocalizedString("connect_calendars_subtitle", comment: ""))
                                 .font(.system(size: 13))
                                 .foregroundColor(.gray)
                         }
@@ -123,7 +123,7 @@ struct PropertyConfigCard: View {
                                 .font(.system(size: 12))
                                 .foregroundColor(.gray)
                         } else {
-                            TextField("", text: $complexName, prompt: Text("Complex").foregroundColor(.gray.opacity(0.5)))
+                            TextField("", text: $complexName, prompt: Text(NSLocalizedString("complex", comment: "")).foregroundColor(.gray.opacity(0.5)))
                                 .font(.system(size: 12))
                                 .foregroundColor(.gray)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -137,7 +137,7 @@ struct PropertyConfigCard: View {
                             Text(unitName)
                                 .font(.system(size: 20, weight: .bold))
                         } else {
-                            TextField("Unit Name", text: $unitName)
+                            TextField(NSLocalizedString("unit_name", comment: ""), text: $unitName)
                                 .font(.system(size: 20, weight: .bold))
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .onChange(of: unitName) { _ in
@@ -175,29 +175,29 @@ struct PropertyConfigCard: View {
                 // Address fields - disabled when locked
                 if !property.isLocked {
                     VStack(spacing: 6) {
-                        TextField("Street Address", text: $streetAddress)
+                        TextField(NSLocalizedString("street_address", comment: ""), text: $streetAddress)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .font(.caption)
                             .onChange(of: streetAddress) { _ in updateProperty() }
                         
-                        TextField("Unit", text: $unit)
+                        TextField(NSLocalizedString("unit", comment: ""), text: $unit)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .font(.caption)
                             .onChange(of: unit) { _ in updateProperty() }
                         
                         HStack(spacing: 6) {
-                            TextField("City", text: $city)
+                            TextField(NSLocalizedString("city", comment: ""), text: $city)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .font(.caption)
                                 .onChange(of: city) { _ in updateProperty() }
                             
-                            TextField("State", text: $state)
+                            TextField(NSLocalizedString("state", comment: ""), text: $state)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .font(.caption)
                                 .frame(width: 60)
                                 .onChange(of: state) { _ in updateProperty() }
                             
-                            TextField("ZIP", text: $zipCode)
+                            TextField(NSLocalizedString("zip", comment: ""), text: $zipCode)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .font(.caption)
                                 .frame(width: 80)
@@ -242,7 +242,7 @@ struct PropertyConfigCard: View {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.system(size: 20))
                                     .foregroundColor(.blue)
-                                Text("Add Custom iCal Feed")
+                                Text(NSLocalizedString("add_custom_ical", comment: ""))
                                     .font(.caption)
                                     .foregroundColor(.blue)
                             }
@@ -258,9 +258,9 @@ struct PropertyConfigCard: View {
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
             )
-            .alert("Are you sure you want to delete this unit?", isPresented: $showDeleteConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Delete", role: .destructive) {
+            .alert(NSLocalizedString("delete_unit_confirmation", comment: ""), isPresented: $showDeleteConfirmation) {
+                Button(NSLocalizedString("cancel", comment: ""), role: .cancel) { }
+                Button(NSLocalizedString("delete", comment: ""), role: .destructive) {
                     onDelete()
                 }
             }
@@ -287,7 +287,7 @@ struct PropertyConfigCard: View {
         for otherProperty in allProperties where otherProperty.id != property.id {
             for otherFeed in otherProperty.iCalFeeds {
                 if otherFeed.url.lowercased() == url {
-                    showToastMessage("⚠️ This iCal feed is being used by \(otherProperty.displayName). Check your sources.")
+                    showToastMessage("⚠️ " + String(format: NSLocalizedString("feed_already_used", comment: ""), otherProperty.displayName))
                     return
                 }
             }
@@ -299,21 +299,21 @@ struct PropertyConfigCard: View {
             
             if platformName.contains("airbnb") && !url.contains("airbnb.com") {
                 if url.contains("vrbo.com") {
-                    showToastMessage("⚠️ This is a VRBO feed - you need your AirBnB feed for this field.")
+                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_vrbo_for_airbnb", comment: ""))
                 } else if url.contains("booking.com") {
-                    showToastMessage("⚠️ This is a Booking.com feed - you need your AirBnB feed for this field.")
+                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_booking_for_airbnb", comment: ""))
                 }
             } else if platformName.contains("vrbo") && !url.contains("vrbo.com") {
                 if url.contains("airbnb.com") {
-                    showToastMessage("⚠️ This is an AirBnB feed - you need your VRBO feed for this field.")
+                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_airbnb_for_vrbo", comment: ""))
                 } else if url.contains("booking.com") {
-                    showToastMessage("⚠️ This is a Booking.com feed - you need your VRBO feed for this field.")
+                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_booking_for_vrbo", comment: ""))
                 }
             } else if platformName.contains("booking") && !url.contains("booking.com") {
                 if url.contains("airbnb.com") {
-                    showToastMessage("⚠️ This is an AirBnB feed - you need your Booking.com feed for this field.")
+                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_airbnb_for_booking", comment: ""))
                 } else if url.contains("vrbo.com") {
-                    showToastMessage("⚠️ This is a VRBO feed - you need your Booking.com feed for this field.")
+                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_vrbo_for_booking", comment: ""))
                 }
             }
         }
@@ -389,7 +389,7 @@ struct DynamicURLTextField: View {
                             .foregroundColor(.gray)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     } else {
-                        TextField("Platform Name", text: $feed.platformName)
+                        TextField(NSLocalizedString("platform_name", comment: ""), text: $feed.platformName)
                             .font(.system(size: 11, weight: .medium))
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .onChange(of: feed.platformName) { _ in
@@ -398,7 +398,7 @@ struct DynamicURLTextField: View {
                     }
                     
                     // URL field
-                    TextField(feed.isDefault ? "\(feed.platformName) iCal URL" : "Custom iCal URL", text: $feed.url)
+                    TextField(feed.isDefault ? "\(feed.platformName) " + NSLocalizedString("ical_url", comment: "") : NSLocalizedString("custom_ical_url", comment: ""), text: $feed.url)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
@@ -551,4 +551,6 @@ class AdminPanelViewModel: ObservableObject {
         return 1
     }
 }
+
+
 

@@ -60,7 +60,7 @@ struct CleaningStatusButtons: View {
                 }
                 
                 // Completion message
-                Text("Turnaround Completed on \(formattedDate)")
+                Text(NSLocalizedString("turnaround_completed_on", comment: "Completion message") + "  \(formattedDate)")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
                     .italic()
@@ -73,7 +73,7 @@ struct CleaningStatusButtons: View {
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 120, height: 120)
                     
-                    Text("DONE!")
+                    Text(NSLocalizedString("done_exclamation", comment: "Completion text"))
                         .font(.system(size: 32, weight: .bold))
                         .foregroundColor(Color(red: 0, green: 0.7, blue: 0))
                 }
@@ -85,7 +85,7 @@ struct CleaningStatusButtons: View {
                     if showPastDateToast {
                         VStack {
                             Spacer()
-                            Text("This unit was completed in the past. Check the date.")
+                            Text(NSLocalizedString("unit_completed_past", comment: "Toast message"))
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.white)
                                 .multilineTextAlignment(.center)
@@ -194,7 +194,7 @@ struct CleaningStatusButtons: View {
                 Group {
                     if showYellowTooltip {
                         VStack {
-                            Text("I'm on my way! 🚗")
+                            Text(NSLocalizedString("on_my_way", comment: "Tooltip"))
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 16)
@@ -208,7 +208,7 @@ struct CleaningStatusButtons: View {
                     
                     if showGreenTooltip {
                         VStack {
-                            Text("Clean and Ready! ✨")
+                            Text(NSLocalizedString("clean_and_ready", comment: "Tooltip"))
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 16)
@@ -293,4 +293,5 @@ struct GrayedOutStatusButton: View {
         }
     }
 }
+
 

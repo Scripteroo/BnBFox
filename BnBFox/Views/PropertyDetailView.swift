@@ -156,7 +156,7 @@ struct PropertyDetailView: View {
             // Property Name with Lock/Unlock
             HStack {
                 if isEditingName {
-                    TextField("Property Name", text: $editedDisplayName)
+                    TextField(NSLocalizedString("property_name", comment: "Label"), text: $editedDisplayName)
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(currentProperty.color)
@@ -374,7 +374,7 @@ struct PropertyDetailView: View {
                 photoSourceType = .photoLibrary
                 showingImagePicker = true
             }
-            Button("Cancel", role: .cancel) {}
+            Button(NSLocalizedString("cancel", comment: "Button"), role: .cancel) {}
         }
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $selectedImage, sourceType: photoSourceType)
@@ -385,8 +385,8 @@ struct PropertyDetailView: View {
                 }
         }
         .alert("Delete Photo?", isPresented: $showingDeletePhotoConfirmation) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
+            Button(NSLocalizedString("cancel", comment: "Button"), role: .cancel) {}
+            Button(NSLocalizedString("delete", comment: "Button"), role: .destructive) {
                 deletePhoto()
             }
         } message: {
@@ -1167,5 +1167,6 @@ struct BlinkingModifier: ViewModifier {
             }
     }
 }
+
 
 

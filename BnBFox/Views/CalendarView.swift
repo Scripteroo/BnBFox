@@ -28,14 +28,14 @@ struct CalendarView: View {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.system(size: 50))
                             .foregroundColor(.orange)
-                        Text("Error Loading Bookings")
+                        Text(NSLocalizedString("error_loading_bookings", comment: "Error message title"))
                             .font(.headline)
                         Text(errorMessage)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
-                        Button("Retry") {
+                        Button(NSLocalizedString("retry", comment: "Retry button")) {
                             Task {
                                 await viewModel.loadBookings()
                             }
@@ -276,12 +276,12 @@ struct AnimatedLoadingScreen: View {
                 
                 // Text overlay at bottom
                 VStack(spacing: 12) {
-                    Text("Loading your Calendar")
+                    Text(NSLocalizedString("loading_calendar", comment: "Loading screen title"))
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.5), radius: 4, x: 0, y: 2)
                     
-                    Text("Fetching booking data...")
+                    Text(NSLocalizedString("fetching_booking_data", comment: "Loading screen subtitle"))
                         .font(.system(size: 15))
                         .foregroundColor(.white.opacity(0.9))
                         .shadow(color: .black.opacity(0.5), radius: 4, x: 0, y: 2)
@@ -331,11 +331,4 @@ struct CalendarView_Previews: PreviewProvider {
         CalendarView()
     }
 }
-
-
-
-
-
-
-
 

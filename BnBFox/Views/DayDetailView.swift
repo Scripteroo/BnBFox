@@ -48,7 +48,7 @@ struct DayDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(NSLocalizedString("done", comment: "Button")) {
                         dismiss()
                     }
                 }
@@ -114,7 +114,7 @@ struct PropertyActivityCard: View {
                 .padding(.vertical, 8)
             
             VStack(alignment: .leading, spacing: 12) {
-                Text("Cleaning Status")
+                Text(NSLocalizedString("cleaning_status", comment: "Section header"))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.gray)
                 
@@ -200,5 +200,6 @@ struct BookingInfo {
     let guestName: String?
     let booking: Booking
 }
+
 
 
