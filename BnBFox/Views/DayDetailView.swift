@@ -48,7 +48,7 @@ struct DayDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(NSLocalizedString("done", comment: "Done button")) {
                         dismiss()
                     }
                 }

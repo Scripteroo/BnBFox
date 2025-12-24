@@ -1,0 +1,202 @@
+/*
+   Localizable.strings (English)
+   BnBFox
+   
+   Created for localization support
+*/
+
+// MARK: - Tab Bar
+"tab.calendar" = "Calendar";
+"tab.alerts" = "Alerts";
+"tab.properties" = "Properties";
+"tab.settings" = "Settings";
+
+// MARK: - Calendar View
+"calendar.title" = "Calendar";
+"calendar.loading" = "Loading Calendar Data...";
+"calendar.updating" = "Updating...";
+"calendar.noBookings" = "No bookings";
+"calendar.today" = "Today";
+"calendar.upcomingCleanings" = "Upcoming Cleanings (Next 30 Days)";
+
+// MARK: - Month View
+"month.january" = "January";
+"month.february" = "February";
+"month.march" = "March";
+"month.april" = "April";
+"month.may" = "May";
+"month.june" = "June";
+"month.july" = "July";
+"month.august" = "August";
+"month.september" = "September";
+"month.october" = "October";
+"month.november" = "November";
+"month.december" = "December";
+
+// MARK: - Day Detail View
+"dayDetail.title" = "Day Details";
+"dayDetail.noBookings" = "No bookings for this day";
+"dayDetail.cleaningRequired" = "Cleaning Required";
+"dayDetail.checkIn" = "Check-in";
+"dayDetail.checkOut" = "Check-out";
+"dayDetail.occupied" = "Occupied";
+
+// MARK: - Properties View
+"properties.title" = "Properties";
+"properties.addNew" = "Add Property";
+"properties.noProperties" = "No properties added yet";
+"properties.addFirst" = "Add your first property to get started";
+"properties.edit" = "Edit";
+"properties.delete" = "Delete";
+"properties.deleteConfirm" = "Are you sure you want to delete this property?";
+"properties.cancel" = "Cancel";
+
+// MARK: - Property Detail View
+"propertyDetail.title" = "Property Details";
+"propertyDetail.name" = "Property Name";
+"propertyDetail.shortName" = "Short Name";
+"propertyDetail.address" = "Address";
+"propertyDetail.sources" = "Booking Sources";
+"propertyDetail.addSource" = "Add Source";
+"propertyDetail.platform" = "Platform";
+"propertyDetail.url" = "iCal URL";
+"propertyDetail.save" = "Save";
+"propertyDetail.ownerInfo" = "Owner Information";
+"propertyDetail.cleaningChecklist" = "Cleaning Checklist";
+
+// MARK: - Owner Info Panel
+"ownerInfo.title" = "Owner Information";
+"ownerInfo.name" = "Owner Name";
+"ownerInfo.email" = "Email";
+"ownerInfo.phone" = "Phone";
+"ownerInfo.notes" = "Notes";
+"ownerInfo.save" = "Save";
+"ownerInfo.cancel" = "Cancel";
+
+// MARK: - Cleaning Checklist
+"cleaning.title" = "Cleaning Checklist";
+"cleaning.addTask" = "Add Task";
+"cleaning.taskName" = "Task Name";
+"cleaning.completed" = "Completed";
+"cleaning.pending" = "Pending";
+"cleaning.reset" = "Reset All";
+"cleaning.save" = "Save";
+
+// MARK: - Cleaning Status
+"cleaningStatus.clean" = "Clean";
+"cleaningStatus.dirty" = "Dirty";
+"cleaningStatus.inProgress" = "In Progress";
+"cleaningStatus.markClean" = "Mark as Clean";
+"cleaningStatus.markDirty" = "Mark as Dirty";
+"cleaningStatus.markInProgress" = "Mark In Progress";
+
+// MARK: - Alerts/Notifications View
+"alerts.title" = "Notifications";
+"alerts.noAlerts" = "No notifications";
+"alerts.clearAll" = "Clear All";
+"alerts.markRead" = "Mark as Read";
+"alerts.cleaningAlert" = "Cleaning Alert";
+"alerts.bookingAlert" = "New Booking";
+"alerts.maintenanceAlert" = "Maintenance Reminder";
+
+// MARK: - Settings View
+"settings.title" = "Settings";
+"settings.notificationStatus" = "Notification Status";
+"settings.permissionStatus" = "Permission Status";
+"settings.authorized" = "Authorized";
+"settings.denied" = "Denied";
+"settings.notDetermined" = "Not Determined";
+"settings.viewScheduled" = "View Scheduled Notifications";
+"settings.cleaningAlerts" = "Cleaning Day Alerts";
+"settings.enableAlerts" = "Enable Alerts";
+"settings.alertSound" = "Alert Sound";
+"settings.alertTime" = "Alert Time";
+"settings.pendingAlerts" = "Pending Alerts";
+"settings.rescheduleAll" = "Reschedule All Notifications";
+"settings.newBookingAlerts" = "New Booking Alerts";
+"settings.enableNewBooking" = "Enable New Booking Alerts";
+"settings.newBookingDescription" = "Get notified when new bookings appear in the current month";
+"settings.maintenanceTasks" = "Maintenance Tasks";
+"settings.addCustomTask" = "Add Custom Task";
+"settings.acFilterChange" = "Change AC Filter";
+"settings.acFilterDescription" = "Quarterly reminder for all properties";
+"settings.quarterly" = "Quarterly";
+"settings.monthly" = "Monthly";
+"settings.weekly" = "Weekly";
+"settings.allProperties" = "All Properties";
+"settings.specificProperties" = "Specific Properties";
+
+// MARK: - Admin Panel
+"admin.title" = "Admin Panel";
+"admin.testData" = "Test Data";
+"admin.generateData" = "Generate Test Data";
+"admin.clearData" = "Clear All Data";
+"admin.confirmClear" = "Are you sure? This will delete all properties and bookings.";
+"admin.dataGenerated" = "Test data generated successfully";
+"admin.dataCleared" = "All data cleared";
+
+// MARK: - Info View
+"info.title" = "About";
+"info.version" = "Version";
+"info.build" = "Build";
+"info.privacyPolicy" = "Privacy Policy";
+"info.termsOfService" = "Terms of Service";
+"info.support" = "Support";
+"info.contactUs" = "Contact Us";
+
+// MARK: - Privacy Policy
+"privacy.title" = "Privacy Policy";
+"privacy.lastUpdated" = "Last Updated";
+"privacy.content" = "Your privacy is important to us. This app does not collect or share any personal information.";
+
+// MARK: - Terms of Service
+"terms.title" = "Terms of Service";
+"terms.lastUpdated" = "Last Updated";
+"terms.content" = "By using this app, you agree to these terms of service.";
+
+// MARK: - Toast Messages
+"toast.success" = "Success";
+"toast.error" = "Error";
+"toast.warning" = "Warning";
+"toast.saved" = "Saved successfully";
+"toast.deleted" = "Deleted successfully";
+"toast.updated" = "Updated successfully";
+
+// MARK: - Common Actions
+"common.save" = "Save";
+"common.cancel" = "Cancel";
+"common.delete" = "Delete";
+"common.edit" = "Edit";
+"common.done" = "Done";
+"common.close" = "Close";
+"common.add" = "Add";
+"common.remove" = "Remove";
+"common.yes" = "Yes";
+"common.no" = "No";
+"common.ok" = "OK";
+"common.back" = "Back";
+"common.next" = "Next";
+"common.previous" = "Previous";
+"common.search" = "Search";
+"common.filter" = "Filter";
+"common.sort" = "Sort";
+"common.refresh" = "Refresh";
+
+// MARK: - Error Messages
+"error.generic" = "An error occurred";
+"error.networkError" = "Network error. Please check your connection.";
+"error.loadingFailed" = "Failed to load data";
+"error.savingFailed" = "Failed to save";
+"error.deletingFailed" = "Failed to delete";
+"error.invalidInput" = "Invalid input";
+"error.notificationPermission" = "Notification permission denied. Please enable in Settings.";
+
+// MARK: - Date & Time
+"date.today" = "Today";
+"date.yesterday" = "Yesterday";
+"date.tomorrow" = "Tomorrow";
+"time.morning" = "Morning";
+"time.afternoon" = "Afternoon";
+"time.evening" = "Evening";
+"time.night" = "Night";
+

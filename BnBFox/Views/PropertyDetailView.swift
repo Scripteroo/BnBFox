@@ -125,7 +125,7 @@ struct PropertyDetailView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(NSLocalizedString("done", comment: "Done button")) {
                         dismiss()
                     }
                 }
@@ -156,7 +156,7 @@ struct PropertyDetailView: View {
             // Property Name with Lock/Unlock
             HStack {
                 if isEditingName {
-                    TextField("Property Name", text: $editedDisplayName)
+                    TextField(NSLocalizedString("property_name", comment: "Field label"), text: $editedDisplayName)
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(currentProperty.color)
@@ -374,7 +374,7 @@ struct PropertyDetailView: View {
                 photoSourceType = .photoLibrary
                 showingImagePicker = true
             }
-            Button("Cancel", role: .cancel) {}
+            Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) {}
         }
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $selectedImage, sourceType: photoSourceType)
@@ -385,8 +385,8 @@ struct PropertyDetailView: View {
                 }
         }
         .alert("Delete Photo?", isPresented: $showingDeletePhotoConfirmation) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
+            Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) {}
+            Button(NSLocalizedString("delete", comment: "Delete button"), role: .destructive) {
                 deletePhoto()
             }
         } message: {
@@ -686,7 +686,7 @@ struct PropertyDetailView: View {
         if let status = statusManager.getStatus(propertyName: currentProperty.displayName, date: today) {
             switch status.status {
             case .done:
-                return "Clean"
+                return NSLocalizedString("clean", comment: "Cleaning status")
             case .inProgress:
                 return "Cleaning"
             case .todo, .pending:

@@ -3,6 +3,7 @@
 //  BnBShift
 //
 //  Updated with vertical scrolling for booking bars
+//  Optimized on 12/23/2025 - Performance improvements
 //
 
 import SwiftUI
@@ -13,6 +14,9 @@ struct MonthView: View {
     let properties: [Property]  // NEW: Accept properties from CalendarViewModel
     var showMonthTitle: Bool = true  // Allow hiding the title to prevent duplicates
     var showDayHeaders: Bool = true  // Allow hiding day headers to prevent duplicates
+    
+    // OPTIMIZATION #2: Cache generated weeks to avoid recalculating on every render
+    @State private var cachedWeeks: [[Date?]]?
     
     private let daysOfWeek = [
         DayOfWeek(id: 0, label: "S"),
@@ -52,8 +56,8 @@ struct MonthView: View {
                 .padding(.bottom, 8)
             }
             
-            // Calendar weeks
-            ForEach(Array(generateWeeks().enumerated()), id: \.offset) { weekIndex, week in
+            // Calendar weeks - OPTIMIZED: Use cached weeks
+            ForEach(Array(getWeeks().enumerated()), id: \.offset) { weekIndex, week in
                 WeekSection(
                     week: week,
                     bookings: bookings,
@@ -63,6 +67,22 @@ struct MonthView: View {
             }
         }
         .padding(.horizontal, 8)
+        .onAppear {
+            // Pre-calculate weeks on appear
+            if cachedWeeks == nil {
+                cachedWeeks = generateWeeks()
+            }
+        }
+    }
+    
+    // OPTIMIZATION #2: Use cached weeks instead of recalculating
+    private func getWeeks() -> [[Date?]] {
+        if let cached = cachedWeeks {
+            return cached
+        }
+        let weeks = generateWeeks()
+        // Note: Can't mutate @State here, but onAppear will cache it
+        return weeks
     }
     
     private func generateWeeks() -> [[Date?]] {
@@ -192,9 +212,9 @@ struct WeekSection: View {
                 
                 Spacer()
                 
-                // Scrollable property rows area
+                // OPTIMIZATION #8: Use LazyVStack for better scrolling performance
                 ScrollView(.vertical, showsIndicators: true) {
-                    VStack(spacing: 3) {
+                    LazyVStack(spacing: 3) {
                         ForEach(properties) { property in
                             PropertyRow(
                                 property: property,
@@ -332,9 +352,6 @@ struct WeekSection: View {
         }
     }
 }
-
-// PropertyRow remains unchanged - just copy from original file
-// (Lines 319-529 from original MonthView.swift)
 
 struct PropertyRow: View {
     let property: Property

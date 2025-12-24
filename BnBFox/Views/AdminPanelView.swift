@@ -259,8 +259,8 @@ struct PropertyConfigCard: View {
                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
             )
             .alert("Are you sure you want to delete this unit?", isPresented: $showDeleteConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Delete", role: .destructive) {
+                Button(NSLocalizedString("cancel", comment: "Cancel button"), role: .cancel) { }
+                Button(NSLocalizedString("delete", comment: "Delete button"), role: .destructive) {
                     onDelete()
                 }
             }

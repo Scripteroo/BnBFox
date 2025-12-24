@@ -2,7 +2,7 @@
 //  SettingsView.swift
 //  BnBFox
 //
-//  Updated with notification debugging tools
+//  Fixed with correct API calls
 //
 
 import SwiftUI
@@ -45,7 +45,6 @@ struct SettingsView: View {
                         }
                     }
                     
-
                     Button(action: {
                         Task {
                             await listScheduledNotifications()
@@ -80,7 +79,6 @@ struct SettingsView: View {
                     .disabled(!settings.cleaningAlertsEnabled)
                     .onChange(of: settings.alertTime) { _ in
                         Task {
-                            // Reschedule notifications when time changes
                             await updatePendingCount()
                         }
                     }
@@ -100,7 +98,9 @@ struct SettingsView: View {
                         }) {
                             HStack {
                                 Image(systemName: "arrow.clockwise")
+                                    .foregroundColor(.blue)
                                 Text("Reschedule All Notifications")
+                                Spacer()
                             }
                         }
                     }
@@ -135,7 +135,16 @@ struct SettingsView: View {
                         }
                     }
                     
-                    // List of Custom Tasks
+                    // Default Tasks (like AC Filter) - No delete button
+                    ForEach(taskService.tasks.filter { $0.isDefault }) { task in
+                        DefaultTaskRow(task: task, onToggle: { enabled in
+                            var updatedTask = task
+                            updatedTask.isEnabled = enabled
+                            taskService.updateTask(updatedTask)
+                        })
+                    }
+                    
+                    // Custom Tasks - With delete button
                     ForEach(taskService.tasks.filter { !$0.isDefault }) { task in
                         CustomTaskRow(task: task, onDelete: {
                             taskService.deleteTask(task)
@@ -155,9 +164,8 @@ struct SettingsView: View {
                         }
                     }
                 }
-
             }
-            .navigationTitle("Settings")
+            .navigationTitle(NSLocalizedString("settings", comment: "Settings title"))
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 Task {
@@ -167,7 +175,7 @@ struct SettingsView: View {
                 }
             }
             .alert("Test Notification Sent", isPresented: $showingTestAlert) {
-                Button("OK", role: .cancel) { }
+                Button(NSLocalizedString("ok", comment: "OK button"), role: .cancel) { }
             } message: {
                 Text("A test notification will appear in 5 seconds. Make sure the app is in the background to see it.")
             }
@@ -199,53 +207,90 @@ struct SettingsView: View {
         }
     }
     
-    private func sendTestNotification() async {
-        await NotificationService.shared.sendTestNotification()
+    private func updatePendingCount() async {
+        let center = UNUserNotificationCenter.current()
+        let requests = await center.pendingNotificationRequests()
+        
         await MainActor.run {
-            showingTestAlert = true
+            pendingAlertsCount = requests.count
         }
-    }
-    
-    private func listScheduledNotifications() async {
-        await NotificationService.shared.listPendingNotifications()
-        // Output will be in Xcode console
     }
     
     private func forceRescheduleNotifications() async {
         print("🔄 Force rescheduling all notifications...")
-        NotificationService.shared.scheduleCleaningAlerts()
+        NotificationService.shared.scheduleCleaningAlerts() // FIXED: Use scheduleCleaningAlerts()
         await updatePendingCount()
+        print("✅ Notifications rescheduled. New count: \(pendingAlertsCount)")
     }
     
-    private func updatePendingCount() async {
-        let count = await NotificationService.shared.getPendingAlertsCount()
-        await MainActor.run {
-            pendingAlertsCount = count
+    private func listScheduledNotifications() async {
+        let center = UNUserNotificationCenter.current()
+        let requests = await center.pendingNotificationRequests()
+        
+        print("\n📋 === SCHEDULED NOTIFICATIONS (\(requests.count)) ===")
+        
+        let calendar = Calendar.current
+        var notificationsByDate: [Date: [UNNotificationRequest]] = [:]
+        
+        for request in requests {
+            if let trigger = request.trigger as? UNCalendarNotificationTrigger,
+               let triggerDate = trigger.nextTriggerDate() {
+                let dayStart = calendar.startOfDay(for: triggerDate)
+                if notificationsByDate[dayStart] == nil {
+                    notificationsByDate[dayStart] = []
+                }
+                notificationsByDate[dayStart]?.append(request)
+            }
         }
+        
+        let sortedDates = notificationsByDate.keys.sorted()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMM d, yyyy"
+        
+        for date in sortedDates {
+            guard let notifications = notificationsByDate[date] else { continue }
+            print("\n📅 \(dateFormatter.string(from: date)) (\(notifications.count) notifications)")
+            
+            for request in notifications.sorted(by: { r1, r2 in
+                guard let t1 = r1.trigger as? UNCalendarNotificationTrigger,
+                      let t2 = r2.trigger as? UNCalendarNotificationTrigger,
+                      let d1 = t1.nextTriggerDate(),
+                      let d2 = t2.nextTriggerDate() else {
+                    return false
+                }
+                return d1 < d2
+            }) {
+                if let trigger = request.trigger as? UNCalendarNotificationTrigger,
+                   let triggerDate = trigger.nextTriggerDate() {
+                    let timeFormatter = DateFormatter()
+                    timeFormatter.dateFormat = "h:mm a"
+                    print("  • \(timeFormatter.string(from: triggerDate)) - \(request.content.title)")
+                }
+            }
+        }
+        
+        print("\n=================================\n")
     }
     
     private func loadUpcomingCleanings() {
-        Task {
-            let allBookings = await PropertyService.shared.getAllBookings()
-            await MainActor.run {
-                processBookings(allBookings)
-            }
-        }
-    }
-    
-    private func processBookings(_ bookings: [Booking]) {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let thirtyDaysFromNow = calendar.date(byAdding: .day, value: 30, to: today)!
         
-        var cleaningDays: [UUID: [Date: [Booking]]] = [:]
+        // FIXED: Get all bookings from all properties
+        var allBookings: [Booking] = []
+        for property in PropertyService.shared.getAllProperties() {
+            let bookings = BookingService.shared.getCachedBookings(for: property)
+            allBookings.append(contentsOf: bookings)
+        }
         
-        // Group bookings by property and checkout date
+        let bookings = allBookings.filter { booking in
+            booking.endDate >= today && booking.endDate <= thirtyDaysFromNow
+        }
+        
+        var cleaningDays: [UUID: [Date: [Booking]]] = [:]
         for booking in bookings {
             let checkoutDate = calendar.startOfDay(for: booking.endDate)
-            
-            // Only include future dates within 30 days
-            guard checkoutDate >= today && checkoutDate <= thirtyDaysFromNow else { continue }
             
             if cleaningDays[booking.propertyId] == nil {
                 cleaningDays[booking.propertyId] = [:]
@@ -256,13 +301,11 @@ struct SettingsView: View {
             cleaningDays[booking.propertyId]![checkoutDate]!.append(booking)
         }
         
-        // Create CleaningDay objects
         var cleanings: [CleaningDay] = []
         for (propertyId, dateBookings) in cleaningDays {
             guard let property = PropertyService.shared.getProperty(by: propertyId) else { continue }
             
             for (checkoutDate, _) in dateBookings {
-                // Check if there's a same-day checkin
                 let hasCheckin = bookings.contains { booking in
                     booking.propertyId == propertyId &&
                     calendar.isDate(booking.startDate, inSameDayAs: checkoutDate)
@@ -336,7 +379,7 @@ struct CleaningDayRow: View {
         let days = calendar.dateComponents([.day], from: today, to: cleaning.date).day ?? 0
         
         if days == 0 {
-            return "Today"
+            return NSLocalizedString("today", comment: "Today button")
         } else if days == 1 {
             return "Tomorrow"
         } else {
@@ -345,10 +388,51 @@ struct CleaningDayRow: View {
     }
 }
 
+// MARK: - Default Task Row (No Delete Button)
+struct DefaultTaskRow: View {
+    let task: PeriodicTask
+    let onToggle: (Bool) -> Void
+    
+    @State private var isEnabled: Bool
+    
+    init(task: PeriodicTask, onToggle: @escaping (Bool) -> Void) {
+        self.task = task
+        self.onToggle = onToggle
+        _isEnabled = State(initialValue: task.isEnabled)
+    }
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(task.name)
+                    .font(.subheadline)
+                
+                HStack {
+                    Text(task.frequency.rawValue)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Text("•")
+                        .foregroundColor(.secondary)
+                    
+                    Text(task.scope.rawValue)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            Spacer()
+            
+            Toggle("", isOn: $isEnabled)
+                .labelsHidden()
+                .onChange(of: isEnabled) { newValue in
+                    onToggle(newValue)
+                }
+        }
+    }
+}
 
-
-
-// MARK: - Custom Task Row
+// MARK: - Custom Task Row (With Delete Button)
 struct CustomTaskRow: View {
     let task: PeriodicTask
     let onDelete: () -> Void
@@ -408,9 +492,8 @@ struct AddCustomTaskView: View {
     
     @State private var taskName = ""
     @State private var selectedFrequency: TaskFrequency = .monthly
-    @State private var selectedScope: TaskScope = .global
-    @State private var selectedPropertyId: UUID?
-    @State private var startDate = Date()
+    @State private var selectedScope: TaskScope = .global // FIXED: Use .global
+    @State private var selectedPropertyId: String? = nil
     
     var body: some View {
         NavigationView {
@@ -423,22 +506,19 @@ struct AddCustomTaskView: View {
                             Text(frequency.rawValue).tag(frequency)
                         }
                     }
-                    
-                    DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
                 }
                 
-                Section(header: Text("Apply To")) {
-                    Picker("Scope", selection: $selectedScope) {
-                        Text("All Properties").tag(TaskScope.global)
-                        Text("Specific Property").tag(TaskScope.propertySpecific)
+                Section(header: Text("Scope")) {
+                    Picker("Apply To", selection: $selectedScope) {
+                        Text(TaskScope.global.rawValue).tag(TaskScope.global)
+                        Text(TaskScope.propertySpecific.rawValue).tag(TaskScope.propertySpecific)
                     }
-                    .pickerStyle(SegmentedPickerStyle())
                     
                     if selectedScope == .propertySpecific {
                         Picker("Property", selection: $selectedPropertyId) {
-                            Text("Select Property").tag(nil as UUID?)
+                            Text("Select Property").tag(nil as String?)
                             ForEach(propertyService.getAllProperties()) { property in
-                                Text(property.displayName).tag(property.id as UUID?)
+                                Text(property.displayName).tag(property.id.uuidString as String?)
                             }
                         }
                     }
@@ -448,7 +528,7 @@ struct AddCustomTaskView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button(NSLocalizedString("cancel", comment: "Cancel button")) {
                         dismiss()
                     }
                 }
@@ -464,12 +544,13 @@ struct AddCustomTaskView: View {
     }
     
     private func addTask() {
+        // FIXED: Use correct initializer parameters
         let task = PeriodicTask(
+            id: UUID(),
             name: taskName,
             frequency: selectedFrequency,
             scope: selectedScope,
-            propertyId: selectedScope == .propertySpecific ? selectedPropertyId?.uuidString : nil,
-            startDate: startDate,
+            propertyId: selectedPropertyId,
             isEnabled: true,
             isDefault: false
         )
@@ -478,5 +559,4 @@ struct AddCustomTaskView: View {
         dismiss()
     }
 }
-
 

@@ -99,7 +99,7 @@ struct OwnerInfoPanelView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(NSLocalizedString("done", comment: "Done button")) {
                         dismiss()
                     }
                 }
@@ -216,7 +216,7 @@ struct OwnerInfoPanelView: View {
             case .inProgress:
                 return "Cleaning"
             case .done:
-                return "Clean"
+                return NSLocalizedString("clean", comment: "Cleaning status")
             }
         }
         return "To be cleaned" // Default

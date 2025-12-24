@@ -23,7 +23,7 @@ class CalendarViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     // OPTIMIZATION #3: Add booking cache with expiration
-    private var bookingCache: [String: (bookings: [Booking], timestamp: Date)] = [:]
+    private var bookingCache: [UUID: (bookings: [Booking], timestamp: Date)] = [:]
     private let cacheExpiration: TimeInterval = 300 // 5 minutes
     
     var properties: [Property] {
@@ -55,7 +55,7 @@ class CalendarViewModel: ObservableObject {
         let totalProperties = properties.count
         var completed = 0
         
-        await withTaskGroup(of: (propertyId: String, bookings: [Booking]).self) { group in
+        await withTaskGroup(of: (propertyId: UUID, bookings: [Booking]).self) { group in
             for property in properties {
                 group.addTask {
                     let bookings = await self.fetchBookingsWithCache(for: property)
@@ -123,7 +123,7 @@ class CalendarViewModel: ObservableObject {
     }
     
     // NEW: Clear cache for specific property
-    func clearCache(for propertyId: String) {
+    func clearCache(for propertyId: UUID) {
         bookingCache.removeValue(forKey: propertyId)
     }
     
@@ -189,3 +189,4 @@ enum ScrollDirection {
     case forward
     case backward
 }
+

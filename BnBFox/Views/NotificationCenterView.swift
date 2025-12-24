@@ -295,7 +295,7 @@ struct NotificationRow: View {
                 
                 CleaningStatusButton(
                     imageName: "green-cleaning-button",
-                    label: "Clean",
+                    label: NSLocalizedString("clean", comment: "Cleaning status"),
                     sublabel: "Limpio",
                     isSelected: rowViewModel.currentStatus == .done,
                     action: {

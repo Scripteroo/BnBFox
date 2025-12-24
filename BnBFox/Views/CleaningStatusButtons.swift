@@ -51,7 +51,7 @@ struct CleaningStatusButtons: View {
                         }
                     }
                     
-                    GrayedOutStatusButton(label: "Clean", sublabel: "Limpio") {
+                    GrayedOutStatusButton(label: NSLocalizedString("clean", comment: "Cleaning status"), sublabel: "Limpio") {
                         showPastDateToast = true
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                             showPastDateToast = false
@@ -158,7 +158,7 @@ struct CleaningStatusButtons: View {
                 // Green button (Clean / Limpio)
                 StatusButton(
                     imageName: "green-cleaning-button",
-                    label: "Clean",
+                    label: NSLocalizedString("clean", comment: "Cleaning status"),
                     sublabel: "Limpio",
                     labelColor: .black,
                     isSelected: currentStatus == .done,

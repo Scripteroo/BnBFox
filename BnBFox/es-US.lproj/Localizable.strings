@@ -1,0 +1,202 @@
+/*
+   Localizable.strings (Spanish)
+   BnBFox
+   
+   Traducciones al español
+*/
+
+// MARK: - Tab Bar
+"tab.calendar" = "Calendario";
+"tab.alerts" = "Alertas";
+"tab.properties" = "Propiedades";
+"tab.settings" = "Ajustes";
+
+// MARK: - Calendar View
+"calendar.title" = "Calendario";
+"calendar.loading" = "Cargando datos del calendario...";
+"calendar.updating" = "Actualizando...";
+"calendar.noBookings" = "Sin reservas";
+"calendar.today" = "Hoy";
+"calendar.upcomingCleanings" = "Próximas limpiezas (próximos 30 días)";
+
+// MARK: - Month View
+"month.january" = "Enero";
+"month.february" = "Febrero";
+"month.march" = "Marzo";
+"month.april" = "Abril";
+"month.may" = "Mayo";
+"month.june" = "Junio";
+"month.july" = "Julio";
+"month.august" = "Agosto";
+"month.september" = "Septiembre";
+"month.october" = "Octubre";
+"month.november" = "Noviembre";
+"month.december" = "Diciembre";
+
+// MARK: - Day Detail View
+"dayDetail.title" = "Detalles del día";
+"dayDetail.noBookings" = "No hay reservas para este día";
+"dayDetail.cleaningRequired" = "Limpieza requerida";
+"dayDetail.checkIn" = "Entrada";
+"dayDetail.checkOut" = "Salida";
+"dayDetail.occupied" = "Ocupado";
+
+// MARK: - Properties View
+"properties.title" = "Propiedades";
+"properties.addNew" = "Agregar propiedad";
+"properties.noProperties" = "No hay propiedades agregadas";
+"properties.addFirst" = "Agrega tu primera propiedad para comenzar";
+"properties.edit" = "Editar";
+"properties.delete" = "Eliminar";
+"properties.deleteConfirm" = "¿Estás seguro de que quieres eliminar esta propiedad?";
+"properties.cancel" = "Cancelar";
+
+// MARK: - Property Detail View
+"propertyDetail.title" = "Detalles de la propiedad";
+"propertyDetail.name" = "Nombre de la propiedad";
+"propertyDetail.shortName" = "Nombre corto";
+"propertyDetail.address" = "Dirección";
+"propertyDetail.sources" = "Fuentes de reservas";
+"propertyDetail.addSource" = "Agregar fuente";
+"propertyDetail.platform" = "Plataforma";
+"propertyDetail.url" = "URL iCal";
+"propertyDetail.save" = "Guardar";
+"propertyDetail.ownerInfo" = "Información del propietario";
+"propertyDetail.cleaningChecklist" = "Lista de limpieza";
+
+// MARK: - Owner Info Panel
+"ownerInfo.title" = "Información del propietario";
+"ownerInfo.name" = "Nombre del propietario";
+"ownerInfo.email" = "Correo electrónico";
+"ownerInfo.phone" = "Teléfono";
+"ownerInfo.notes" = "Notas";
+"ownerInfo.save" = "Guardar";
+"ownerInfo.cancel" = "Cancelar";
+
+// MARK: - Cleaning Checklist
+"cleaning.title" = "Lista de limpieza";
+"cleaning.addTask" = "Agregar tarea";
+"cleaning.taskName" = "Nombre de la tarea";
+"cleaning.completed" = "Completado";
+"cleaning.pending" = "Pendiente";
+"cleaning.reset" = "Restablecer todo";
+"cleaning.save" = "Guardar";
+
+// MARK: - Cleaning Status
+"cleaningStatus.clean" = "Limpio";
+"cleaningStatus.dirty" = "Sucio";
+"cleaningStatus.inProgress" = "En progreso";
+"cleaningStatus.markClean" = "Marcar como limpio";
+"cleaningStatus.markDirty" = "Marcar como sucio";
+"cleaningStatus.markInProgress" = "Marcar en progreso";
+
+// MARK: - Alerts/Notifications View
+"alerts.title" = "Notificaciones";
+"alerts.noAlerts" = "Sin notificaciones";
+"alerts.clearAll" = "Borrar todo";
+"alerts.markRead" = "Marcar como leído";
+"alerts.cleaningAlert" = "Alerta de limpieza";
+"alerts.bookingAlert" = "Nueva reserva";
+"alerts.maintenanceAlert" = "Recordatorio de mantenimiento";
+
+// MARK: - Settings View
+"settings.title" = "Ajustes";
+"settings.notificationStatus" = "Estado de notificaciones";
+"settings.permissionStatus" = "Estado de permisos";
+"settings.authorized" = "Autorizado";
+"settings.denied" = "Denegado";
+"settings.notDetermined" = "No determinado";
+"settings.viewScheduled" = "Ver notificaciones programadas";
+"settings.cleaningAlerts" = "Alertas de día de limpieza";
+"settings.enableAlerts" = "Activar alertas";
+"settings.alertSound" = "Sonido de alerta";
+"settings.alertTime" = "Hora de alerta";
+"settings.pendingAlerts" = "Alertas pendientes";
+"settings.rescheduleAll" = "Reprogramar todas las notificaciones";
+"settings.newBookingAlerts" = "Alertas de nuevas reservas";
+"settings.enableNewBooking" = "Activar alertas de nuevas reservas";
+"settings.newBookingDescription" = "Recibe notificaciones cuando aparezcan nuevas reservas en el mes actual";
+"settings.maintenanceTasks" = "Tareas de mantenimiento";
+"settings.addCustomTask" = "Agregar tarea personalizada";
+"settings.acFilterChange" = "Cambiar filtro de aire acondicionado";
+"settings.acFilterDescription" = "Recordatorio trimestral para todas las propiedades";
+"settings.quarterly" = "Trimestral";
+"settings.monthly" = "Mensual";
+"settings.weekly" = "Semanal";
+"settings.allProperties" = "Todas las propiedades";
+"settings.specificProperties" = "Propiedades específicas";
+
+// MARK: - Admin Panel
+"admin.title" = "Panel de administración";
+"admin.testData" = "Datos de prueba";
+"admin.generateData" = "Generar datos de prueba";
+"admin.clearData" = "Borrar todos los datos";
+"admin.confirmClear" = "¿Estás seguro? Esto eliminará todas las propiedades y reservas.";
+"admin.dataGenerated" = "Datos de prueba generados exitosamente";
+"admin.dataCleared" = "Todos los datos borrados";
+
+// MARK: - Info View
+"info.title" = "Acerca de";
+"info.version" = "Versión";
+"info.build" = "Compilación";
+"info.privacyPolicy" = "Política de privacidad";
+"info.termsOfService" = "Términos de servicio";
+"info.support" = "Soporte";
+"info.contactUs" = "Contáctanos";
+
+// MARK: - Privacy Policy
+"privacy.title" = "Política de privacidad";
+"privacy.lastUpdated" = "Última actualización";
+"privacy.content" = "Tu privacidad es importante para nosotros. Esta aplicación no recopila ni comparte información personal.";
+
+// MARK: - Terms of Service
+"terms.title" = "Términos de servicio";
+"terms.lastUpdated" = "Última actualización";
+"terms.content" = "Al usar esta aplicación, aceptas estos términos de servicio.";
+
+// MARK: - Toast Messages
+"toast.success" = "Éxito";
+"toast.error" = "Error";
+"toast.warning" = "Advertencia";
+"toast.saved" = "Guardado exitosamente";
+"toast.deleted" = "Eliminado exitosamente";
+"toast.updated" = "Actualizado exitosamente";
+
+// MARK: - Common Actions
+"common.save" = "Guardar";
+"common.cancel" = "Cancelar";
+"common.delete" = "Eliminar";
+"common.edit" = "Editar";
+"common.done" = "Listo";
+"common.close" = "Cerrar";
+"common.add" = "Agregar";
+"common.remove" = "Quitar";
+"common.yes" = "Sí";
+"common.no" = "No";
+"common.ok" = "OK";
+"common.back" = "Atrás";
+"common.next" = "Siguiente";
+"common.previous" = "Anterior";
+"common.search" = "Buscar";
+"common.filter" = "Filtrar";
+"common.sort" = "Ordenar";
+"common.refresh" = "Actualizar";
+
+// MARK: - Error Messages
+"error.generic" = "Ocurrió un error";
+"error.networkError" = "Error de red. Por favor verifica tu conexión.";
+"error.loadingFailed" = "Error al cargar datos";
+"error.savingFailed" = "Error al guardar";
+"error.deletingFailed" = "Error al eliminar";
+"error.invalidInput" = "Entrada inválida";
+"error.notificationPermission" = "Permiso de notificaciones denegado. Por favor actívalo en Ajustes.";
+
+// MARK: - Date & Time
+"date.today" = "Hoy";
+"date.yesterday" = "Ayer";
+"date.tomorrow" = "Mañana";
+"time.morning" = "Mañana";
+"time.afternoon" = "Tarde";
+"time.evening" = "Noche";
+"time.night" = "Madrugada";
+
