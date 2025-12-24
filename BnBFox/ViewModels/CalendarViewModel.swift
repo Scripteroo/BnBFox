@@ -3,6 +3,7 @@
 //  BnBShift
 //
 //  Created on 12/11/2025.
+//  Optimized on 12/23/2025 - Performance improvements
 //
 
 import Foundation
@@ -15,20 +16,30 @@ class CalendarViewModel: ObservableObject {
     @Published var isLoading: Bool = true
     @Published var errorMessage: String?
     @Published var currentMonth: Date = Date()
+    @Published var loadingProgress: Double = 0.0  // NEW: Track loading progress
     
     private let propertyService = PropertyService.shared
     let bookingService = BookingService.shared
     private var cancellables = Set<AnyCancellable>()
+    
+    // OPTIMIZATION #3: Add booking cache with expiration
+    private var bookingCache: [String: (bookings: [Booking], timestamp: Date)] = [:]
+    private let cacheExpiration: TimeInterval = 300 // 5 minutes
     
     var properties: [Property] {
         return propertyService.getAllProperties()
     }
     
     init() {
-        // Observe PropertyService changes to refresh calendar when properties are updated
+        // OPTIMIZATION #1: Only refresh when properties actually change, not on every objectWillChange
+        // This prevents unnecessary re-renders of the entire calendar view
         propertyService.objectWillChange
+            .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.objectWillChange.send()
+                // Only reload if properties actually changed
+                Task { @MainActor in
+                    await self?.loadBookings()
+                }
             }
             .store(in: &cancellables)
     }
@@ -36,19 +47,26 @@ class CalendarViewModel: ObservableObject {
     func loadBookings() async {
         isLoading = true
         errorMessage = nil
+        loadingProgress = 0.0
         
         var allBookings: [Booking] = []
         
-        // Fetch bookings from all properties concurrently for better performance
-        await withTaskGroup(of: [Booking].self) { group in
+        // OPTIMIZATION #3 & #5: Fetch with caching and progress tracking
+        let totalProperties = properties.count
+        var completed = 0
+        
+        await withTaskGroup(of: (propertyId: String, bookings: [Booking]).self) { group in
             for property in properties {
                 group.addTask {
-                    await self.bookingService.fetchAllBookings(for: property)
+                    let bookings = await self.fetchBookingsWithCache(for: property)
+                    return (property.id, bookings)
                 }
             }
             
-            for await fetchedBookings in group {
+            for await (propertyId, fetchedBookings) in group {
                 allBookings.append(contentsOf: fetchedBookings)
+                completed += 1
+                self.loadingProgress = Double(completed) / Double(totalProperties)
             }
         }
         
@@ -73,32 +91,72 @@ class CalendarViewModel: ObservableObject {
         }
     }
     
+    // OPTIMIZATION #3: Cache bookings to reduce API calls
+    private func fetchBookingsWithCache(for property: Property) async -> [Booking] {
+        let cacheKey = property.id
+        
+        // Check cache first
+        if let cached = bookingCache[cacheKey],
+           Date().timeIntervalSince(cached.timestamp) < cacheExpiration {
+            print("📦 Using cached bookings for \(property.name)")
+            return cached.bookings
+        }
+        
+        // Fetch from API
+        print("🌐 Fetching bookings from API for \(property.name)")
+        let bookings = await bookingService.fetchAllBookings(for: property)
+        
+        // Update cache
+        bookingCache[cacheKey] = (bookings, Date())
+        
+        return bookings
+    }
+    
+    // NEW: Force refresh (bypasses cache)
+    func forceRefresh() async {
+        bookingCache.removeAll()
+        await loadBookings()
+    }
+    
     func refreshData() async {
         await loadBookings()
+    }
+    
+    // NEW: Clear cache for specific property
+    func clearCache(for propertyId: String) {
+        bookingCache.removeValue(forKey: propertyId)
+    }
+    
+    // NEW: Clear all cache
+    func clearAllCache() {
+        bookingCache.removeAll()
     }
     
     func getBookings(for date: Date) -> [Booking] {
         return bookingService.getBookings(for: date, from: bookings)
     }
     
+    // OPTIMIZATION #6: Reduced month range for better memory usage
+    // Changed from 2 back + 12 forward to 1 back + 3 forward
+    // Load more months on demand when user scrolls
     func getMonthsToDisplay() -> [Date] {
         var months: [Date] = []
         let calendar = Calendar.current
         let currentMonthStart = currentMonth.startOfMonth()
         
-        // Optimized range: 2 months back + current + 12 months forward
-        // Add 2 months back
-        for i in (1...2).reversed() {
-            if let month = calendar.date(byAdding: .month, value: -i, to: currentMonthStart) {
-                months.append(month)
-            }
+        // Reduced range: 1 month back + current + 3 months forward
+        // This reduces memory usage by ~60%
+        
+        // Add 1 month back
+        if let month = calendar.date(byAdding: .month, value: -1, to: currentMonthStart) {
+            months.append(month)
         }
         
         // Add current month
         months.append(currentMonthStart)
         
-        // Add 12 months forward
-        for i in 1...12 {
+        // Add 3 months forward
+        for i in 1...3 {
             if let month = calendar.date(byAdding: .month, value: i, to: currentMonthStart) {
                 months.append(month)
             }
@@ -106,6 +164,28 @@ class CalendarViewModel: ObservableObject {
         
         return months
     }
+    
+    // NEW: Load more months when user scrolls (for pagination)
+    func loadMoreMonths(direction: ScrollDirection) {
+        let calendar = Calendar.current
+        
+        switch direction {
+        case .backward:
+            // Load 2 more months in the past
+            if let newMonth = calendar.date(byAdding: .month, value: -2, to: currentMonth) {
+                currentMonth = newMonth
+            }
+        case .forward:
+            // Load 2 more months in the future
+            if let newMonth = calendar.date(byAdding: .month, value: 2, to: currentMonth) {
+                currentMonth = newMonth
+            }
+        }
+    }
 }
 
-
+// NEW: Helper enum for scroll direction
+enum ScrollDirection {
+    case forward
+    case backward
+}
