@@ -2,7 +2,7 @@
 //  AdminPanelView.swift
 //  BnBShift
 //
-//  Created on 12/12/2025.
+//  Updated with iCal feed validation and toast messages
 //
 
 import SwiftUI
@@ -42,6 +42,7 @@ struct AdminPanelView: View {
                         ForEach(viewModel.properties) { property in
                             PropertyConfigCard(
                                 property: property,
+                                allProperties: viewModel.properties,
                                 onUpdate: { updated in
                                     viewModel.updateProperty(updated)
                                 },
@@ -77,6 +78,7 @@ struct AdminPanelView: View {
 
 struct PropertyConfigCard: View {
     let property: PropertyConfig
+    let allProperties: [PropertyConfig]
     let onUpdate: (PropertyConfig) -> Void
     let onDelete: () -> Void
     let onToggleLock: () -> Void
@@ -90,9 +92,12 @@ struct PropertyConfigCard: View {
     @State private var zipCode: String
     @State private var iCalFeeds: [ICalFeed]
     @State private var showDeleteConfirmation = false
+    @State private var toastMessage: String?
+    @State private var showToast = false
     
-    init(property: PropertyConfig, onUpdate: @escaping (PropertyConfig) -> Void, onDelete: @escaping () -> Void, onToggleLock: @escaping () -> Void) {
+    init(property: PropertyConfig, allProperties: [PropertyConfig], onUpdate: @escaping (PropertyConfig) -> Void, onDelete: @escaping () -> Void, onToggleLock: @escaping () -> Void) {
         self.property = property
+        self.allProperties = allProperties
         self.onUpdate = onUpdate
         self.onDelete = onDelete
         self.onToggleLock = onToggleLock
@@ -107,171 +112,220 @@ struct PropertyConfigCard: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Header with property name and buttons
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
-                    // Complex name - editable when unlocked
-                    if property.isLocked {
-                        Text(complexName.isEmpty ? "Complex" : complexName)
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
-                    } else {
-                        TextField("", text: $complexName, prompt: Text("Complex").foregroundColor(.gray.opacity(0.5)))
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: complexName) { _ in
-                                updateProperty()
-                            }
-                    }
-                    
-                    // Unit name - editable when unlocked
-                    if property.isLocked {
-                        Text(unitName)
-                            .font(.system(size: 20, weight: .bold))
-                    } else {
-                        TextField("Unit Name", text: $unitName)
-                            .font(.system(size: 20, weight: .bold))
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: unitName) { _ in
-                                updateProperty()
-                            }
-                    }
-                }
-                
-                Spacer()
-                
-                HStack(spacing: 8) {
-                    // Lock/Unlock button
-                    Button(action: onToggleLock) {
-                        Image(systemName: property.isLocked ? "lock.fill" : "lock.open.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(property.isLocked ? .green : .gray)
-                    }
-                    
-                    // Delete button - only visible when unlocked
-                    if !property.isLocked {
-                        Button(action: {
-                            showDeleteConfirmation = true
-                        }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 28))
-                                .foregroundColor(.red)
+        ZStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 8) {
+                // Header with property name and buttons
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        // Complex name - editable when unlocked
+                        if property.isLocked {
+                            Text(complexName.isEmpty ? "Complex" : complexName)
+                                .font(.system(size: 12))
+                                .foregroundColor(.gray)
+                        } else {
+                            TextField("", text: $complexName, prompt: Text("Complex").foregroundColor(.gray.opacity(0.5)))
+                                .font(.system(size: 12))
+                                .foregroundColor(.gray)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .onChange(of: complexName) { _ in
+                                    updateProperty()
+                                }
+                        }
+                        
+                        // Unit name - editable when unlocked
+                        if property.isLocked {
+                            Text(unitName)
+                                .font(.system(size: 20, weight: .bold))
+                        } else {
+                            TextField("Unit Name", text: $unitName)
+                                .font(.system(size: 20, weight: .bold))
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .onChange(of: unitName) { _ in
+                                    updateProperty()
+                                }
                         }
                     }
-                }
-            }
-            
-            Divider()
-                .padding(.vertical, 4)
-            
-            // Address fields - disabled when locked
-            if !property.isLocked {
-                VStack(spacing: 6) {
-                    TextField("Street Address", text: $streetAddress)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .font(.caption)
-                        .onChange(of: streetAddress) { _ in updateProperty() }
                     
-                    TextField("Unit", text: $unit)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .font(.caption)
-                        .onChange(of: unit) { _ in updateProperty() }
+                    Spacer()
                     
-                    HStack(spacing: 6) {
-                        TextField("City", text: $city)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.caption)
-                            .onChange(of: city) { _ in updateProperty() }
-                        
-                        TextField("State", text: $state)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.caption)
-                            .frame(width: 60)
-                            .onChange(of: state) { _ in updateProperty() }
-                        
-                        TextField("ZIP", text: $zipCode)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.caption)
-                            .frame(width: 80)
-                            .onChange(of: zipCode) { _ in updateProperty() }
-                    }
-                }
-                .padding(.bottom, 8)
-            }
-            
-            // Instructional text with hyperlink
-            HStack(spacing: 4) {
-                Text("Enter iCal information below.")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                
-                Button(action: {
-                    // TODO: Link to instruction page
-                    print("Open iCal instructions")
-                }) {
-                    Text("Where to find iCal information...")
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                        .underline()
-                }
-            }
-            .padding(.bottom, 4)
-            
-            // Dynamic iCal URL fields
-            VStack(spacing: 8) {
-                ForEach($iCalFeeds) { $feed in
                     HStack(spacing: 8) {
-                        DynamicURLTextField(
-                            feed: $feed,
-                            isDisabled: property.isLocked,
-                            onChange: { updateProperty() }
-                        )
+                        // Lock/Unlock button
+                        Button(action: onToggleLock) {
+                            Image(systemName: property.isLocked ? "lock.fill" : "lock.open.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(property.isLocked ? .green : .gray)
+                        }
                         
-                        // Delete button for custom feeds (not default ones)
-                        if !property.isLocked && !feed.isDefault {
+                        // Delete button - only visible when unlocked
+                        if !property.isLocked {
                             Button(action: {
-                                deleteFeed(feed)
+                                showDeleteConfirmation = true
                             }) {
-                                Image(systemName: "minus.circle.fill")
-                                    .font(.system(size: 20))
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 28))
                                     .foregroundColor(.red)
                             }
                         }
                     }
                 }
                 
-                // Add button for new custom feeds
+                Divider()
+                    .padding(.vertical, 4)
+                
+                // Address fields - disabled when locked
                 if !property.isLocked {
-                    Button(action: {
-                        addCustomFeed()
-                    }) {
+                    VStack(spacing: 6) {
+                        TextField("Street Address", text: $streetAddress)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.caption)
+                            .onChange(of: streetAddress) { _ in updateProperty() }
+                        
+                        TextField("Unit", text: $unit)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.caption)
+                            .onChange(of: unit) { _ in updateProperty() }
+                        
                         HStack(spacing: 6) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.blue)
-                            Text("Add Custom iCal Feed")
+                            TextField("City", text: $city)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .font(.caption)
-                                .foregroundColor(.blue)
+                                .onChange(of: city) { _ in updateProperty() }
+                            
+                            TextField("State", text: $state)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .font(.caption)
+                                .frame(width: 60)
+                                .onChange(of: state) { _ in updateProperty() }
+                            
+                            TextField("ZIP", text: $zipCode)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .font(.caption)
+                                .frame(width: 80)
+                                .onChange(of: zipCode) { _ in updateProperty() }
                         }
                     }
-                    .padding(.top, 4)
+                    .padding(.bottom, 8)
+                }
+                
+                // Dynamic iCal URL fields
+                VStack(spacing: 8) {
+                    ForEach($iCalFeeds) { $feed in
+                        HStack(spacing: 8) {
+                            DynamicURLTextField(
+                                feed: $feed,
+                                isDisabled: property.isLocked,
+                                onChange: {
+                                    validateFeed(feed)
+                                    updateProperty()
+                                }
+                            )
+                            
+                            // Delete button for custom feeds (not default ones)
+                            if !property.isLocked && !feed.isDefault {
+                                Button(action: {
+                                    deleteFeed(feed)
+                                }) {
+                                    Image(systemName: "minus.circle.fill")
+                                        .font(.system(size: 20))
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Add button for new custom feeds
+                    if !property.isLocked {
+                        Button(action: {
+                            addCustomFeed()
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.blue)
+                                Text("Add Custom iCal Feed")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.top, 4)
+                    }
+                }
+            }
+            .padding(16)
+            .background(Color.white)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+            )
+            .alert("Are you sure you want to delete this unit?", isPresented: $showDeleteConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    onDelete()
+                }
+            }
+            
+            // Toast notification
+            if showToast, let message = toastMessage {
+                VStack {
+                    Spacer()
+                    ToastView(message: message)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .padding(.bottom, 16)
+                }
+                .animation(.spring(), value: showToast)
+            }
+        }
+    }
+    
+    private func validateFeed(_ feed: ICalFeed) {
+        guard !feed.url.isEmpty else { return }
+        
+        let url = feed.url.lowercased()
+        
+        // Check for duplicate URLs in other properties
+        for otherProperty in allProperties where otherProperty.id != property.id {
+            for otherFeed in otherProperty.iCalFeeds {
+                if otherFeed.url.lowercased() == url {
+                    showToastMessage("⚠️ This iCal feed is being used by \(otherProperty.displayName). Check your sources.")
+                    return
                 }
             }
         }
-        .padding(16)
-        .background(Color.white)
-        .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-        )
-        .alert("Are you sure you want to delete this unit?", isPresented: $showDeleteConfirmation) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
-                onDelete()
+        
+        // Check for platform mismatch (only for default feeds)
+        if feed.isDefault {
+            let platformName = feed.platformName.lowercased()
+            
+            if platformName.contains("airbnb") && !url.contains("airbnb.com") {
+                if url.contains("vrbo.com") {
+                    showToastMessage("⚠️ This is a VRBO feed - you need your AirBnB feed for this field.")
+                } else if url.contains("booking.com") {
+                    showToastMessage("⚠️ This is a Booking.com feed - you need your AirBnB feed for this field.")
+                }
+            } else if platformName.contains("vrbo") && !url.contains("vrbo.com") {
+                if url.contains("airbnb.com") {
+                    showToastMessage("⚠️ This is an AirBnB feed - you need your VRBO feed for this field.")
+                } else if url.contains("booking.com") {
+                    showToastMessage("⚠️ This is a Booking.com feed - you need your VRBO feed for this field.")
+                }
+            } else if platformName.contains("booking") && !url.contains("booking.com") {
+                if url.contains("airbnb.com") {
+                    showToastMessage("⚠️ This is an AirBnB feed - you need your Booking.com feed for this field.")
+                } else if url.contains("vrbo.com") {
+                    showToastMessage("⚠️ This is a VRBO feed - you need your Booking.com feed for this field.")
+                }
             }
+        }
+    }
+    
+    private func showToastMessage(_ message: String) {
+        toastMessage = message
+        showToast = true
+        
+        // Auto-hide after 4 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            showToast = false
         }
     }
     
@@ -407,13 +461,9 @@ class AdminPanelViewModel: ObservableObject {
                 isDefault: true
             ))
             
-            // Add any additional custom sources
+            // Add any custom sources (non-default platforms)
             let customSources = property.sources.filter { source in
-                // Count how many times this source appears in default feeds
-                let isAirbnb = source.platform == .airbnb && airbnbSource != nil
-                let isVrbo = source.platform == .vrbo && vrboSource != nil
-                let isBooking = source.platform == .bookingCom && bookingSource != nil
-                return !isAirbnb && !isVrbo && !isBooking
+                source.platform != .airbnb && source.platform != .vrbo && source.platform != .bookingCom
             }
             
             for customSource in customSources {
@@ -455,6 +505,7 @@ class AdminPanelViewModel: ObservableObject {
         )
         
         properties.append(newProperty)
+        saveChanges() // AUTO-SAVE when adding new property
     }
     
     func updateProperty(_ updated: PropertyConfig) {
@@ -470,11 +521,13 @@ class AdminPanelViewModel: ObservableObject {
         // Only allow deletion if unlocked
         guard !property.isLocked else { return }
         properties.removeAll { $0.id == property.id }
+        saveChanges() // AUTO-SAVE when deleting property
     }
     
     func toggleLock(_ property: PropertyConfig) {
         if let index = properties.firstIndex(where: { $0.id == property.id }) {
             properties[index].isLocked.toggle()
+            saveChanges() // AUTO-SAVE when toggling lock
         }
     }
     
@@ -498,5 +551,4 @@ class AdminPanelViewModel: ObservableObject {
         return 1
     }
 }
-
 

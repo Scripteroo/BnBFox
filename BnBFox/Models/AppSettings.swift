@@ -1,8 +1,8 @@
 //
 //  AppSettings.swift
-//  BnBFox
+//  BnBShift
 //
-//  Updated with 9:00 AM default alert time
+//  Created on 12/12/2025.
 //
 
 import Foundation
@@ -48,20 +48,19 @@ class AppSettings: ObservableObject {
         self.alertSoundEnabled = UserDefaults.standard.object(forKey: "alertSoundEnabled") as? Bool ?? true
         self.newBookingAlertsEnabled = UserDefaults.standard.object(forKey: "newBookingAlertsEnabled") as? Bool ?? true
         
-        // Default alert time: 9:00 AM (1 hour before 10 AM checkout)
+        // Default alert time: 9:00 AM
         if let savedTime = UserDefaults.standard.object(forKey: "alertTime") as? Date {
             self.alertTime = savedTime
         } else {
             let calendar = Calendar.current
             var components = calendar.dateComponents([.year, .month, .day], from: Date())
-            components.hour = 9  // Changed from 8 to 9
+            components.hour = 9
             components.minute = 0
             self.alertTime = calendar.date(from: components) ?? Date()
         }
     }
     
     private func scheduleAllCleaningAlerts() {
-        // This will be implemented in NotificationService
         NotificationService.shared.scheduleCleaningAlerts()
     }
     

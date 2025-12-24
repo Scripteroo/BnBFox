@@ -1,6 +1,6 @@
 //
 //  OwnerInfoPanelView.swift
-//  BnBFox
+//  BnBShift
 //
 //  Created on 12/11/2025.
 //
@@ -87,6 +87,7 @@ struct OwnerInfoPanelView: View {
                     MonthView(
                         month: currentMonth,
                         bookings: getBookingsForProperty(),
+                        properties: [property],
                         showMonthTitle: false,
                         showDayHeaders: true
                     )
@@ -229,5 +230,6 @@ extension Date {
         return formatter.string(from: self)
     }
 }
+
 
 

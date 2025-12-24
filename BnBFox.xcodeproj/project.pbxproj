@@ -25,6 +25,9 @@
 		449187AD2EFB2158008A8587 /* InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449187AC2EFB2158008A8587 /* InfoView.swift */; };
 		449187B02EFB2610008A8587 /* TermsOfServiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449187AF2EFB2610008A8587 /* TermsOfServiceView.swift */; };
 		449187B12EFB2610008A8587 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449187AE2EFB2610008A8587 /* PrivacyPolicyView.swift */; };
+		449187B32EFB479A008A8587 /* PeriodicTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449187B22EFB479A008A8587 /* PeriodicTask.swift */; };
+		449187B52EFB5916008A8587 /* TestDataGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449187B42EFB5916008A8587 /* TestDataGenerator.swift */; };
+		449187BE2EFB62EE008A8587 /* cleaning-hand-clean.json in Resources */ = {isa = PBXBuildFile; fileRef = 449187BD2EFB62EE008A8587 /* cleaning-hand-clean.json */; };
 		A1000001000000000000001 /* BnBFoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002000000000000001 /* BnBFoxApp.swift */; };
 		A1000003000000000000001 /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004000000000000001 /* Platform.swift */; };
 		A1000005000000000000001 /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006000000000000001 /* Property.swift */; };
@@ -65,6 +68,9 @@
 		449187AC2EFB2158008A8587 /* InfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoView.swift; sourceTree = "<group>"; };
 		449187AE2EFB2610008A8587 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
 		449187AF2EFB2610008A8587 /* TermsOfServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceView.swift; sourceTree = "<group>"; };
+		449187B22EFB479A008A8587 /* PeriodicTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodicTask.swift; sourceTree = "<group>"; };
+		449187B42EFB5916008A8587 /* TestDataGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDataGenerator.swift; sourceTree = "<group>"; };
+		449187BD2EFB62EE008A8587 /* cleaning-hand-clean.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "cleaning-hand-clean.json"; sourceTree = "<group>"; };
 		A1000000000000000000001 /* BnBFox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BnBFox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000002000000000000001 /* BnBFoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BnBFoxApp.swift; sourceTree = "<group>"; };
 		A1000004000000000000001 /* Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
@@ -119,6 +125,7 @@
 		A1000035000000000000001 /* BnBFox */ = {
 			isa = PBXGroup;
 			children = (
+				449187BD2EFB62EE008A8587 /* cleaning-hand-clean.json */,
 				445A91372EF6793D00C37B62 /* cleaning-supplies.mov */,
 				4446E30B2EF5E8C00003CE05 /* Actions */,
 				A1000002000000000000001 /* BnBFoxApp.swift */,
@@ -149,7 +156,9 @@
 				445A913D2EFA604600C37B62 /* CleaningChecklist.swift */,
 				4446E3152EF5EB240003CE05 /* CleaningStatus.swift */,
 				A1000004000000000000001 /* Platform.swift */,
+				449187B22EFB479A008A8587 /* PeriodicTask.swift */,
 				A1000006000000000000001 /* Property.swift */,
+				449187B42EFB5916008A8587 /* TestDataGenerator.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -250,6 +259,8 @@
 				Base,
 			);
 			mainGroup = A1000034000000000000001;
+			packageReferences = (
+			);
 			productRefGroup = A1000036000000000000001 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -264,6 +275,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				449187BE2EFB62EE008A8587 /* cleaning-hand-clean.json in Resources */,
 				445A91382EF6793D00C37B62 /* cleaning-supplies.mov in Resources */,
 				A1000031000000000000001 /* Assets.xcassets in Resources */,
 			);
@@ -303,6 +315,8 @@
 				4446E3122EF5EADE0003CE05 /* CleaningStatusButtons.swift in Sources */,
 				A1000027000000000000001 /* PropertyDetailView.swift in Sources */,
 				A1000061000000000000001 /* AppSettings.swift in Sources */,
+				449187B32EFB479A008A8587 /* PeriodicTask.swift in Sources */,
+				449187B52EFB5916008A8587 /* TestDataGenerator.swift in Sources */,
 				4446E30C2EF5E8C00003CE05 /* PropertyActionsView.swift in Sources */,
 				449187B02EFB2610008A8587 /* TermsOfServiceView.swift in Sources */,
 				449187B12EFB2610008A8587 /* PrivacyPolicyView.swift in Sources */,

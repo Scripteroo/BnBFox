@@ -44,6 +44,9 @@ struct CleaningChecklistPanel: View {
                 .fontWeight(.bold)
                 .padding(.top)
             
+            // Periodic Maintenance Tasks (if any due)
+            PeriodicTasksSection(propertyId: property.id.uuidString, date: date)
+            
             // Finishing Checklist Section
             VStack(alignment: .leading, spacing: 12) {
                 ChecklistItem(text: "Towels - 6 bath, 2 hand, 6 beach", isChecked: $checklist.towelsChecked)
@@ -247,3 +250,74 @@ struct ChecklistItem: View {
 }
 
 // Note: ImagePicker already exists in the project, so we use the existing one
+
+
+// MARK: - Periodic Tasks Section
+struct PeriodicTasksSection: View {
+    let propertyId: String
+    let date: Date
+    
+    @StateObject private var taskService = PeriodicTaskService.shared
+    @State private var completedTasks: Set<UUID> = []
+    
+    var dueTasks: [PeriodicTask] {
+        taskService.getTasksDue(on: date, for: propertyId)
+    }
+    
+    var body: some View {
+        if !dueTasks.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Maintenance Tasks")
+                    .font(.headline)
+                    .foregroundColor(.orange)
+                
+                ForEach(dueTasks) { task in
+                    PeriodicTaskItem(
+                        task: task,
+                        isCompleted: completedTasks.contains(task.id),
+                        onToggle: {
+                            if completedTasks.contains(task.id) {
+                                completedTasks.remove(task.id)
+                            } else {
+                                completedTasks.insert(task.id)
+                                taskService.markTaskCompleted(task, on: date)
+                            }
+                        }
+                    )
+                }
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(Color.orange.opacity(0.1))
+            .cornerRadius(8)
+            
+            Divider()
+        }
+    }
+}
+
+// MARK: - Periodic Task Item
+struct PeriodicTaskItem: View {
+    let task: PeriodicTask
+    let isCompleted: Bool
+    let onToggle: () -> Void
+    
+    var body: some View {
+        Button(action: onToggle) {
+            HStack(spacing: 12) {
+                Image(systemName: isCompleted ? "checkmark.square.fill" : "square")
+                    .font(.title3)
+                    .foregroundColor(isCompleted ? .green : .orange)
+                
+                Text(task.displayText)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+

@@ -1,6 +1,6 @@
 //
 //  CalendarViewModel.swift
-//  BnBFox
+//  BnBShift
 //
 //  Created on 12/11/2025.
 //
@@ -86,9 +86,9 @@ class CalendarViewModel: ObservableObject {
         let calendar = Calendar.current
         let currentMonthStart = currentMonth.startOfMonth()
         
-        // Always show full range: 6 months back + current + 12 months forward
-        // Add 6 months back
-        for i in (1...6).reversed() {
+        // Optimized range: 2 months back + current + 12 months forward
+        // Add 2 months back
+        for i in (1...2).reversed() {
             if let month = calendar.date(byAdding: .month, value: -i, to: currentMonthStart) {
                 months.append(month)
             }
@@ -107,4 +107,5 @@ class CalendarViewModel: ObservableObject {
         return months
     }
 }
+
 

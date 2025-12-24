@@ -9,12 +9,14 @@ import SwiftUI
 
 struct SettingsView: View {
     @StateObject private var settings = AppSettings.shared
+    @StateObject private var taskService = PeriodicTaskService.shared
     @Environment(\.dismiss) private var dismiss
     
     @State private var pendingAlertsCount = 0
     @State private var upcomingCleanings: [CleaningDay] = []
     @State private var notificationStatus = "Checking..."
     @State private var showingTestAlert = false
+    @State private var showingAddTask = false
     
     var body: some View {
         NavigationView {
@@ -119,6 +121,32 @@ struct SettingsView: View {
                     }
                 }
                 
+                // Maintenance Tasks Section
+                Section(header: Text("Maintenance Tasks")) {
+                    // Add Custom Task Button
+                    Button(action: {
+                        showingAddTask = true
+                    }) {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundColor(.green)
+                            Text("Add Custom Task")
+                            Spacer()
+                        }
+                    }
+                    
+                    // List of Custom Tasks
+                    ForEach(taskService.tasks.filter { !$0.isDefault }) { task in
+                        CustomTaskRow(task: task, onDelete: {
+                            taskService.deleteTask(task)
+                        }, onToggle: { enabled in
+                            var updatedTask = task
+                            updatedTask.isEnabled = enabled
+                            taskService.updateTask(updatedTask)
+                        })
+                    }
+                }
+                
                 // Upcoming Cleanings Section
                 if settings.cleaningAlertsEnabled && !upcomingCleanings.isEmpty {
                     Section(header: Text("Upcoming Cleanings (Next 30 Days)")) {
@@ -127,7 +155,6 @@ struct SettingsView: View {
                         }
                     }
                 }
-                
 
             }
             .navigationTitle("Settings")
@@ -143,6 +170,9 @@ struct SettingsView: View {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text("A test notification will appear in 5 seconds. Make sure the app is in the background to see it.")
+            }
+            .sheet(isPresented: $showingAddTask) {
+                AddCustomTaskView()
             }
         }
     }
@@ -315,5 +345,138 @@ struct CleaningDayRow: View {
     }
 }
 
+
+
+
+// MARK: - Custom Task Row
+struct CustomTaskRow: View {
+    let task: PeriodicTask
+    let onDelete: () -> Void
+    let onToggle: (Bool) -> Void
+    
+    @State private var isEnabled: Bool
+    
+    init(task: PeriodicTask, onDelete: @escaping () -> Void, onToggle: @escaping (Bool) -> Void) {
+        self.task = task
+        self.onDelete = onDelete
+        self.onToggle = onToggle
+        _isEnabled = State(initialValue: task.isEnabled)
+    }
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(task.name)
+                    .font(.subheadline)
+                
+                HStack {
+                    Text(task.frequency.rawValue)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Text("•")
+                        .foregroundColor(.secondary)
+                    
+                    Text(task.scope.rawValue)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            Spacer()
+            
+            Toggle("", isOn: $isEnabled)
+                .labelsHidden()
+                .onChange(of: isEnabled) { newValue in
+                    onToggle(newValue)
+                }
+            
+            Button(action: onDelete) {
+                Image(systemName: "trash")
+                    .foregroundColor(.red)
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+    }
+}
+
+// MARK: - Add Custom Task View
+struct AddCustomTaskView: View {
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var taskService = PeriodicTaskService.shared
+    @StateObject private var propertyService = PropertyService.shared
+    
+    @State private var taskName = ""
+    @State private var selectedFrequency: TaskFrequency = .monthly
+    @State private var selectedScope: TaskScope = .global
+    @State private var selectedPropertyId: UUID?
+    @State private var startDate = Date()
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Task Details")) {
+                    TextField("Task Name", text: $taskName)
+                    
+                    Picker("Frequency", selection: $selectedFrequency) {
+                        ForEach(TaskFrequency.allCases, id: \.self) { frequency in
+                            Text(frequency.rawValue).tag(frequency)
+                        }
+                    }
+                    
+                    DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
+                }
+                
+                Section(header: Text("Apply To")) {
+                    Picker("Scope", selection: $selectedScope) {
+                        Text("All Properties").tag(TaskScope.global)
+                        Text("Specific Property").tag(TaskScope.propertySpecific)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    
+                    if selectedScope == .propertySpecific {
+                        Picker("Property", selection: $selectedPropertyId) {
+                            Text("Select Property").tag(nil as UUID?)
+                            ForEach(propertyService.getAllProperties()) { property in
+                                Text(property.displayName).tag(property.id as UUID?)
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Add Custom Task")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        addTask()
+                    }
+                    .disabled(taskName.isEmpty || (selectedScope == .propertySpecific && selectedPropertyId == nil))
+                }
+            }
+        }
+    }
+    
+    private func addTask() {
+        let task = PeriodicTask(
+            name: taskName,
+            frequency: selectedFrequency,
+            scope: selectedScope,
+            propertyId: selectedScope == .propertySpecific ? selectedPropertyId?.uuidString : nil,
+            startDate: startDate,
+            isEnabled: true,
+            isDefault: false
+        )
+        
+        taskService.addTask(task)
+        dismiss()
+    }
+}
 
 
