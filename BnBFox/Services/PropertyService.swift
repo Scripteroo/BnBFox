@@ -206,6 +206,7 @@ class PropertyService: ObservableObject {
             let name = config.displayName.lowercased().replacingOccurrences(of: " ", with: "-")
             
             return Property(
+                id: UUID(uuidString: config.id) ?? UUID(),
                 name: name,
                 displayName: config.displayName,
                 shortName: shortName,
