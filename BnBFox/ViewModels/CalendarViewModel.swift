@@ -31,6 +31,15 @@ class CalendarViewModel: ObservableObject {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
+        
+        // Listen for property changes and refresh bookings
+        NotificationCenter.default.publisher(for: .propertiesDidChange)
+            .sink { [weak self] _ in
+                Task { @MainActor in
+                    await self?.loadBookings()
+                }
+            }
+            .store(in: &cancellables)
     }
     
     func loadBookings() async {
@@ -39,11 +48,18 @@ class CalendarViewModel: ObservableObject {
         
         var allBookings: [Booking] = []
         
+        // Guard against empty properties array
+        guard !properties.isEmpty else {
+            self.bookings = []
+            isLoading = false
+            return
+        }
+        
         // Fetch bookings from all properties concurrently for better performance
         await withTaskGroup(of: [Booking].self) { group in
             for property in properties {
                 group.addTask {
-                    await self.bookingService.fetchAllBookings(for: property)
+                    return await self.bookingService.fetchAllBookings(for: property)
                 }
             }
             

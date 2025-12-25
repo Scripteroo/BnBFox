@@ -129,6 +129,13 @@ class PropertyService: ObservableObject {
         if let data = userDefaults.data(forKey: propertiesKey),
            let decoded = try? JSONDecoder().decode([PropertyData].self, from: data) {
             properties = decoded.map { $0.toProperty() }
+            print("📥 Loaded \(properties.count) properties from storage")
+            for (idx, property) in properties.enumerated() {
+                print("   \(idx + 1). \(property.displayName): \(property.sources.count) sources")
+                for (srcIdx, source) in property.sources.enumerated() {
+                    print("      \(srcIdx + 1). \(source.platform.displayName): \(source.url.absoluteString)")
+                }
+            }
         } else {
             // First launch - use default properties
             properties = getDefaultProperties()
@@ -181,31 +188,67 @@ class PropertyService: ObservableObject {
     
     // Update properties from admin panel
     func updateProperties(_ configs: [PropertyConfig]) {
+        // Clear booking cache to force fresh fetch after properties are updated
+        BookingService.shared.clearAllCache()
+        
         properties = configs.map { config in
+            print("📦 Processing property: \(config.displayName) with \(config.iCalFeeds.count) feeds")
+            
             // Convert iCalFeeds array to CalendarSource array
-            let sources = config.iCalFeeds.compactMap { feed -> CalendarSource? in
-                guard !feed.url.isEmpty, let url = URL(string: feed.url) else { return nil }
+            var sources: [CalendarSource] = []
+            for (index, feed) in config.iCalFeeds.enumerated() {
+                // Trim whitespace from URL to prevent issues with trailing spaces
+                var trimmedUrl = feed.url.trimmingCharacters(in: .whitespacesAndNewlines)
                 
-                // Map platform name to Platform enum
+                if trimmedUrl.isEmpty {
+                    print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - empty URL")
+                    continue
+                }
+                
+                // Upgrade HTTP to HTTPS for known domains (iOS ATS requires secure connections)
+                if trimmedUrl.hasPrefix("http://") {
+                    let httpsUrl = trimmedUrl.replacingOccurrences(of: "http://", with: "https://")
+                    print("  🔒 Upgrading HTTP to HTTPS: \(trimmedUrl) -> \(httpsUrl)")
+                    trimmedUrl = httpsUrl
+                }
+                
+                guard let url = URL(string: trimmedUrl) else {
+                    print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - invalid URL: '\(trimmedUrl)'")
+                    continue
+                }
+                
+                // Map platform name to Platform enum (normalize whitespace and case)
+                let normalizedPlatformName = feed.platformName.lowercased().trimmingCharacters(in: .whitespaces)
                 let platform: Platform
-                switch feed.platformName.lowercased() {
-                case "airbnb":
+                switch normalizedPlatformName {
+                case "airbnb", "air bnb":
                     platform = .airbnb
                 case "vrbo":
                     platform = .vrbo
-                case "booking.com":
+                case "booking.com", "booking":
                     platform = .bookingCom
                 default:
+                    print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Unknown platform '\(feed.platformName)', defaulting to AirBnB")
                     platform = .airbnb // Default for custom feeds
                 }
                 
-                return CalendarSource(platform: platform, url: url)
+                print("  ✅ Feed \(index + 1)/\(config.iCalFeeds.count): \(platform.displayName) -> \(url.absoluteString)")
+                sources.append(CalendarSource(platform: platform, url: url))
             }
             
             let shortName = config.unitName
             let name = config.displayName.lowercased().replacingOccurrences(of: " ", with: "-")
             
+            // Preserve the ID from the PropertyConfig so references stay stable
+            let propertyId = UUID(uuidString: config.id) ?? UUID()
+            
+            print("📋 Created property: \(config.displayName) with \(sources.count) sources (from \(config.iCalFeeds.count) feeds)")
+            for source in sources {
+                print("   ✓ \(source.platform.displayName): \(source.url.absoluteString)")
+            }
+            
             return Property(
+                id: propertyId,
                 name: name,
                 displayName: config.displayName,
                 shortName: shortName,
@@ -240,31 +283,63 @@ class PropertyService: ObservableObject {
     // NEW: Update a single property from PropertyConfig (for bidirectional sync)
     func updatePropertyFromConfig(_ config: PropertyConfig) {
         guard let existingProperty = properties.first(where: { $0.id.uuidString == config.id }) else {
+            print("⚠️ updatePropertyFromConfig: Property not found with ID: \(config.id)")
             return
         }
         
+        print("🔄 Updating single property: \(config.displayName) with \(config.iCalFeeds.count) feeds")
+        
         // Convert iCalFeeds array to CalendarSource array
-        let sources = config.iCalFeeds.compactMap { feed -> CalendarSource? in
-            guard !feed.url.isEmpty, let url = URL(string: feed.url) else { return nil }
+        var sources: [CalendarSource] = []
+        for (index, feed) in config.iCalFeeds.enumerated() {
+            // Trim whitespace from URL to prevent issues with trailing spaces
+            var trimmedUrl = feed.url.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            if trimmedUrl.isEmpty {
+                print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - empty URL")
+                continue
+            }
+            
+            // Upgrade HTTP to HTTPS for known domains (iOS ATS requires secure connections)
+            if trimmedUrl.hasPrefix("http://") {
+                let httpsUrl = trimmedUrl.replacingOccurrences(of: "http://", with: "https://")
+                print("  🔒 Upgrading HTTP to HTTPS: \(trimmedUrl) -> \(httpsUrl)")
+                trimmedUrl = httpsUrl
+            }
+            
+            guard let url = URL(string: trimmedUrl) else {
+                print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - invalid URL: '\(trimmedUrl)'")
+                continue
+            }
             
             // Map platform name to Platform enum
+            let normalizedPlatformName = feed.platformName.lowercased().trimmingCharacters(in: .whitespaces)
             let platform: Platform
-            switch feed.platformName.lowercased() {
-            case "airbnb":
+            switch normalizedPlatformName {
+            case "airbnb", "air bnb":
                 platform = .airbnb
             case "vrbo":
                 platform = .vrbo
-            case "booking.com":
+            case "booking.com", "booking":
                 platform = .bookingCom
             default:
+                print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Unknown platform '\(feed.platformName)', defaulting to AirBnB")
                 platform = .airbnb // Default for custom feeds
             }
             
-            return CalendarSource(platform: platform, url: url)
+            print("  ✅ Feed \(index + 1)/\(config.iCalFeeds.count): \(platform.displayName) -> \(url.absoluteString)")
+            sources.append(CalendarSource(platform: platform, url: url))
         }
+        
+        print("🔄 Updated property: \(config.displayName) with \(sources.count) sources (from \(config.iCalFeeds.count) feeds)")
         
         let shortName = config.unitName
         let name = config.displayName.lowercased().replacingOccurrences(of: " ", with: "-")
+        
+        print("🔄 Creating updated property with \(sources.count) sources:")
+        for (idx, source) in sources.enumerated() {
+            print("   \(idx + 1). \(source.platform.displayName): \(source.url.absoluteString)")
+        }
         
         let updatedProperty = Property(
             id: existingProperty.id,
