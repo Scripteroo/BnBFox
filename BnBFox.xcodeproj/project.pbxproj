@@ -31,6 +31,7 @@
 		449187CF2EFBB0CC008A8587 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 449187CA2EFBB0CC008A8587 /* Localizable.strings */; };
 		449187D02EFBB0CC008A8587 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 449187CD2EFBB0CC008A8587 /* Localizable.strings */; };
 		449187D52EFBC38C008A8587 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 449187D32EFBC38C008A8587 /* Localizable.strings */; };
+		449188062EFCFCF8008A8587 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 449188052EFCFCF8008A8587 /* Info.plist */; };
 		A1000001000000000000001 /* BnBFoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002000000000000001 /* BnBFoxApp.swift */; };
 		A1000003000000000000001 /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004000000000000001 /* Platform.swift */; };
 		A1000005000000000000001 /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006000000000000001 /* Property.swift */; };
@@ -78,6 +79,7 @@
 		449187CC2EFBB0CC008A8587 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = Localizable.strings; sourceTree = "<group>"; };
 		449187D12EFBC339008A8587 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = ../pl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		449187D22EFBC38C008A8587 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = Localizable.strings; sourceTree = "<group>"; };
+		449188052EFCFCF8008A8587 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000000000000000000001 /* BnBFox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BnBFox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000002000000000000001 /* BnBFoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BnBFoxApp.swift; sourceTree = "<group>"; };
 		A1000004000000000000001 /* Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 		A1000035000000000000001 /* BnBFox */ = {
 			isa = PBXGroup;
 			children = (
+				449188052EFCFCF8008A8587 /* Info.plist */,
 				449187D42EFBC38C008A8587 /* pl.lproj */,
 				449187CB2EFBB0CC008A8587 /* en.lproj */,
 				449187CE2EFBB0CC008A8587 /* es.lproj */,
@@ -317,6 +320,7 @@
 				449187CF2EFBB0CC008A8587 /* Localizable.strings in Resources */,
 				449187D02EFBB0CC008A8587 /* Localizable.strings in Resources */,
 				A1000031000000000000001 /* Assets.xcassets in Resources */,
+				449188062EFCFCF8008A8587 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -526,7 +530,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = AXP9TJV4B4;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = BnBShift;
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "";
@@ -563,7 +567,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = AXP9TJV4B4;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = BnBShift;
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "";
