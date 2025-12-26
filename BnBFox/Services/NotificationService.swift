@@ -306,6 +306,93 @@ class NotificationService {
         previousBookingIds = Set(bookings.map { $0.id })
     }
     
+    // MARK: - AC Filter Maintenance
+    
+    // Schedule quarterly AC filter change notifications
+    func scheduleACFilterNotifications() {
+        Task {
+            // First, ensure we have permission
+            let authorized = await requestAuthorization()
+            guard authorized else {
+                print("Notification permission denied")
+                return
+            }
+            
+            // Cancel existing AC filter alerts
+            cancelACFilterNotifications()
+            
+            let calendar = Calendar.current
+            let now = Date()
+            
+            // Get alert time from settings (same as cleaning alerts)
+            let settings = AppSettings.shared
+            let alertComponents = calendar.dateComponents([.hour, .minute], from: settings.alertTime)
+            let alertHour = alertComponents.hour ?? 9
+            let alertMinute = alertComponents.minute ?? 0
+            
+            print("🔧 Scheduling quarterly AC filter notifications")
+            
+            // Schedule 4 notifications for the next year (quarterly)
+            for quarter in 0..<4 {
+                guard let notificationDate = calendar.date(byAdding: .month, value: quarter * 3, to: now) else {
+                    continue
+                }
+                
+                // Set the time to the configured alert time
+                var components = calendar.dateComponents([.year, .month, .day], from: notificationDate)
+                components.hour = alertHour
+                components.minute = alertMinute
+                
+                guard let scheduledDate = calendar.date(from: components),
+                      scheduledDate > now else {
+                    continue
+                }
+                
+                // Create notification content
+                let content = UNMutableNotificationContent()
+                content.title = "🔧 Maintenance Reminder"
+                content.body = "Time to change AC filters in all properties"
+                content.categoryIdentifier = "MAINTENANCE"
+                
+                // Add sound if enabled
+                if settings.alertSoundEnabled {
+                    content.sound = .default
+                }
+                
+                // Create trigger
+                let triggerComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: scheduledDate)
+                let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
+                
+                // Create request
+                let identifier = "ac_filter_\(quarter)"
+                let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+                
+                // Schedule
+                do {
+                    try await UNUserNotificationCenter.current().add(request)
+                    let formatter = DateFormatter()
+                    formatter.dateStyle = .medium
+                    formatter.timeStyle = .short
+                    print("  ✅ Scheduled AC filter notification for \(formatter.string(from: scheduledDate))")
+                } catch {
+                    print("  ❌ Error scheduling AC filter notification: \(error)")
+                }
+            }
+        }
+    }
+    
+    // Cancel all AC filter notifications
+    func cancelACFilterNotifications() {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            let acFilterIdentifiers = requests
+                .filter { $0.identifier.starts(with: "ac_filter_") }
+                .map { $0.identifier }
+            
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: acFilterIdentifiers)
+            print("🗑️  Cancelled \(acFilterIdentifiers.count) AC filter notifications")
+        }
+    }
+    
     // MARK: - Test Notification (for debugging)
     
     func sendTestNotification() async {
@@ -331,5 +418,6 @@ class NotificationService {
         }
     }
 }
+
 
 

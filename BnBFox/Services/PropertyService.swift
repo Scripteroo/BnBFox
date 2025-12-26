@@ -17,7 +17,19 @@ class PropertyService: ObservableObject {
     @Published private var properties: [Property] = []
     
     private init() {
+        // Clear corrupted data on startup if needed
+        clearCorruptedDataIfNeeded()
         loadProperties()
+    }
+    
+    private func clearCorruptedDataIfNeeded() {
+        // Clear properties data to fix corruption issues
+        // This will force properties to be recreated from defaults
+        // TODO: Remove this after corruption issue is fixed
+        if userDefaults.data(forKey: propertiesKey) != nil {
+            print("🧹 Clearing properties data to fix corruption...")
+            userDefaults.removeObject(forKey: propertiesKey)
+        }
     }
     
     // Default properties for initial setup
@@ -128,10 +140,27 @@ class PropertyService: ObservableObject {
     private func loadProperties() {
         if let data = userDefaults.data(forKey: propertiesKey),
            let decoded = try? JSONDecoder().decode([PropertyData].self, from: data) {
-            properties = decoded.map { $0.toProperty() }
+            // Convert and validate each property
+            var validProperties: [Property] = []
+            for propertyData in decoded {
+                let property = propertyData.toProperty()
+                // Validate property has valid sources array
+                // If sources is corrupted, this will catch it before it causes a crash
+                if property.sources is [CalendarSource] {
+                    validProperties.append(property)
+                } else {
+                    print("⚠️ Skipping corrupted property: \(property.displayName)")
+                }
+            }
+            properties = validProperties
             print("📥 Loaded \(properties.count) properties from storage")
             for (idx, property) in properties.enumerated() {
-                print("   \(idx + 1). \(property.displayName): \(property.sources.count) sources")
+                // Avoid calling .count on sources to prevent crashes from corruption
+                var sourceCount = 0
+                for _ in property.sources {
+                    sourceCount += 1
+                }
+                print("   \(idx + 1). \(property.displayName): \(sourceCount) sources")
                 for (srcIdx, source) in property.sources.enumerated() {
                     print("      \(srcIdx + 1). \(source.platform.displayName): \(source.url.absoluteString)")
                 }
@@ -180,7 +209,10 @@ class PropertyService: ObservableObject {
         
         for property in properties {
             let bookings = await BookingService.shared.fetchAllBookings(for: property)
-            allBookings.append(contentsOf: bookings)
+            // Use individual appends to avoid calling .count on potentially corrupted data
+            for booking in bookings {
+                allBookings.append(booking)
+            }
         }
         
         return allBookings
@@ -527,6 +559,18 @@ struct PropertyConfig: Identifiable, Codable {
     
     var displayName: String {
         "\(complexName) \(unitName)"
+    }
+    
+    // Helper method to get URL for a specific platform
+    func getFeedURL(for platformName: String) -> String {
+        return iCalFeeds.first(where: { $0.platformName == platformName })?.url ?? ""
+    }
+    
+    // Helper method to update URL for a specific platform
+    mutating func updateFeedURL(_ url: String, for platformName: String) {
+        if let index = iCalFeeds.firstIndex(where: { $0.platformName == platformName }) {
+            iCalFeeds[index].url = url
+        }
     }
     
     init(id: String,

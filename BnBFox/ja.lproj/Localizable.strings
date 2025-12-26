@@ -1,0 +1,164 @@
+/* CalendarView strings */
+"error_loading_bookings" = "予約の読み込み中にエラーが発生しました";
+"retry" = "再試行";
+"loading_calendar" = "カレンダーを読み込み中";
+"fetching_booking_data" = "予約データを取得中...";
+
+/* SettingsView strings */
+"checking" = "確認中...";
+"notification_status" = "通知ステータス";
+"permission_status" = "権限ステータス";
+"authorized" = "許可済み";
+"open_settings_to_enable" = "設定を開いて有効にする";
+"view_scheduled_notifications" = "スケジュール済み通知を表示";
+"cleaning_day_alerts" = "清掃日のアラート";
+"enable_alerts" = "アラートを有効にする";
+"alert_sound" = "アラート音";
+"alert_time" = "アラート時刻";
+"pending_alerts" = "保留中のアラート";
+"reschedule_all_notifications" = "すべての通知を再スケジュール";
+"new_booking_alerts" = "新規予約アラート";
+"enable_new_booking_alerts" = "新規予約アラートを有効にする";
+"new_booking_alerts_description" = "今月の新しい予約が表示されたときに通知を受け取ります";
+"maintenance_tasks" = "メンテナンス作業";
+"change_ac_filter_quarterly" = "エアコンフィルター交換（四半期ごと）";
+"add_custom_task" = "カスタム作業を追加";
+"upcoming_cleanings_30_days" = "今後の清掃（30日以内）";
+"settings" = "設定";
+"test_notification_sent" = "テスト通知を送信しました";
+"ok" = "OK";
+"test_notification_message" = "5秒後にテスト通知が表示されます。表示するには、アプリがバックグラウンドにあることを確認してください。";
+"denied" = "拒否";
+"not_requested" = "未要求";
+"provisional" = "仮承認";
+"ephemeral" = "一時的";
+"unknown" = "不明";
+"same_day_turnover" = "• 同日入替";
+"today" = "今日";
+"tomorrow" = "明日";
+"task_details" = "作業の詳細";
+"task_name" = "作業名";
+"frequency" = "頻度";
+"start_date" = "開始日";
+"apply_to" = "適用先";
+"scope" = "範囲";
+"all_properties" = "すべての物件";
+"specific_property" = "特定の物件";
+"property" = "物件";
+"select_property" = "物件を選択";
+
+/* PropertyDetailView strings */
+"property_details" = "物件の詳細";
+"property_name" = "物件名";
+"ical_feed_url" = "iCalフィードURL";
+"paste_ical_url_here" = "ここにiCalのURLを貼り付け";
+"are_you_sure" = "本当によろしいですか？";
+"delete_property_message" = "この物件とすべての予約が完全に削除されます。";
+
+/* MonthView strings */
+"no_bookings_this_month" = "今月の予約はありません";
+
+/* DayDetailView strings */
+"check_in" = "チェックイン";
+"check_out" = "チェックアウト";
+"guest" = "ゲスト：";
+"cleaning_status" = "清掃ステータス";
+"owner_info" = "オーナー情報";
+"done" = "完了";
+
+/* CleaningChecklistPanel strings */
+"cleaning_checklist" = "清掃チェックリスト";
+"mark_all_as_done" = "すべて完了にする";
+"clear_all" = "すべてクリア";
+
+/* CleaningChecklistPanel - Complete */
+"finishing_checklist" = "最終チェックリスト";
+"actions" = "対応";
+"damage_report" = "破損報告";
+"pest_control" = "害虫駆除";
+"supplies" = "備品";
+"towels_checklist" = "タオル - バス6枚、ハンド2枚、ビーチ6枚";
+"toilet_paper_checklist" = "トイレットペーパー 2 + 2ロール";
+"paper_towels_checklist" = "ペーパータオル（キッチン）1ロール";
+"hand_soap" = "ハンドソープ";
+"dish_soap" = "食器用洗剤・食洗機用洗剤";
+"laundry_detergent" = "洗濯用洗剤";
+"log_cleaning_photo" = "玄関ドア内側から\n清掃完了の写真を記録してください。";
+"termites" = "シロアリ";
+"cockroaches" = "ゴキブリ";
+"bedbugs" = "トコジラミ";
+"mice" = "ネズミ";
+"other" = "その他";
+"toilet_paper_supply" = "トイレットペーパー";
+"towels_supply" = "タオル";
+"ac_filters" = "エアコンフィルター";
+"cleaning_supplies" = "清掃用品";
+"paper_towels_supply" = "ペーパータオル";
+"detergent" = "洗剤";
+"light_bulbs" = "電球";
+
+/* AdminPanelView strings */
+"admin_panel" = "管理パネル";
+"delete_all_properties" = "すべての物件を削除";
+"clear_all_cleaning_status" = "すべての清掃ステータスをクリア";
+"reset_all_notifications" = "すべての通知をリセット";
+"export_database" = "データベースをエクスポート";
+"import_database" = "データベースをインポート";
+"action_cannot_be_undone" = "この操作は元に戻せません。";
+
+/* InfoView strings */
+"about_bnbfox" = "BnBFoxについて";
+"version" = "バージョン";
+"contact_support" = "サポートに連絡";
+"rate_on_app_store" = "App Storeで評価";
+
+/* CleaningStatusButtons strings */
+"turnaround_completed_on" = "入替完了日";
+"done_exclamation" = "完了！";
+"unit_completed_past" = "このユニットは過去に完了しています。日付を確認してください。";
+"on_my_way" = "向かっています！ 🚗";
+"clean_and_ready" = "清掃完了・準備完了！ ✨";
+
+/* NotificationCenterView strings */
+"cleaning_tasks" = "清掃作業";
+"coming_up_today" = "本日予定...";
+"pending_tasks" = "保留中の作業";
+"all_caught_up" = "すべて完了！";
+"no_pending_cleaning_tasks" = "保留中の清掃作業はありません";
+"no_pending_tasks" = "保留中の作業はありません";
+"no_upcoming_cleanings" = "予定されている清掃はありません";
+"checkout_checkin" = "チェックアウト／チェックイン";
+"dirty" = "汚れあり";
+"dirty_spanish" = "Sucio";
+"cleaning" = "清掃中";
+"cleaning_spanish" = "Limpiando";
+"clean" = "清潔";
+"clean_spanish" = "Limpio";
+"time_until_checkout" = "チェックアウトまでの時間：";
+"time_until_checkin" = "チェックインまでの時間：";
+"days" = "日";
+
+/* AdminPanelView (Property Administration) strings */
+"property_administration" = "物件管理";
+"connect_calendars_subtitle" = "AirBnB、VRBO、Booking.comのカレンダーを接続";
+"unit_name" = "ユニット名";
+"street_address" = "住所";
+"unit" = "部屋番号";
+"city" = "市区町村";
+"state" = "都道府県";
+"zip" = "郵便番号";
+"add_custom_ical" = "カスタムiCalフィードを追加";
+"delete_unit_confirmation" = "このユニットを削除してもよろしいですか？";
+"cancel" = "キャンセル";
+"delete" = "削除";
+"no_url" = "URLなし";
+"platform_name" = "プラットフォーム名";
+"ical_url" = "iCal URL";
+"custom_ical_url" = "カスタムiCal URL";
+"feed_already_used" = "このiCalフィードは%@で既に使用されています。ソースを確認してください。";
+"wrong_feed_vrbo_for_airbnb" = "これはVRBOのフィードです。この項目にはAirBnBのフィードが必要です。";
+"wrong_feed_booking_for_airbnb" = "これはBooking.comのフィードです。この項目にはAirBnBのフィードが必要です。";
+"wrong_feed_airbnb_for_vrbo" = "これはAirBnBのフィードです。この項目にはVRBOのフィードが必要です。";
+"wrong_feed_booking_for_vrbo" = "これはBooking.comのフィードです。この項目にはVRBOのフィードが必要です。";
+"wrong_feed_airbnb_for_booking" = "これはAirBnBのフィードです。この項目にはBooking.comのフィードが必要です。";
+"wrong_feed_vrbo_for_booking" = "これはVRBOのフィードです。この項目にはBooking.comのフィードが必要です。";

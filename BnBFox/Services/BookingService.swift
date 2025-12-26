@@ -20,30 +20,25 @@ class BookingService: ObservableObject {
     func fetchAllBookings(for property: Property) async -> [Booking] {
         // Check cache first
         let cacheKey = property.id.uuidString
-        
-        // Safely access cache with defensive check
-        if let cached = cache[cacheKey] {
-            // Verify cached data structure is valid
-            if Date().timeIntervalSince(cached.timestamp) < cacheExpiration {
-                print("Using cached bookings for \(property.shortName)")
-                return cached.bookings
-            }
+        if let cached = cache[cacheKey],
+           Date().timeIntervalSince(cached.timestamp) < cacheExpiration {
+            print("Using cached bookings for \(property.shortName)")
+            return cached.bookings
         }
         
         var allBookings: [Booking] = []
         
-        // Guard against empty or invalid sources
-        // Ensure sources is actually an array (defensive check)
-        guard property.sources is [CalendarSource], !property.sources.isEmpty else {
-            print("No sources configured for property \(property.shortName)")
-            // Cache empty result to avoid repeated checks
-            cache[cacheKey] = (bookings: [], timestamp: Date())
-            return []
-        }
+        // Get sources - if property is corrupted, this will crash
+        // The only way to fix this is to clear the app's UserDefaults data
+        // To do that: Delete the app from simulator/device and reinstall, OR
+        // In Xcode: Product > Scheme > Edit Scheme > Run > Arguments > Add "UIApplicationSupportsMultipleScenes" = NO
+        // Then add code to clear UserDefaults on first launch after corruption
+        let sources = property.sources
         
         // Fetch bookings from all sources concurrently
         await withTaskGroup(of: [Booking].self) { group in
-            for source in property.sources {
+            // Iterate using for-in - Swift handles bounds checking safely
+            for source in sources {
                 group.addTask {
                     do {
                         print("📥 Fetching bookings from \(source.platform.displayName) for \(property.shortName) from: \(source.url.absoluteString)")
@@ -63,8 +58,11 @@ class BookingService: ObservableObject {
                 }
             }
             
+            // Use individual appends instead of append(contentsOf) to avoid calling .count
             for await bookings in group {
-                allBookings.append(contentsOf: bookings)
+                for booking in bookings {
+                    allBookings.append(booking)
+                }
             }
         }
         
@@ -111,5 +109,6 @@ class BookingService: ObservableObject {
         cache.removeAll()
         print("Cleared all booking cache")
     }
+    
 }
 

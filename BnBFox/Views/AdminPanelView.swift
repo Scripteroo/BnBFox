@@ -1,8 +1,8 @@
 //
 //  AdminPanelView.swift
-//  BnBShift
+//  BnBFox
 //
-//  Updated with iCal feed validation and toast messages
+//  Created on 12/12/2025.
 //
 
 import SwiftUI
@@ -15,25 +15,18 @@ struct AdminPanelView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 0) {
-                    // Header with logo and title
-                    HStack(spacing: 12) {
-                        Image("bnbshift-logo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 60, height: 60)
+                    // Header
+                    VStack(spacing: 8) {
+                        Text("iCal Connect")
+                            .font(.system(size: 24, weight: .bold))
+                            .multilineTextAlignment(.center)
                         
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(NSLocalizedString("property_administration", comment: ""))
-                                .font(.system(size: 22, weight: .bold))
-                            
-                            Text(NSLocalizedString("connect_calendars_subtitle", comment: ""))
-                                .font(.system(size: 13))
-                                .foregroundColor(.gray)
-                        }
-                        
-                        Spacer()
+                        Text("Connect your AirBnB, VRBO and Booking.com Calendars")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
                     }
-                    .padding(.horizontal, 20)
                     .padding(.top, 20)
                     .padding(.bottom, 24)
                     
@@ -42,7 +35,6 @@ struct AdminPanelView: View {
                         ForEach(viewModel.properties) { property in
                             PropertyConfigCard(
                                 property: property,
-                                allProperties: viewModel.properties,
                                 onUpdate: { updated in
                                     viewModel.updateProperty(updated)
                                 },
@@ -78,254 +70,125 @@ struct AdminPanelView: View {
 
 struct PropertyConfigCard: View {
     let property: PropertyConfig
-    let allProperties: [PropertyConfig]
     let onUpdate: (PropertyConfig) -> Void
     let onDelete: () -> Void
     let onToggleLock: () -> Void
     
     @State private var complexName: String
     @State private var unitName: String
-    @State private var streetAddress: String
-    @State private var unit: String
-    @State private var city: String
-    @State private var state: String
-    @State private var zipCode: String
-    @State private var iCalFeeds: [ICalFeed]
+    @State private var airbnbURL: String
+    @State private var vrboURL: String
+    @State private var bookingURL: String
     @State private var showDeleteConfirmation = false
-    @State private var toastMessage: String?
-    @State private var showToast = false
     
-    init(property: PropertyConfig, allProperties: [PropertyConfig], onUpdate: @escaping (PropertyConfig) -> Void, onDelete: @escaping () -> Void, onToggleLock: @escaping () -> Void) {
+    init(property: PropertyConfig, onUpdate: @escaping (PropertyConfig) -> Void, onDelete: @escaping () -> Void, onToggleLock: @escaping () -> Void) {
         self.property = property
-        self.allProperties = allProperties
         self.onUpdate = onUpdate
         self.onDelete = onDelete
         self.onToggleLock = onToggleLock
         _complexName = State(initialValue: property.complexName)
         _unitName = State(initialValue: property.unitName)
-        _streetAddress = State(initialValue: property.streetAddress)
-        _unit = State(initialValue: property.unit)
-        _city = State(initialValue: property.city)
-        _state = State(initialValue: property.state)
-        _zipCode = State(initialValue: property.zipCode)
-        _iCalFeeds = State(initialValue: property.iCalFeeds)
+        _airbnbURL = State(initialValue: property.getFeedURL(for: "AirBnB"))
+        _vrboURL = State(initialValue: property.getFeedURL(for: "VRBO"))
+        _bookingURL = State(initialValue: property.getFeedURL(for: "Booking.com"))
     }
     
     var body: some View {
-        ZStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 8) {
-                // Header with property name and buttons
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        // Complex name - editable when unlocked
-                        if property.isLocked {
-                            Text(complexName.isEmpty ? "Complex" : complexName)
-                                .font(.system(size: 12))
-                                .foregroundColor(.gray)
-                        } else {
-                            TextField("", text: $complexName, prompt: Text(NSLocalizedString("complex", comment: "")).foregroundColor(.gray.opacity(0.5)))
-                                .font(.system(size: 12))
-                                .foregroundColor(.gray)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .onChange(of: complexName) { _ in
-                                    updateProperty()
-                                }
-                        }
-                        
-                        // Unit name - editable when unlocked
-                        if property.isLocked {
-                            Text(unitName)
-                                .font(.system(size: 20, weight: .bold))
-                        } else {
-                            TextField(NSLocalizedString("unit_name", comment: ""), text: $unitName)
-                                .font(.system(size: 20, weight: .bold))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .onChange(of: unitName) { _ in
-                                    updateProperty()
-                                }
-                        }
+        VStack(alignment: .leading, spacing: 8) {
+            // Header with property name and buttons
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    // Complex name - editable when unlocked
+                    if property.isLocked {
+                        Text(complexName.isEmpty ? "Property Name" : complexName)
+                            .font(.system(size: 12))
+                            .foregroundColor(.gray)
+                    } else {
+                        TextField("", text: $complexName, prompt: Text("Property Name").foregroundColor(.gray.opacity(0.5)))
+                            .font(.system(size: 12))
+                            .foregroundColor(.gray)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: complexName) { _ in
+                                updateProperty()
+                            }
                     }
                     
-                    Spacer()
-                    
-                    HStack(spacing: 8) {
-                        // Lock/Unlock button
-                        Button(action: onToggleLock) {
-                            Image(systemName: property.isLocked ? "lock.fill" : "lock.open.fill")
-                                .font(.system(size: 24))
-                                .foregroundColor(property.isLocked ? .green : .gray)
-                        }
-                        
-                        // Delete button - only visible when unlocked
-                        if !property.isLocked {
-                            Button(action: {
-                                showDeleteConfirmation = true
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.system(size: 28))
-                                    .foregroundColor(.red)
+                    // Unit name - editable when unlocked
+                    if property.isLocked {
+                        Text(unitName)
+                            .font(.system(size: 20, weight: .bold))
+                    } else {
+                        TextField("Unit Name", text: $unitName)
+                            .font(.system(size: 20, weight: .bold))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: unitName) { _ in
+                                updateProperty()
                             }
-                        }
                     }
                 }
                 
-                Divider()
-                    .padding(.vertical, 4)
+                Spacer()
                 
-                // Address fields - disabled when locked
-                if !property.isLocked {
-                    VStack(spacing: 6) {
-                        TextField(NSLocalizedString("street_address", comment: ""), text: $streetAddress)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.caption)
-                            .onChange(of: streetAddress) { _ in updateProperty() }
-                        
-                        TextField(NSLocalizedString("unit", comment: ""), text: $unit)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.caption)
-                            .onChange(of: unit) { _ in updateProperty() }
-                        
-                        HStack(spacing: 6) {
-                            TextField(NSLocalizedString("city", comment: ""), text: $city)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .font(.caption)
-                                .onChange(of: city) { _ in updateProperty() }
-                            
-                            TextField(NSLocalizedString("state", comment: ""), text: $state)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .font(.caption)
-                                .frame(width: 60)
-                                .onChange(of: state) { _ in updateProperty() }
-                            
-                            TextField(NSLocalizedString("zip", comment: ""), text: $zipCode)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .font(.caption)
-                                .frame(width: 80)
-                                .onChange(of: zipCode) { _ in updateProperty() }
-                        }
-                    }
-                    .padding(.bottom, 8)
-                }
-                
-                // Dynamic iCal URL fields
-                VStack(spacing: 8) {
-                    ForEach($iCalFeeds) { $feed in
-                        HStack(spacing: 8) {
-                            DynamicURLTextField(
-                                feed: $feed,
-                                isDisabled: property.isLocked,
-                                onChange: {
-                                    validateFeed(feed)
-                                    updateProperty()
-                                }
-                            )
-                            
-                            // Delete button for custom feeds (not default ones)
-                            if !property.isLocked && !feed.isDefault {
-                                Button(action: {
-                                    deleteFeed(feed)
-                                }) {
-                                    Image(systemName: "minus.circle.fill")
-                                        .font(.system(size: 20))
-                                        .foregroundColor(.red)
-                                }
-                            }
-                        }
+                HStack(spacing: 8) {
+                    // Lock/Unlock button
+                    Button(action: onToggleLock) {
+                        Image(systemName: property.isLocked ? "lock.fill" : "lock.open.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(property.isLocked ? .green : .gray)
                     }
                     
-                    // Add button for new custom feeds
+                    // Delete button - only visible when unlocked
                     if !property.isLocked {
                         Button(action: {
-                            addCustomFeed()
+                            showDeleteConfirmation = true
                         }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(.blue)
-                                Text(NSLocalizedString("add_custom_ical", comment: ""))
-                                    .font(.caption)
-                                    .foregroundColor(.blue)
-                            }
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 28))
+                                .foregroundColor(.red)
                         }
-                        .padding(.top, 4)
                     }
                 }
             }
-            .padding(16)
-            .background(Color.white)
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-            )
-            .alert(NSLocalizedString("delete_unit_confirmation", comment: ""), isPresented: $showDeleteConfirmation) {
-                Button(NSLocalizedString("cancel", comment: ""), role: .cancel) { }
-                Button(NSLocalizedString("delete", comment: ""), role: .destructive) {
-                    onDelete()
-                }
-            }
             
-            // Toast notification
-            if showToast, let message = toastMessage {
-                VStack {
-                    Spacer()
-                    ToastView(message: message)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                        .padding(.bottom, 16)
-                }
-                .animation(.spring(), value: showToast)
-            }
-        }
-    }
-    
-    private func validateFeed(_ feed: ICalFeed) {
-        guard !feed.url.isEmpty else { return }
-        
-        let url = feed.url.lowercased()
-        
-        // Check for duplicate URLs in other properties
-        for otherProperty in allProperties where otherProperty.id != property.id {
-            for otherFeed in otherProperty.iCalFeeds {
-                if otherFeed.url.lowercased() == url {
-                    showToastMessage("⚠️ " + String(format: NSLocalizedString("feed_already_used", comment: ""), otherProperty.displayName))
-                    return
-                }
-            }
-        }
-        
-        // Check for platform mismatch (only for default feeds)
-        if feed.isDefault {
-            let platformName = feed.platformName.lowercased()
+            Divider()
+                .padding(.vertical, 4)
             
-            if platformName.contains("airbnb") && !url.contains("airbnb.com") {
-                if url.contains("vrbo.com") {
-                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_vrbo_for_airbnb", comment: ""))
-                } else if url.contains("booking.com") {
-                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_booking_for_airbnb", comment: ""))
-                }
-            } else if platformName.contains("vrbo") && !url.contains("vrbo.com") {
-                if url.contains("airbnb.com") {
-                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_airbnb_for_vrbo", comment: ""))
-                } else if url.contains("booking.com") {
-                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_booking_for_vrbo", comment: ""))
-                }
-            } else if platformName.contains("booking") && !url.contains("booking.com") {
-                if url.contains("airbnb.com") {
-                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_airbnb_for_booking", comment: ""))
-                } else if url.contains("vrbo.com") {
-                    showToastMessage("⚠️ " + NSLocalizedString("wrong_feed_vrbo_for_booking", comment: ""))
-                }
+            // iCal URL fields - disabled when locked
+            VStack(spacing: 8) {
+                URLTextField(
+                    placeholder: property.isLocked ? airbnbURL : "AirBnB iCal",
+                    text: $airbnbURL,
+                    isDisabled: property.isLocked,
+                    onChange: { updateProperty() }
+                )
+                
+                URLTextField(
+                    placeholder: property.isLocked ? vrboURL : "VRBO iCal",
+                    text: $vrboURL,
+                    isDisabled: property.isLocked,
+                    onChange: { updateProperty() }
+                )
+                
+                URLTextField(
+                    placeholder: property.isLocked ? bookingURL : "Booking.com iCal",
+                    text: $bookingURL,
+                    isDisabled: property.isLocked,
+                    onChange: { updateProperty() }
+                )
             }
         }
-    }
-    
-    private func showToastMessage(_ message: String) {
-        toastMessage = message
-        showToast = true
-        
-        // Auto-hide after 4 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-            showToast = false
+        .padding(16)
+        .background(Color.white)
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+        )
+        .alert("Are you sure you want to delete this unit?", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                onDelete()
+            }
         }
     }
     
@@ -333,81 +196,39 @@ struct PropertyConfigCard: View {
         var updated = property
         updated.complexName = complexName
         updated.unitName = unitName
-        updated.streetAddress = streetAddress
-        updated.unit = unit
-        updated.city = city
-        updated.state = state
-        updated.zipCode = zipCode
-        updated.iCalFeeds = iCalFeeds
+        updated.updateFeedURL(airbnbURL, for: "AirBnB")
+        updated.updateFeedURL(vrboURL, for: "VRBO")
+        updated.updateFeedURL(bookingURL, for: "Booking.com")
         onUpdate(updated)
-    }
-    
-    private func addCustomFeed() {
-        let newFeed = ICalFeed(platformName: "Custom", url: "", isDefault: false)
-        iCalFeeds.append(newFeed)
-        updateProperty()
-    }
-    
-    private func deleteFeed(_ feed: ICalFeed) {
-        iCalFeeds.removeAll { $0.id == feed.id }
-        updateProperty()
     }
 }
 
-struct DynamicURLTextField: View {
-    @Binding var feed: ICalFeed
+struct URLTextField: View {
+    let placeholder: String
+    @Binding var text: String
     let isDisabled: Bool
     let onChange: () -> Void
     
     var body: some View {
-        VStack(spacing: 4) {
-            if isDisabled {
-                // Show as read-only text when locked
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(feed.platformName)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.gray)
-                    
-                    Text(feed.url.isEmpty ? "No URL" : feed.url)
-                        .font(.system(size: 14))
-                        .foregroundColor(feed.url.isEmpty ? .gray.opacity(0.5) : .primary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                }
+        if isDisabled {
+            // Show as read-only text when locked
+            Text(text.isEmpty ? placeholder : text)
+                .font(.system(size: 14))
+                .foregroundColor(text.isEmpty ? .gray.opacity(0.5) : .primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 8)
                 .background(Color.gray.opacity(0.1))
                 .cornerRadius(5)
-            } else {
-                // Editable when unlocked
-                VStack(spacing: 4) {
-                    // Platform name field (editable for custom feeds)
-                    if feed.isDefault {
-                        Text(feed.platformName)
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.gray)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    } else {
-                        TextField(NSLocalizedString("platform_name", comment: ""), text: $feed.platformName)
-                            .font(.system(size: 11, weight: .medium))
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: feed.platformName) { _ in
-                                onChange()
-                            }
-                    }
-                    
-                    // URL field
-                    TextField(feed.isDefault ? "\(feed.platformName) " + NSLocalizedString("ical_url", comment: "") : NSLocalizedString("custom_ical_url", comment: ""), text: $feed.url)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
-                        .font(.system(size: 14))
-                        .onChange(of: feed.url) { _ in
-                            onChange()
-                        }
+        } else {
+            // Editable when unlocked
+            TextField(placeholder, text: $text)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+                .disableAutocorrection(true)
+                .onChange(of: text) { _ in
+                    onChange()
                 }
-            }
         }
     }
 }
@@ -436,42 +257,28 @@ class AdminPanelViewModel: ObservableObject {
         let existingProperties = PropertyService.shared.getAllProperties()
         
         properties = existingProperties.map { property in
-            // Convert CalendarSource array to ICalFeed array
+            // Convert Property sources to ICalFeeds
             var feeds: [ICalFeed] = []
             
-            // Add default feeds with URLs if they exist
-            let airbnbSource = property.sources.first(where: { $0.platform == .airbnb })
-            feeds.append(ICalFeed(
-                platformName: "AirBnB",
-                url: airbnbSource?.url.absoluteString ?? "",
-                isDefault: true
-            ))
-            
-            let vrboSource = property.sources.first(where: { $0.platform == .vrbo })
-            feeds.append(ICalFeed(
-                platformName: "VRBO",
-                url: vrboSource?.url.absoluteString ?? "",
-                isDefault: true
-            ))
-            
-            let bookingSource = property.sources.first(where: { $0.platform == .bookingCom })
-            feeds.append(ICalFeed(
-                platformName: "Booking.com",
-                url: bookingSource?.url.absoluteString ?? "",
-                isDefault: true
-            ))
-            
-            // Add any custom sources (non-default platforms)
-            let customSources = property.sources.filter { source in
-                source.platform != .airbnb && source.platform != .vrbo && source.platform != .bookingCom
+            // Add AirBnB feed
+            if let airbnbSource = property.sources.first(where: { $0.platform == .airbnb }) {
+                feeds.append(ICalFeed(platformName: "AirBnB", url: airbnbSource.url.absoluteString, isDefault: true))
+            } else {
+                feeds.append(ICalFeed(platformName: "AirBnB", isDefault: true))
             }
             
-            for customSource in customSources {
-                feeds.append(ICalFeed(
-                    platformName: "Custom",
-                    url: customSource.url.absoluteString,
-                    isDefault: false
-                ))
+            // Add VRBO feed
+            if let vrboSource = property.sources.first(where: { $0.platform == .vrbo }) {
+                feeds.append(ICalFeed(platformName: "VRBO", url: vrboSource.url.absoluteString, isDefault: true))
+            } else {
+                feeds.append(ICalFeed(platformName: "VRBO", isDefault: true))
+            }
+            
+            // Add Booking.com feed
+            if let bookingSource = property.sources.first(where: { $0.platform == .bookingCom }) {
+                feeds.append(ICalFeed(platformName: "Booking.com", url: bookingSource.url.absoluteString, isDefault: true))
+            } else {
+                feeds.append(ICalFeed(platformName: "Booking.com", isDefault: true))
             }
             
             return PropertyConfig(
@@ -498,22 +305,18 @@ class AdminPanelViewModel: ObservableObject {
         
         let newProperty = PropertyConfig(
             id: UUID().uuidString,
-            complexName: "Complex",
+            complexName: "",
             unitName: "Unit#\(nextUnit)",
             isLocked: false, // New properties start unlocked for editing
             color: color
         )
         
         properties.append(newProperty)
-        saveChanges() // AUTO-SAVE when adding new property
     }
     
     func updateProperty(_ updated: PropertyConfig) {
         if let index = properties.firstIndex(where: { $0.id == updated.id }) {
             properties[index] = updated
-            
-            // Sync to PropertyService for bidirectional updates
-            PropertyService.shared.updatePropertyFromConfig(updated)
         }
     }
     
@@ -521,13 +324,11 @@ class AdminPanelViewModel: ObservableObject {
         // Only allow deletion if unlocked
         guard !property.isLocked else { return }
         properties.removeAll { $0.id == property.id }
-        saveChanges() // AUTO-SAVE when deleting property
     }
     
     func toggleLock(_ property: PropertyConfig) {
         if let index = properties.firstIndex(where: { $0.id == property.id }) {
             properties[index].isLocked.toggle()
-            saveChanges() // AUTO-SAVE when toggling lock
         }
     }
     
@@ -551,6 +352,5 @@ class AdminPanelViewModel: ObservableObject {
         return 1
     }
 }
-
 
 

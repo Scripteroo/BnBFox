@@ -1,0 +1,164 @@
+/* CalendarView strings */
+"error_loading_bookings" = "加载预订时出错";
+"retry" = "重试";
+"loading_calendar" = "正在加载您的日历";
+"fetching_booking_data" = "正在获取预订数据...";
+
+/* SettingsView strings */
+"checking" = "检查中...";
+"notification_status" = "通知状态";
+"permission_status" = "权限状态";
+"authorized" = "已授权";
+"open_settings_to_enable" = "打开设置以启用";
+"view_scheduled_notifications" = "查看已计划的通知";
+"cleaning_day_alerts" = "清洁日提醒";
+"enable_alerts" = "启用提醒";
+"alert_sound" = "提醒声音";
+"alert_time" = "提醒时间";
+"pending_alerts" = "待处理提醒";
+"reschedule_all_notifications" = "重新安排所有通知";
+"new_booking_alerts" = "新预订提醒";
+"enable_new_booking_alerts" = "启用新预订提醒";
+"new_booking_alerts_description" = "当本月出现新的预订时接收通知";
+"maintenance_tasks" = "维护任务";
+"change_ac_filter_quarterly" = "更换空调过滤器（每季度）";
+"add_custom_task" = "添加自定义任务";
+"upcoming_cleanings_30_days" = "即将进行的清洁（未来30天）";
+"settings" = "设置";
+"test_notification_sent" = "测试通知已发送";
+"ok" = "确定";
+"test_notification_message" = "测试通知将在5秒后出现。请确保应用在后台运行以查看通知。";
+"denied" = "已拒绝";
+"not_requested" = "未请求";
+"provisional" = "临时";
+"ephemeral" = "短暂";
+"unknown" = "未知";
+"same_day_turnover" = "• 当天更换";
+"today" = "今天";
+"tomorrow" = "明天";
+"task_details" = "任务详情";
+"task_name" = "任务名称";
+"frequency" = "频率";
+"start_date" = "开始日期";
+"apply_to" = "应用到";
+"scope" = "范围";
+"all_properties" = "所有房源";
+"specific_property" = "指定房源";
+"property" = "房源";
+"select_property" = "选择房源";
+
+/* PropertyDetailView strings */
+"property_details" = "房源详情";
+"property_name" = "房源名称";
+"ical_feed_url" = "iCal 订阅链接";
+"paste_ical_url_here" = "在此粘贴 iCal 链接";
+"are_you_sure" = "您确定吗？";
+"delete_property_message" = "此操作将永久删除该房源及其所有预订。";
+
+/* MonthView strings */
+"no_bookings_this_month" = "本月没有预订";
+
+/* DayDetailView strings */
+"check_in" = "入住";
+"check_out" = "退房";
+"guest" = "客人：";
+"cleaning_status" = "清洁状态";
+"owner_info" = "房主信息";
+"done" = "完成";
+
+/* CleaningChecklistPanel strings */
+"cleaning_checklist" = "清洁检查清单";
+"mark_all_as_done" = "全部标记为完成";
+"clear_all" = "全部清除";
+
+/* CleaningChecklistPanel - Complete */
+"finishing_checklist" = "最终检查清单";
+"actions" = "操作";
+"damage_report" = "损坏报告";
+"pest_control" = "害虫控制";
+"supplies" = "物资";
+"towels_checklist" = "毛巾 - 浴巾6条，手巾2条，沙滩巾6条";
+"toilet_paper_checklist" = "卫生纸 2 + 2 卷";
+"paper_towels_checklist" = "厨房纸巾 1 卷";
+"hand_soap" = "洗手液";
+"dish_soap" = "洗洁精及洗碗机清洁剂";
+"laundry_detergent" = "洗衣液";
+"log_cleaning_photo" = "请从前门内侧\n拍摄并记录清洁完成的照片。";
+"termites" = "白蚁";
+"cockroaches" = "蟑螂";
+"bedbugs" = "臭虫";
+"mice" = "老鼠";
+"other" = "其他";
+"toilet_paper_supply" = "卫生纸";
+"towels_supply" = "毛巾";
+"ac_filters" = "空调过滤器";
+"cleaning_supplies" = "清洁用品";
+"paper_towels_supply" = "厨房纸巾";
+"detergent" = "清洁剂";
+"light_bulbs" = "灯泡";
+
+/* AdminPanelView strings */
+"admin_panel" = "管理面板";
+"delete_all_properties" = "删除所有房源";
+"clear_all_cleaning_status" = "清除所有清洁状态";
+"reset_all_notifications" = "重置所有通知";
+"export_database" = "导出数据库";
+"import_database" = "导入数据库";
+"action_cannot_be_undone" = "此操作无法撤销。";
+
+/* InfoView strings */
+"about_bnbfox" = "关于 BnBFox";
+"version" = "版本";
+"contact_support" = "联系支持";
+"rate_on_app_store" = "在 App Store 评分";
+
+/* CleaningStatusButtons strings */
+"turnaround_completed_on" = "更换完成日期";
+"done_exclamation" = "完成！";
+"unit_completed_past" = "该房源已在过去完成。请检查日期。";
+"on_my_way" = "正在路上！ 🚗";
+"clean_and_ready" = "清洁完成，已准备好！ ✨";
+
+/* NotificationCenterView strings */
+"cleaning_tasks" = "清洁任务";
+"coming_up_today" = "今天即将进行...";
+"pending_tasks" = "待处理任务";
+"all_caught_up" = "全部完成！";
+"no_pending_cleaning_tasks" = "没有待处理的清洁任务";
+"no_pending_tasks" = "没有待处理任务";
+"no_upcoming_cleanings" = "没有即将进行的清洁";
+"checkout_checkin" = "退房 / 入住";
+"dirty" = "脏";
+"dirty_spanish" = "Sucio";
+"cleaning" = "清洁中";
+"cleaning_spanish" = "Limpiando";
+"clean" = "干净";
+"clean_spanish" = "Limpio";
+"time_until_checkout" = "距离退房时间：";
+"time_until_checkin" = "距离入住时间：";
+"days" = "天";
+
+/* AdminPanelView (Property Administration) strings */
+"property_administration" = "房源管理";
+"connect_calendars_subtitle" = "连接您的 AirBnB、VRBO 和 Booking.com 日历";
+"unit_name" = "房间名称";
+"street_address" = "街道地址";
+"unit" = "房号";
+"city" = "城市";
+"state" = "省/州";
+"zip" = "邮政编码";
+"add_custom_ical" = "添加自定义 iCal 订阅";
+"delete_unit_confirmation" = "确定要删除此房间吗？";
+"cancel" = "取消";
+"delete" = "删除";
+"no_url" = "无链接";
+"platform_name" = "平台名称";
+"ical_url" = "iCal 链接";
+"custom_ical_url" = "自定义 iCal 链接";
+"feed_already_used" = "该 iCal 订阅已被 %@ 使用。请检查您的来源。";
+"wrong_feed_vrbo_for_airbnb" = "这是 VRBO 的订阅源——此字段需要 AirBnB 的订阅源。";
+"wrong_feed_booking_for_airbnb" = "这是 Booking.com 的订阅源——此字段需要 AirBnB 的订阅源。";
+"wrong_feed_airbnb_for_vrbo" = "这是 AirBnB 的订阅源——此字段需要 VRBO 的订阅源。";
+"wrong_feed_booking_for_vrbo" = "这是 Booking.com 的订阅源——此字段需要 VRBO 的订阅源。";
+"wrong_feed_airbnb_for_booking" = "这是 AirBnB 的订阅源——此字段需要 Booking.com 的订阅源。";
+"wrong_feed_vrbo_for_booking" = "这是 VRBO 的订阅源——此字段需要 Booking.com 的订阅源。";

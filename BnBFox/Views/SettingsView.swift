@@ -123,6 +123,9 @@ struct SettingsView: View {
                 
                 // Maintenance Tasks Section
                 Section(header: Text(NSLocalizedString("maintenance_tasks", comment: "Section header"))) {
+                    // AC Filter Task Toggle
+                    Toggle("Change AC Filter (Quarterly)", isOn: $settings.acFilterTaskEnabled)
+                    
                     // Add Custom Task Button
                     Button(action: {
                         showingAddTask = true
@@ -160,6 +163,7 @@ struct SettingsView: View {
             .navigationTitle(NSLocalizedString("settings", comment: "Title"))
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
+                syncACFilterToggle()
                 Task {
                     await checkNotificationStatus()
                     await updatePendingCount()
@@ -229,6 +233,15 @@ struct SettingsView: View {
             let allBookings = await PropertyService.shared.getAllBookings()
             await MainActor.run {
                 processBookings(allBookings)
+            }
+        }
+    }
+    
+    private func syncACFilterToggle() {
+        // Sync toggle state with actual task state
+        if let acFilterTask = taskService.tasks.first(where: { $0.isDefault && $0.name == "Change AC Filter" }) {
+            if settings.acFilterTaskEnabled != acFilterTask.isEnabled {
+                settings.acFilterTaskEnabled = acFilterTask.isEnabled
             }
         }
     }

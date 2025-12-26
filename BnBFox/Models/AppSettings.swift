@@ -42,11 +42,31 @@ class AppSettings: ObservableObject {
         }
     }
     
+    @Published var acFilterTaskEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(acFilterTaskEnabled, forKey: "acFilterTaskEnabled")
+            updateACFilterTask()
+        }
+    }
+    
     private init() {
         // Load saved settings or use defaults
         self.cleaningAlertsEnabled = UserDefaults.standard.object(forKey: "cleaningAlertsEnabled") as? Bool ?? true
         self.alertSoundEnabled = UserDefaults.standard.object(forKey: "alertSoundEnabled") as? Bool ?? true
         self.newBookingAlertsEnabled = UserDefaults.standard.object(forKey: "newBookingAlertsEnabled") as? Bool ?? true
+        
+        // Load AC filter task setting, or sync with existing task
+        if let savedValue = UserDefaults.standard.object(forKey: "acFilterTaskEnabled") as? Bool {
+            self.acFilterTaskEnabled = savedValue
+        } else {
+            // Sync with existing task if it exists
+            let taskService = PeriodicTaskService.shared
+            if let acFilterTask = taskService.tasks.first(where: { $0.isDefault && $0.name == "Change AC Filter" }) {
+                self.acFilterTaskEnabled = acFilterTask.isEnabled
+            } else {
+                self.acFilterTaskEnabled = true // Default to enabled
+            }
+        }
         
         // Default alert time: 9:00 AM
         if let savedTime = UserDefaults.standard.object(forKey: "alertTime") as? Date {
@@ -67,5 +87,17 @@ class AppSettings: ObservableObject {
     private func cancelAllCleaningAlerts() {
         NotificationService.shared.cancelAllCleaningAlerts()
     }
+    
+    private func updateACFilterTask() {
+        // Update the AC Filter task's enabled state in PeriodicTaskService
+        // The PeriodicTaskService handles notification scheduling automatically
+        let taskService = PeriodicTaskService.shared
+        if let acFilterTask = taskService.tasks.first(where: { $0.isDefault && $0.name == "Change AC Filter" }) {
+            var updatedTask = acFilterTask
+            updatedTask.isEnabled = acFilterTaskEnabled
+            taskService.updateTask(updatedTask)
+        }
+    }
 }
+
 
