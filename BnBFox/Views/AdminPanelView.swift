@@ -603,16 +603,18 @@ struct OnboardingSheet: View {
             
             // Welcome content
             VStack(spacing: 16) {
-                // Logo
-                Image("bnbshift-logo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 80, height: 80)
-                
-                // Title
-                Text("Welcome to BnBShift!")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                // Logo and Title side by side
+                HStack(spacing: 16) {
+                    Image("bnbshift-logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 60, height: 60)
+                    
+                    Text("Welcome to BnBShift!")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                }
+                .padding(.horizontal, 20)
                 
                 // Description
                 Text("Get started by adding your first property with iCal URLs from your booking platforms.")
@@ -705,3 +707,4 @@ struct PlatformLinkButton: View {
         }
     }
 }
+

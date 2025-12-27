@@ -821,8 +821,34 @@ struct AboutView: View {
                 
                 Divider()
                 
-                Text("BnBShift is a comprehensive property management solution designed for vacation rental hosts and cleaning crews.")
-                    .font(.body)
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("BnBShift is a comprehensive property management solution designed for vacation rental hosts and cleaning crews.")
+                        .font(.body)
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Why I Built This")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        
+                        Text("As a bed & breakfast and short-term rental host for years, I was constantly worried about my cleaning crew and maintenance team missing critical updates. At the beginning of each month, I would email them a calendar to arrange cleanings—but the system was fragile.")
+                            .font(.body)
+                        
+                        Text("A last-minute cancellation while traveling could be missed. A new booking could slip through the cracks, leading to a disastrous check-in and risking my hard-earned ratings.")
+                            .font(.body)
+                        
+                        Text("I built BnBShift to solve this problem for myself, and now I'm sharing it with the vacation rental community.")
+                            .font(.body)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("What's Next")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        
+                        Text("This app is free for service professionals to use as a stand-alone solution. Coming soon, a comprehensive host-side platform will connect property owners with their cleaning and maintenance staff in real-time, providing instant visibility into property status—dirty, cleaning, or clean—and staff presence on-site.")
+                            .font(.body)
+                    }
+                }
                 
                 Spacer()
             }
