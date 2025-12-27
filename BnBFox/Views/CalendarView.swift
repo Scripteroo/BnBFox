@@ -223,10 +223,20 @@ struct CalendarView: View {
                     Button(action: {
                         selectedProperty = property
                     }) {
-                        VStack(spacing: 4) {
+                        VStack(spacing: 2) {
+                            // Property name (complexName) - small gray text
+                            Text(property.complexName)
+                                .font(.system(size: 8))
+                                .foregroundColor(.gray)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                                .frame(width: 40)
+                            
                             RoundedRectangle(cornerRadius: 3)
                                 .fill(property.color)
                                 .frame(width: 40, height: 20)
+                            
+                            // Unit name (shortName) - blue underlined text
                             Text(property.shortName)
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(.blue)
@@ -331,4 +341,5 @@ struct CalendarView_Previews: PreviewProvider {
         CalendarView()
     }
 }
+
 
