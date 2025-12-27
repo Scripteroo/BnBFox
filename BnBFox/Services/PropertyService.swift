@@ -16,38 +16,49 @@ class PropertyService: ObservableObject {
     
     @Published private var properties: [Property] = []
     
-  /*  private init() {
-        // Clear corrupted data on startup if needed
-        clearCorruptedDataIfNeeded()
+    private init() {
         loadProperties()
     }
     
-    private func clearCorruptedDataIfNeeded() {
-        // Clear properties data to fix corruption issues
-        // This will force properties to be recreated from defaults
-        // TODO: Remove this after corruption issue is fixed
-        if userDefaults.data(forKey: propertiesKey) != nil {
-            print("🧹 Clearing properties data to fix corruption...")
-            userDefaults.removeObject(forKey: propertiesKey)
-        }
-    }
-   */
-    // Default properties for initial setup
-    // Returns empty array - properties should be added by user through admin panel
     // Default properties for initial setup
     // Returns empty array - properties should be added by user through admin panel
     private func getDefaultProperties() -> [Property] {
         return []
-        
-        /* COMMENTED OUT - Hardcoded properties for reference/testing
-        return [
-            Property(
-                name: "kawama-c2",
-                displayName: "Kawama C-2",
-                ... rest of properties ...
-            )
-        ]
-        */
+    }
+    
+    private func loadProperties() {
+        if let data = userDefaults.data(forKey: propertiesKey),
+           let decoded = try? JSONDecoder().decode([PropertyData].self, from: data) {
+            // Convert and validate each property
+            var validProperties: [Property] = []
+            for propertyData in decoded {
+                let property = propertyData.toProperty()
+                // Validate property has valid sources array
+                // If sources is corrupted, this will catch it before it causes a crash
+                if property.sources is [CalendarSource] {
+                    validProperties.append(property)
+                } else {
+                    print("⚠️ Skipping corrupted property: \(property.displayName)")
+                }
+            }
+            properties = validProperties
+            print("📥 Loaded \(properties.count) properties from storage")
+            for (idx, property) in properties.enumerated() {
+                // Avoid calling .count on sources to prevent crashes from corruption
+                var sourceCount = 0
+                for _ in property.sources {
+                    sourceCount += 1
+                }
+                print("   \(idx + 1). \(property.displayName): \(sourceCount) sources")
+                for (srcIdx, source) in property.sources.enumerated() {
+                    print("      \(srcIdx + 1). \(source.platform.displayName): \(source.url.absoluteString)")
+                }
+            }
+        } else {
+            // First launch - use default properties
+            properties = getDefaultProperties()
+            saveProperties()
+        }
     }
     
     private func saveProperties() {
@@ -427,6 +438,7 @@ struct PropertyConfig: Identifiable, Codable {
     var city: String
     var state: String
     var zipCode: String
+    var country: String
     var iCalFeeds: [ICalFeed]
     var isLocked: Bool
     let colorHex: String
@@ -459,6 +471,7 @@ struct PropertyConfig: Identifiable, Codable {
          city: String = "",
          state: String = "",
          zipCode: String = "",
+         country: String = "USA",
          iCalFeeds: [ICalFeed]? = nil,
          isLocked: Bool = true,
          color: Color) {
@@ -470,6 +483,7 @@ struct PropertyConfig: Identifiable, Codable {
         self.city = city
         self.state = state
         self.zipCode = zipCode
+        self.country = country
         
         // Default 3 feeds if none provided
         self.iCalFeeds = iCalFeeds ?? [
@@ -484,5 +498,6 @@ struct PropertyConfig: Identifiable, Codable {
 }
 
 // Color init(hex:) extension is defined in DateExtensions.swift
+
 
 

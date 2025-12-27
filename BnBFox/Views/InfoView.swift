@@ -9,10 +9,12 @@ import SwiftUI
 
 struct InfoView: View {
     @Environment(\.dismiss) var dismiss
+    var scrollTarget: String? = nil  // Optional scroll target ("airbnb", "vrbo", "booking")
     
     var body: some View {
         NavigationView {
-            ScrollView {
+            ScrollViewReader { proxy in
+                ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     // App Logo and Title
                     HStack {
@@ -171,6 +173,7 @@ struct InfoView: View {
                                 color: .red,
                                 icon: "house.fill"
                             )
+                            .id("airbnb")
                             
                             Divider()
                             
@@ -180,6 +183,7 @@ struct InfoView: View {
                                 color: .blue,
                                 icon: "building.2.fill"
                             )
+                            .id("vrbo")
                             
                             Divider()
                             
@@ -189,6 +193,7 @@ struct InfoView: View {
                                 color: .orange,
                                 icon: "bed.double.fill"
                             )
+                            .id("booking")
                         }
                     }
                     
@@ -241,6 +246,16 @@ struct InfoView: View {
                 }
                 .padding(20)
             }
+            .onAppear {
+                // Scroll to target platform section if specified
+                if let target = scrollTarget {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        withAnimation {
+                            proxy.scrollTo(target, anchor: .top)
+                        }
+                    }
+                }
+            }
             .navigationTitle("Information & Help")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -249,6 +264,7 @@ struct InfoView: View {
                         dismiss()
                     }
                 }
+            }
             }
         }
     }
@@ -812,5 +828,6 @@ struct AboutView: View {
 #Preview {
     InfoView()
 }
+
 
 
