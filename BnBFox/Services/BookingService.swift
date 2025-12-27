@@ -22,7 +22,7 @@ class BookingService: ObservableObject {
         let cacheKey = property.id.uuidString
         if let cached = cache[cacheKey],
            Date().timeIntervalSince(cached.timestamp) < cacheExpiration {
-            print("Using cached bookings for \(property.shortName)")
+            Logger.log("Using cached bookings for \(property.shortName)")
             return cached.bookings
         }
         
@@ -41,18 +41,18 @@ class BookingService: ObservableObject {
             for source in sources {
                 group.addTask {
                     do {
-                        print("📥 Fetching bookings from \(source.platform.displayName) for \(property.shortName) from: \(source.url.absoluteString)")
+                        Logger.log("📥 Fetching bookings from \(source.platform.displayName) for \(property.shortName) from: \(source.url.absoluteString)")
                         let icalData = try await self.icalService.fetchICalData(from: source.url)
                         let bookings = self.icalService.parseICalData(
                             icalData,
                             platform: source.platform,
                             propertyId: property.id
                         )
-                        print("✅ Found \(bookings.count) bookings from \(source.platform.displayName) for \(property.shortName)")
+                        Logger.log("✅ Found \(bookings.count) bookings from \(source.platform.displayName) for \(property.shortName)")
                         return bookings
                     } catch {
-                        print("❌ Error fetching bookings from \(source.platform.displayName) for \(property.shortName): \(error.localizedDescription)")
-                        print("   URL: \(source.url.absoluteString)")
+                        Logger.log("❌ Error fetching bookings from \(source.platform.displayName) for \(property.shortName): \(error.localizedDescription)")
+                        Logger.log("   URL: \(source.url.absoluteString)")
                         return []
                     }
                 }
@@ -71,7 +71,7 @@ class BookingService: ObservableObject {
         
         // Cache the results
         cache[cacheKey] = (bookings: sortedBookings, timestamp: Date())
-        print("Cached bookings for \(property.shortName)")
+        Logger.log("Cached bookings for \(property.shortName)")
         
         return sortedBookings
     }
@@ -101,13 +101,13 @@ class BookingService: ObservableObject {
     func clearCache(for propertyId: UUID) {
         let cacheKey = propertyId.uuidString
         cache.removeValue(forKey: cacheKey)
-        print("Cleared booking cache for property: \(cacheKey)")
+        Logger.log("Cleared booking cache for property: \(cacheKey)")
     }
     
     // Clear cache for all properties
     func clearAllCache() {
         cache.removeAll()
-        print("Cleared all booking cache")
+        Logger.log("Cleared all booking cache")
     }
     
 }

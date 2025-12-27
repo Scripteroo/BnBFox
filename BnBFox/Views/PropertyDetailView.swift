@@ -469,8 +469,10 @@ struct PropertyDetailView: View {
                         Text("Phone:").font(.subheadline).foregroundColor(.secondary)
                         if currentProperty.ownerPhone.isEmpty {
                             Text("Not set").font(.subheadline).foregroundColor(.secondary)
+                        } else if let phoneURL = URL(string: "tel:\(currentProperty.ownerPhone)") {
+                            Link(currentProperty.ownerPhone, destination: phoneURL).font(.subheadline)
                         } else {
-                            Link(currentProperty.ownerPhone, destination: URL(string: "tel:\(currentProperty.ownerPhone)")!).font(.subheadline)
+                            Text(currentProperty.ownerPhone).font(.subheadline)
                         }
                         Spacer()
                     }
@@ -478,8 +480,10 @@ struct PropertyDetailView: View {
                         Text("Email:").font(.subheadline).foregroundColor(.secondary)
                         if currentProperty.ownerEmail.isEmpty {
                             Text("Not set").font(.subheadline).foregroundColor(.secondary)
+                        } else if let emailURL = URL(string: "mailto:\(currentProperty.ownerEmail)") {
+                            Link(currentProperty.ownerEmail, destination: emailURL).font(.subheadline)
                         } else {
-                            Link(currentProperty.ownerEmail, destination: URL(string: "mailto:\(currentProperty.ownerEmail)")!).font(.subheadline)
+                            Text(currentProperty.ownerEmail).font(.subheadline)
                         }
                         Spacer()
                     }
@@ -713,8 +717,10 @@ struct PropertyDetailView: View {
             Text(label + ":").font(.subheadline).foregroundColor(.secondary)
             if url.isEmpty {
                 Text("Not set").font(.subheadline).foregroundColor(.secondary)
+            } else if let validURL = URL(string: url) {
+                Link(url, destination: validURL).font(.subheadline).lineLimit(1).truncationMode(.middle)
             } else {
-                Link(url, destination: URL(string: url) ?? URL(string: "https://")!).font(.subheadline).lineLimit(1).truncationMode(.middle)
+                Text(url).font(.subheadline).lineLimit(1).truncationMode(.middle).foregroundColor(.gray)
             }
             Spacer()
         }

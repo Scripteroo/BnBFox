@@ -24,7 +24,7 @@ class ICalService {
         var bookings: [Booking] = []
         let events = extractEvents(from: icalString)
         
-        print("📅 Parsing \(events.count) events from \(platform.displayName) iCal data")
+        Logger.log("📅 Parsing \(events.count) events from \(platform.displayName) iCal data")
         
         var skippedCount = 0
         for event in events {
@@ -33,7 +33,7 @@ class ICalService {
                   let uid = event["UID"] else {
                 skippedCount += 1
                 if skippedCount <= 3 { // Log first 3 skipped events for debugging
-                    print("⚠️ Skipping event - missing required fields. DTSTART: \(event["DTSTART"] ?? "nil"), DTEND: \(event["DTEND"] ?? "nil"), UID: \(event["UID"] ?? "nil")")
+                    Logger.log("⚠️ Skipping event - missing required fields. DTSTART: \(event["DTSTART"] ?? "nil"), DTEND: \(event["DTEND"] ?? "nil"), UID: \(event["UID"] ?? "nil")")
                 }
                 continue
             }
@@ -53,10 +53,10 @@ class ICalService {
         }
         
         if skippedCount > 0 {
-            print("⚠️ Skipped \(skippedCount) events due to missing required fields")
+            Logger.log("⚠️ Skipped \(skippedCount) events due to missing required fields")
         }
         
-        print("✅ Parsed \(bookings.count) valid bookings from \(platform.displayName)")
+        Logger.log("✅ Parsed \(bookings.count) valid bookings from \(platform.displayName)")
         return bookings
     }
     

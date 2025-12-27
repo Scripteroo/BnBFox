@@ -175,7 +175,9 @@ struct NotificationCenterView: View {
     private func getUpcomingCleanings() -> [UpcomingCleaning] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        let thirtyDaysFromNow = calendar.date(byAdding: .day, value: 30, to: today)!
+        guard let thirtyDaysFromNow = calendar.date(byAdding: .day, value: 30, to: today) else {
+            return []
+        }
         
         let properties = PropertyService.shared.getAllProperties()
         var cleanings: [UpcomingCleaning] = []
@@ -464,4 +466,5 @@ struct UpcomingCleaningListRow: View {
         .padding(.vertical, 4)
     }
 }
+
 

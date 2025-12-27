@@ -22,6 +22,8 @@
 		445A913E2EFA604600C37B62 /* CleaningChecklist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445A913D2EFA604600C37B62 /* CleaningChecklist.swift */; };
 		445A91402EFA607000C37B62 /* CleaningChecklistPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445A913F2EFA607000C37B62 /* CleaningChecklistPanel.swift */; };
 		445F709F2EF64425003B6D28 /* OwnerInfoPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445F709E2EF64425003B6D28 /* OwnerInfoPanelView.swift */; };
+		4485C0AD2EFFD545002E948C /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4485C0AC2EFFD545002E948C /* Logger.swift */; };
+		4485C0AF2EFFD555002E948C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4485C0AE2EFFD555002E948C /* PrivacyInfo.xcprivacy */; };
 		449187AD2EFB2158008A8587 /* InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449187AC2EFB2158008A8587 /* InfoView.swift */; };
 		449187B02EFB2610008A8587 /* TermsOfServiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449187AF2EFB2610008A8587 /* TermsOfServiceView.swift */; };
 		449187B12EFB2610008A8587 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449187AE2EFB2610008A8587 /* PrivacyPolicyView.swift */; };
@@ -70,6 +72,8 @@
 		445A913D2EFA604600C37B62 /* CleaningChecklist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningChecklist.swift; sourceTree = "<group>"; };
 		445A913F2EFA607000C37B62 /* CleaningChecklistPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleaningChecklistPanel.swift; sourceTree = "<group>"; };
 		445F709E2EF64425003B6D28 /* OwnerInfoPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerInfoPanelView.swift; sourceTree = "<group>"; };
+		4485C0AC2EFFD545002E948C /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		4485C0AE2EFFD555002E948C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		449187AC2EFB2158008A8587 /* InfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoView.swift; sourceTree = "<group>"; };
 		449187AE2EFB2610008A8587 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
 		449187AF2EFB2610008A8587 /* TermsOfServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceView.swift; sourceTree = "<group>"; };
@@ -103,18 +107,8 @@
 		A1000064000000000000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		44C8BDAC2EFF0A8100A30EFC /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"pt-BR.lproj/Localizable.strings",
-			);
-			target = A1000042000000000000001 /* BnBFox */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		44C8BD7B2EFEFE1200A30EFC /* pt-br */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (44C8BDAC2EFF0A8100A30EFC /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = "pt-br"; sourceTree = "<group>"; };
+		44C8BD7B2EFEFE1200A30EFC /* pt-br */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "pt-br"; sourceTree = "<group>"; };
 		44C8BD7E2EFEFE8400A30EFC /* fr.lproj */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = fr.lproj; sourceTree = "<group>"; };
 		44C8BD882EFF009800A30EFC /* it.lproj */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = it.lproj; sourceTree = "<group>"; };
 		44C8BD932EFF01D200A30EFC /* zh.lproj */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = zh.lproj; sourceTree = "<group>"; };
@@ -192,6 +186,7 @@
 		A1000035000000000000001 /* BnBFox */ = {
 			isa = PBXGroup;
 			children = (
+				4485C0AE2EFFD555002E948C /* PrivacyInfo.xcprivacy */,
 				44C8BDA32EFF071D00A30EFC /* ru.lproj */,
 				44C8BD962EFF026700A30EFC /* ja.lproj */,
 				44C8BD932EFF01D200A30EFC /* zh.lproj */,
@@ -285,6 +280,7 @@
 		A1000041000000000000001 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				4485C0AC2EFFD545002E948C /* Logger.swift */,
 				4446E3132EF5EB060003CE05 /* BadgeManager.swift */,
 				A1000030000000000000001 /* DateExtensions.swift */,
 			);
@@ -368,6 +364,7 @@
 			files = (
 				449187BE2EFB62EE008A8587 /* cleaning-hand-clean.json in Resources */,
 				44C8BD792EFEFBF800A30EFC /* Localizable.strings in Resources */,
+				4485C0AF2EFFD555002E948C /* PrivacyInfo.xcprivacy in Resources */,
 				44C8BD9B2EFF041300A30EFC /* Localizable.strings in Resources */,
 				445A91382EF6793D00C37B62 /* cleaning-supplies.mov in Resources */,
 				44C8BDA42EFF071D00A30EFC /* Localizable.strings in Resources */,
@@ -403,6 +400,7 @@
 				A1000019000000000000001 /* CalendarView.swift in Sources */,
 				A1000021000000000000001 /* MonthView.swift in Sources */,
 				4446E3142EF5EB060003CE05 /* BadgeManager.swift in Sources */,
+				4485C0AD2EFFD545002E948C /* Logger.swift in Sources */,
 				A1000029000000000000001 /* DateExtensions.swift in Sources */,
 				A1000023000000000000001 /* DayDetailView.swift in Sources */,
 				A1000025000000000000001 /* AdminPanelView.swift in Sources */,

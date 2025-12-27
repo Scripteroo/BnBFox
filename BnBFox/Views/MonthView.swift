@@ -99,12 +99,15 @@ struct MonthView: View {
         
         // Fill the last week with dates from next month
         if currentWeek.count > 0 && currentWeek.count < 7 {
-            let lastDayOfMonth = calendar.date(byAdding: .day, value: daysInMonth - 1, to: startOfMonth)!
-            var dayOffset = 1
-            while currentWeek.count < 7 {
-                if let nextDate = calendar.date(byAdding: .day, value: dayOffset, to: lastDayOfMonth) {
-                    currentWeek.append(nextDate)
-                    dayOffset += 1
+            if let lastDayOfMonth = calendar.date(byAdding: .day, value: daysInMonth - 1, to: startOfMonth) {
+                var dayOffset = 1
+                while currentWeek.count < 7 {
+                    if let nextDate = calendar.date(byAdding: .day, value: dayOffset, to: lastDayOfMonth) {
+                        currentWeek.append(nextDate)
+                        dayOffset += 1
+                    } else {
+                        break
+                    }
                 }
             }
         }

@@ -533,7 +533,7 @@ struct PropertyActionsView: View {
             try data.write(to: fileURL)
             return fileURL.path
         } catch {
-            print("Error saving image: \(error)")
+            Logger.log("Error saving image: \(error)")
             return nil
         }
     }

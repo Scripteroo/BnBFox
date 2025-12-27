@@ -191,8 +191,8 @@ class PeriodicTaskService: ObservableObject {
         }
         
         var components = calendar.dateComponents([.year], from: now)
-        if targetMonth == 1 {
-            components.year! += 1
+        if targetMonth == 1, let year = components.year {
+            components.year = year + 1
         }
         components.month = targetMonth
         components.day = 1

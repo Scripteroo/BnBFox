@@ -38,20 +38,20 @@ class PropertyService: ObservableObject {
                 if property.sources is [CalendarSource] {
                     validProperties.append(property)
                 } else {
-                    print("⚠️ Skipping corrupted property: \(property.displayName)")
+                    Logger.log("⚠️ Skipping corrupted property: \(property.displayName)")
                 }
             }
             properties = validProperties
-            print("📥 Loaded \(properties.count) properties from storage")
+            Logger.log("📥 Loaded \(properties.count) properties from storage")
             for (idx, property) in properties.enumerated() {
                 // Avoid calling .count on sources to prevent crashes from corruption
                 var sourceCount = 0
                 for _ in property.sources {
                     sourceCount += 1
                 }
-                print("   \(idx + 1). \(property.displayName): \(sourceCount) sources")
+                Logger.log("   \(idx + 1). \(property.displayName): \(sourceCount) sources")
                 for (srcIdx, source) in property.sources.enumerated() {
-                    print("      \(srcIdx + 1). \(source.platform.displayName): \(source.url.absoluteString)")
+                    Logger.log("      \(srcIdx + 1). \(source.platform.displayName): \(source.url.absoluteString)")
                 }
             }
         } else {
@@ -113,7 +113,7 @@ class PropertyService: ObservableObject {
         BookingService.shared.clearAllCache()
         
         properties = configs.map { config in
-            print("📦 Processing property: \(config.displayName) with \(config.iCalFeeds.count) feeds")
+            Logger.log("📦 Processing property: \(config.displayName) with \(config.iCalFeeds.count) feeds")
             
             // Convert iCalFeeds array to CalendarSource array
             var sources: [CalendarSource] = []
@@ -122,19 +122,19 @@ class PropertyService: ObservableObject {
                 var trimmedUrl = feed.url.trimmingCharacters(in: .whitespacesAndNewlines)
                 
                 if trimmedUrl.isEmpty {
-                    print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - empty URL")
+                    Logger.log("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - empty URL")
                     continue
                 }
                 
                 // Upgrade HTTP to HTTPS for known domains (iOS ATS requires secure connections)
                 if trimmedUrl.hasPrefix("http://") {
                     let httpsUrl = trimmedUrl.replacingOccurrences(of: "http://", with: "https://")
-                    print("  🔒 Upgrading HTTP to HTTPS: \(trimmedUrl) -> \(httpsUrl)")
+                    Logger.log("  🔒 Upgrading HTTP to HTTPS: \(trimmedUrl) -> \(httpsUrl)")
                     trimmedUrl = httpsUrl
                 }
                 
                 guard let url = URL(string: trimmedUrl) else {
-                    print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - invalid URL: '\(trimmedUrl)'")
+                    Logger.log("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - invalid URL: '\(trimmedUrl)'")
                     continue
                 }
                 
@@ -149,11 +149,11 @@ class PropertyService: ObservableObject {
                 case "booking.com", "booking":
                     platform = .bookingCom
                 default:
-                    print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Unknown platform '\(feed.platformName)', defaulting to AirBnB")
+                    Logger.log("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Unknown platform '\(feed.platformName)', defaulting to AirBnB")
                     platform = .airbnb // Default for custom feeds
                 }
                 
-                print("  ✅ Feed \(index + 1)/\(config.iCalFeeds.count): \(platform.displayName) -> \(url.absoluteString)")
+                Logger.log("  ✅ Feed \(index + 1)/\(config.iCalFeeds.count): \(platform.displayName) -> \(url.absoluteString)")
                 sources.append(CalendarSource(platform: platform, url: url))
             }
             
@@ -163,9 +163,9 @@ class PropertyService: ObservableObject {
             // Preserve the ID from the PropertyConfig so references stay stable
             let propertyId = UUID(uuidString: config.id) ?? UUID()
             
-            print("📋 Created property: \(config.displayName) with \(sources.count) sources (from \(config.iCalFeeds.count) feeds)")
+            Logger.log("📋 Created property: \(config.displayName) with \(sources.count) sources (from \(config.iCalFeeds.count) feeds)")
             for source in sources {
-                print("   ✓ \(source.platform.displayName): \(source.url.absoluteString)")
+                Logger.log("   ✓ \(source.platform.displayName): \(source.url.absoluteString)")
             }
             
             return Property(
@@ -204,11 +204,11 @@ class PropertyService: ObservableObject {
     // NEW: Update a single property from PropertyConfig (for bidirectional sync)
     func updatePropertyFromConfig(_ config: PropertyConfig) {
         guard let existingProperty = properties.first(where: { $0.id.uuidString == config.id }) else {
-            print("⚠️ updatePropertyFromConfig: Property not found with ID: \(config.id)")
+            Logger.log("⚠️ updatePropertyFromConfig: Property not found with ID: \(config.id)")
             return
         }
         
-        print("🔄 Updating single property: \(config.displayName) with \(config.iCalFeeds.count) feeds")
+        Logger.log("🔄 Updating single property: \(config.displayName) with \(config.iCalFeeds.count) feeds")
         
         // Convert iCalFeeds array to CalendarSource array
         var sources: [CalendarSource] = []
@@ -217,19 +217,19 @@ class PropertyService: ObservableObject {
             var trimmedUrl = feed.url.trimmingCharacters(in: .whitespacesAndNewlines)
             
             if trimmedUrl.isEmpty {
-                print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - empty URL")
+                Logger.log("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - empty URL")
                 continue
             }
             
             // Upgrade HTTP to HTTPS for known domains (iOS ATS requires secure connections)
             if trimmedUrl.hasPrefix("http://") {
                 let httpsUrl = trimmedUrl.replacingOccurrences(of: "http://", with: "https://")
-                print("  🔒 Upgrading HTTP to HTTPS: \(trimmedUrl) -> \(httpsUrl)")
+                Logger.log("  🔒 Upgrading HTTP to HTTPS: \(trimmedUrl) -> \(httpsUrl)")
                 trimmedUrl = httpsUrl
             }
             
             guard let url = URL(string: trimmedUrl) else {
-                print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - invalid URL: '\(trimmedUrl)'")
+                Logger.log("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Skipping \(feed.platformName) - invalid URL: '\(trimmedUrl)'")
                 continue
             }
             
@@ -244,22 +244,22 @@ class PropertyService: ObservableObject {
             case "booking.com", "booking":
                 platform = .bookingCom
             default:
-                print("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Unknown platform '\(feed.platformName)', defaulting to AirBnB")
+                Logger.log("  ⚠️ Feed \(index + 1)/\(config.iCalFeeds.count): Unknown platform '\(feed.platformName)', defaulting to AirBnB")
                 platform = .airbnb // Default for custom feeds
             }
             
-            print("  ✅ Feed \(index + 1)/\(config.iCalFeeds.count): \(platform.displayName) -> \(url.absoluteString)")
+            Logger.log("  ✅ Feed \(index + 1)/\(config.iCalFeeds.count): \(platform.displayName) -> \(url.absoluteString)")
             sources.append(CalendarSource(platform: platform, url: url))
         }
         
-        print("🔄 Updated property: \(config.displayName) with \(sources.count) sources (from \(config.iCalFeeds.count) feeds)")
+        Logger.log("🔄 Updated property: \(config.displayName) with \(sources.count) sources (from \(config.iCalFeeds.count) feeds)")
         
         let shortName = config.unitName
         let name = config.displayName.lowercased().replacingOccurrences(of: " ", with: "-")
         
-        print("🔄 Creating updated property with \(sources.count) sources:")
+        Logger.log("🔄 Creating updated property with \(sources.count) sources:")
         for (idx, source) in sources.enumerated() {
-            print("   \(idx + 1). \(source.platform.displayName): \(source.url.absoluteString)")
+            Logger.log("   \(idx + 1). \(source.platform.displayName): \(source.url.absoluteString)")
         }
         
         let updatedProperty = Property(
@@ -387,7 +387,9 @@ struct CalendarSourceData: Codable {
     
     func toCalendarSource() -> CalendarSource {
         let platform = Platform(rawValue: platform) ?? .airbnb
-        let url = URL(string: urlString) ?? URL(string: "https://example.com")!
+        // Provide a safe fallback URL - this should never be reached in practice
+        let fallbackURL = URL(string: "https://example.com") ?? URL(fileURLWithPath: "/")
+        let url = URL(string: urlString) ?? fallbackURL
         return CalendarSource(platform: platform, url: url)
     }
 }
@@ -498,6 +500,5 @@ struct PropertyConfig: Identifiable, Codable {
 }
 
 // Color init(hex:) extension is defined in DateExtensions.swift
-
 
 

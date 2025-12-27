@@ -216,7 +216,7 @@ struct SettingsView: View {
     }
     
     private func forceRescheduleNotifications() async {
-        print("🔄 Force rescheduling all notifications...")
+        Logger.log("🔄 Force rescheduling all notifications...")
         NotificationService.shared.scheduleCleaningAlerts()
         await updatePendingCount()
     }

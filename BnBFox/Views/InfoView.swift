@@ -138,7 +138,8 @@ struct InfoView: View {
                                 .font(.body)
                             
                             // PDF Download Button
-                            Link(destination: URL(string: "https://yourwebsite.com/bnbshift-ical-guide.pdf")!) {
+                            if let pdfURL = URL(string: "https://yourwebsite.com/bnbshift-ical-guide.pdf") {
+                                Link(destination: pdfURL) {
                                 HStack {
                                     Image(systemName: "arrow.down.doc.fill")
                                         .font(.system(size: 20))
@@ -166,6 +167,7 @@ struct InfoView: View {
                                 .shadow(color: Color.blue.opacity(0.3), radius: 8, x: 0, y: 4)
                             }
                             .padding(.vertical, 8)
+                            }
                             
                             // AirBnB Instructions
                             DetailedPlatformInstructionView(
@@ -522,16 +524,18 @@ struct AirBnBInstructions: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
             
-            Link(destination: URL(string: "https://www.airbnb.com/help/article/99")!) {
-                HStack {
-                    Image(systemName: "link.circle.fill")
-                    Text("Official Airbnb Help Article")
-                    Image(systemName: "arrow.up.right")
+            if let airbnbHelpURL = URL(string: "https://www.airbnb.com/help/article/99") {
+                Link(destination: airbnbHelpURL) {
+                    HStack {
+                        Image(systemName: "link.circle.fill")
+                        Text("Official Airbnb Help Article")
+                        Image(systemName: "arrow.up.right")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.blue)
                 }
-                .font(.caption)
-                .foregroundColor(.blue)
+                .padding(.top, 8)
             }
-            .padding(.top, 8)
         }
     }
 }
@@ -584,16 +588,18 @@ struct VRBOInstructions: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
             
-            Link(destination: URL(string: "https://help.vrbo.com/articles/How-do-I-import-or-export-a-calendar")!) {
-                HStack {
-                    Image(systemName: "link.circle.fill")
-                    Text("Official VRBO Help Article")
-                    Image(systemName: "arrow.up.right")
+            if let vrboHelpURL = URL(string: "https://help.vrbo.com/articles/How-do-I-import-or-export-a-calendar") {
+                Link(destination: vrboHelpURL) {
+                    HStack {
+                        Image(systemName: "link.circle.fill")
+                        Text("Official VRBO Help Article")
+                        Image(systemName: "arrow.up.right")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.blue)
                 }
-                .font(.caption)
-                .foregroundColor(.blue)
+                .padding(.top, 8)
             }
-            .padding(.top, 8)
         }
     }
 }
@@ -656,16 +662,18 @@ struct BookingComInstructions: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
             
-            Link(destination: URL(string: "https://partner.booking.com/en-us/help/rates-availability/calendar-sync/sync-your-bookingcom-calendar-other-websites")!) {
-                HStack {
-                    Image(systemName: "link.circle.fill")
-                    Text("Official Booking.com Help Article")
-                    Image(systemName: "arrow.up.right")
+            if let bookingHelpURL = URL(string: "https://partner.booking.com/en-us/help/rates-availability/calendar-sync/sync-your-bookingcom-calendar-other-websites") {
+                Link(destination: bookingHelpURL) {
+                    HStack {
+                        Image(systemName: "link.circle.fill")
+                        Text("Official Booking.com Help Article")
+                        Image(systemName: "arrow.up.right")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.blue)
                 }
-                .font(.caption)
-                .foregroundColor(.blue)
+                .padding(.top, 8)
             }
-            .padding(.top, 8)
         }
     }
 }

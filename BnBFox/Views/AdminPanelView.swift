@@ -405,7 +405,7 @@ struct PropertyConfigCard: View {
         )
         additionalFeeds.append(newFeed)
         updateProperty()
-        print("➕ Added new iCal feed slot")
+        Logger.log("➕ Added new iCal feed slot")
     }
     
     private func deleteAdditionalFeed(at index: Int) {
@@ -413,7 +413,7 @@ struct PropertyConfigCard: View {
         let feedName = additionalFeeds[index].platformName
         additionalFeeds.remove(at: index)
         updateProperty()
-        print("🗑️ Deleted iCal feed: \(feedName)")
+        Logger.log("🗑️ Deleted iCal feed: \(feedName)")
     }
 }
 
@@ -516,7 +516,7 @@ class AdminPanelViewModel: ObservableObject {
         for index in properties.indices {
             if !properties[index].isLocked {
                 properties[index].isLocked = true
-                print("🔒 Auto-locked property: \(properties[index].displayName)")
+                Logger.log("🔒 Auto-locked property: \(properties[index].displayName)")
             }
         }
         
@@ -535,7 +535,7 @@ class AdminPanelViewModel: ObservableObject {
         )
         
         properties.append(newProperty)
-        print("➕ Added new property: \(newProperty.displayName) (unlocked for editing)")
+        Logger.log("➕ Added new property: \(newProperty.displayName) (unlocked for editing)")
     }
     
     func updateProperty(_ updated: PropertyConfig) {
@@ -557,7 +557,7 @@ class AdminPanelViewModel: ObservableObject {
             
             // If locking the property, save to PropertyService
             if properties[index].isLocked {
-                print("🔒 Locking property and saving to PropertyService: \(properties[index].displayName)")
+                Logger.log("🔒 Locking property and saving to PropertyService: \(properties[index].displayName)")
                 saveChanges()
             }
         }
@@ -705,4 +705,3 @@ struct PlatformLinkButton: View {
         }
     }
 }
-

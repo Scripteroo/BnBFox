@@ -21,7 +21,7 @@ class NotificationService {
             )
             return granted
         } catch {
-            print("Error requesting notification authorization: \(error)")
+            Logger.log("Error requesting notification authorization: \(error)")
             return false
         }
     }
@@ -32,7 +32,7 @@ class NotificationService {
             // First, ensure we have permission
             let authorized = await requestAuthorization()
             guard authorized else {
-                print("Notification permission denied")
+                Logger.log("Notification permission denied")
                 return
             }
             
@@ -45,7 +45,7 @@ class NotificationService {
             // Get alert time from settings
             let settings = AppSettings.shared
             guard settings.cleaningAlertsEnabled else {
-                print("Cleaning alerts are disabled in settings")
+                Logger.log("Cleaning alerts are disabled in settings")
                 return
             }
             
@@ -54,7 +54,7 @@ class NotificationService {
             let alertHour = alertComponents.hour ?? 9  // Default to 9 AM
             let alertMinute = alertComponents.minute ?? 0
             
-            print("📅 Scheduling cleaning alerts for \(alertHour):\(String(format: "%02d", alertMinute))")
+            Logger.log("📅 Scheduling cleaning alerts for \(alertHour):\(String(format: "%02d", alertMinute))")
             
             // Group bookings by property and date
             var cleaningDays: [UUID: [Date: [Booking]]] = [:]
@@ -113,7 +113,7 @@ class NotificationService {
                 }
             }
             
-            print("✅ Scheduled \(scheduledCount) cleaning notifications (next 60 days)")
+            Logger.log("✅ Scheduled \(scheduledCount) cleaning notifications (next 60 days)")
         }
     }
     
@@ -176,7 +176,7 @@ class NotificationService {
             
             return true
         } catch {
-            print("❌ Error scheduling notification for \(property.shortName): \(error)")
+            Logger.log("❌ Error scheduling notification for \(property.shortName): \(error)")
             return false
         }
     }
@@ -189,7 +189,7 @@ class NotificationService {
                 .map { $0.identifier }
             
             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: cleaningIdentifiers)
-            print("🗑️  Cancelled \(cleaningIdentifiers.count) previous cleaning alerts")
+            Logger.log("🗑️  Cancelled \(cleaningIdentifiers.count) previous cleaning alerts")
         }
     }
     
@@ -204,7 +204,7 @@ class NotificationService {
         let requests = await UNUserNotificationCenter.current().pendingNotificationRequests()
         let cleaningRequests = requests.filter { $0.identifier.starts(with: "cleaning_") }
         
-        print("\n📋 Pending Cleaning Notifications (\(cleaningRequests.count) total):")
+        Logger.log("\n📋 Pending Cleaning Notifications (\(cleaningRequests.count) total):")
         
         for request in cleaningRequests.sorted(by: { req1, req2 in
             guard let trigger1 = req1.trigger as? UNCalendarNotificationTrigger,
@@ -219,12 +219,12 @@ class NotificationService {
                let nextTriggerDate = trigger.nextTriggerDate() {
                 let formatter = DateFormatter()
                 formatter.dateFormat = "MMM d, yyyy 'at' h:mm a"
-                print("  • \(request.content.title)")
-                print("    \(request.content.body)")
-                print("    Scheduled: \(formatter.string(from: nextTriggerDate))")
+                Logger.log("  • \(request.content.title)")
+                Logger.log("    \(request.content.body)")
+                Logger.log("    Scheduled: \(formatter.string(from: nextTriggerDate))")
             }
         }
-        print("")
+        Logger.log("")
     }
     
     // MARK: - New Booking Alerts
@@ -294,9 +294,9 @@ class NotificationService {
         // Schedule notification
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
-                print("Error scheduling new booking notification: \(error)")
+                Logger.log("Error scheduling new booking notification: \(error)")
             } else {
-                print("Scheduled new booking notification for \(propertyName)")
+                Logger.log("Scheduled new booking notification for \(propertyName)")
             }
         }
     }
@@ -314,7 +314,7 @@ class NotificationService {
             // First, ensure we have permission
             let authorized = await requestAuthorization()
             guard authorized else {
-                print("Notification permission denied")
+                Logger.log("Notification permission denied")
                 return
             }
             
@@ -330,7 +330,7 @@ class NotificationService {
             let alertHour = alertComponents.hour ?? 9
             let alertMinute = alertComponents.minute ?? 0
             
-            print("🔧 Scheduling quarterly AC filter notifications")
+            Logger.log("🔧 Scheduling quarterly AC filter notifications")
             
             // Schedule 4 notifications for the next year (quarterly)
             for quarter in 0..<4 {
@@ -373,9 +373,9 @@ class NotificationService {
                     let formatter = DateFormatter()
                     formatter.dateStyle = .medium
                     formatter.timeStyle = .short
-                    print("  ✅ Scheduled AC filter notification for \(formatter.string(from: scheduledDate))")
+                    Logger.log("  ✅ Scheduled AC filter notification for \(formatter.string(from: scheduledDate))")
                 } catch {
-                    print("  ❌ Error scheduling AC filter notification: \(error)")
+                    Logger.log("  ❌ Error scheduling AC filter notification: \(error)")
                 }
             }
         }
@@ -389,7 +389,7 @@ class NotificationService {
                 .map { $0.identifier }
             
             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: acFilterIdentifiers)
-            print("🗑️  Cancelled \(acFilterIdentifiers.count) AC filter notifications")
+            Logger.log("🗑️  Cancelled \(acFilterIdentifiers.count) AC filter notifications")
         }
     }
     
@@ -412,9 +412,9 @@ class NotificationService {
         
         do {
             try await UNUserNotificationCenter.current().add(request)
-            print("✅ Test notification scheduled for 5 seconds from now")
+            Logger.log("✅ Test notification scheduled for 5 seconds from now")
         } catch {
-            print("❌ Error scheduling test notification: \(error)")
+            Logger.log("❌ Error scheduling test notification: \(error)")
         }
     }
 }

@@ -213,7 +213,7 @@ struct CleaningChecklistPanel: View {
             
             checklistManager.createOrUpdateChecklist(checklist)
         } catch {
-            print("Error saving image: \(error)")
+            Logger.log("Error saving image: \(error)")
         }
     }
     

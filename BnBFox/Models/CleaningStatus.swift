@@ -82,7 +82,7 @@ class CleaningStatusManager: ObservableObject {
     @MainActor
     func setStatus(propertyName: String, date: Date, bookingId: String, status: CleaningStatus.Status) async {
         let startTime = CFAbsoluteTimeGetCurrent()
-        print("⏱️ setStatus START for \(propertyName)")
+        Logger.log("⏱️ setStatus START for \(propertyName)")
         
         // Update the status array
         if let index = statuses.firstIndex(where: { $0.propertyName == propertyName && Calendar.current.isDate($0.date, inSameDayAs: date) }) {
@@ -91,15 +91,15 @@ class CleaningStatusManager: ObservableObject {
             let newStatus = CleaningStatus(propertyName: propertyName, date: date, bookingId: bookingId, status: status)
             statuses.append(newStatus)
         }
-        print("⏱️ After array update: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
+        Logger.log("⏱️ After array update: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
         
         // Notify views - this will trigger @ObservedObject updates
         objectWillChange.send()
-        print("⏱️ After objectWillChange: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
+        Logger.log("⏱️ After objectWillChange: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
         
         // Immediately notify calendar dots to refresh (on main thread)
         NotificationCenter.default.post(name: NSNotification.Name("CleaningStatusChanged"), object: nil)
-        print("⏱️ After notification: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
+        Logger.log("⏱️ After notification: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
         
         // Do heavy work off main thread (fire and forget - don't wait)
         Task.detached(priority: .userInitiated) {
@@ -112,12 +112,12 @@ class CleaningStatusManager: ObservableObject {
             }
         }
         
-        print("⏱️ After async work: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
+        Logger.log("⏱️ After async work: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
         
         // Badge updates are debounced and handled separately
         scheduleBadgeUpdate()
         
-        print("⏱️ setStatus COMPLETE: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
+        Logger.log("⏱️ setStatus COMPLETE: \(Int((CFAbsoluteTimeGetCurrent() - startTime) * 1000))ms")
     }
     
     /// Schedule a debounced badge update
@@ -164,7 +164,7 @@ class CleaningStatusManager: ObservableObject {
         let now = Date()
         let today = calendar.startOfDay(for: now)
         
-        print("🔄 Auto-creating cleaning tasks for TODAY only...")
+        Logger.log("🔄 Auto-creating cleaning tasks for TODAY only...")
         
         var tasksCreated = 0
         
@@ -219,15 +219,15 @@ class CleaningStatusManager: ObservableObject {
                     )
                     
                     tasksCreated += 1
-                    print("✅ Created cleaning task for \(property.shortName) on \(checkoutDate)")
+                    Logger.log("✅ Created cleaning task for \(property.shortName) on \(checkoutDate)")
                 }
             }
         }
         
         if tasksCreated > 0 {
-            print("✅ Auto-created \(tasksCreated) cleaning tasks for TODAY")
+            Logger.log("✅ Auto-created \(tasksCreated) cleaning tasks for TODAY")
         } else {
-            print("ℹ️  No new cleaning tasks to create for TODAY")
+            Logger.log("ℹ️  No new cleaning tasks to create for TODAY")
         }
     }
     

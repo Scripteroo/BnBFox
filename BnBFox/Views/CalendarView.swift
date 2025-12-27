@@ -314,7 +314,7 @@ struct AnimatedLoadingScreen: View {
     
     private func setupVideoPlayer() {
         guard let videoURL = Bundle.main.url(forResource: "cleaning-supplies", withExtension: "mov") else {
-            print("Error: Could not find cleaning-supplies.mov")
+            Logger.log("Error: Could not find cleaning-supplies.mov")
             return
         }
         
@@ -341,5 +341,4 @@ struct CalendarView_Previews: PreviewProvider {
         CalendarView()
     }
 }
-
 

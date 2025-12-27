@@ -50,12 +50,12 @@ struct CleaningStatusDot: View {
         .id(refreshID)
         .onAppear {
             // Refresh when dot appears (e.g., switching to calendar tab)
-            print("👁️ CleaningStatusDot appeared for \(propertyName) on \(date)")
+            Logger.log("👁️ CleaningStatusDot appeared for \(propertyName) on \(date)")
             refreshID = UUID()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("CleaningStatusChanged"))) { _ in
             // Force view to refresh when cleaning status changes
-            print("🔵 CleaningStatusDot received notification for \(propertyName) on \(date)")
+            Logger.log("🔵 CleaningStatusDot received notification for \(propertyName) on \(date)")
             refreshID = UUID()
         }
     }
