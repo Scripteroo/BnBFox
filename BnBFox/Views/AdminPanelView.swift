@@ -329,6 +329,12 @@ class AdminPanelViewModel: ObservableObject {
     func toggleLock(_ property: PropertyConfig) {
         if let index = properties.firstIndex(where: { $0.id == property.id }) {
             properties[index].isLocked.toggle()
+            
+            // If locking the property, save to PropertyService
+            if properties[index].isLocked {
+                print("🔒 Locking property and saving to PropertyService: \(properties[index].displayName)")
+                saveChanges()
+            }
         }
     }
     
@@ -352,5 +358,6 @@ class AdminPanelViewModel: ObservableObject {
         return 1
     }
 }
+
 
 
