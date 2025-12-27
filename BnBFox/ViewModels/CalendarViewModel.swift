@@ -81,6 +81,7 @@ class CalendarViewModel: ObservableObject {
         }
         
         self.bookings = sortedBookings
+        
         isLoading = false
         
         // Schedule cleaning alerts if enabled
@@ -123,5 +124,6 @@ class CalendarViewModel: ObservableObject {
         return months
     }
 }
+
 
 

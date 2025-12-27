@@ -267,6 +267,60 @@ struct WeekSection: View {
             }
         }
         
+        // NEW: Check if any property needs cleaning on this date
+        if dateHasCleaningActivity(date) {
+            return true
+        }
+        
+        return false
+    }
+    
+    // NEW: Check if any property has a cleaning dot (needs cleaning) on this date
+    private func dateHasCleaningActivity(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        let dayStart = calendar.startOfDay(for: date)
+        let now = calendar.startOfDay(for: Date())
+        
+        for property in properties {
+            // Get current gap info for this property
+            if let gap = CleaningGapCache.shared.getCurrentGapInfo(propertyId: property.id, bookings: bookings) {
+                // Check if this date is in the gap range and conditions match CleaningStatusDot logic
+                if dayStart >= gap.gapStart && dayStart <= gap.gapEnd && now <= gap.gapEnd && dayStart <= now {
+                    // Make sure this date is not during an active booking
+                    if !isDuringActiveBooking(propertyId: property.id, date: dayStart) {
+                        // Check if property needs cleaning (not marked as done)
+                        if let status = CleaningStatusManager.shared.getStatus(propertyName: property.displayName, date: gap.checkoutDate) {
+                            // Make clickable if status is NOT done (red, orange, or gray dots)
+                            if status.status != .done {
+                                return true
+                            }
+                        } else {
+                            // No status set = needs cleaning (red dot) = clickable
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+        
+        return false
+    }
+    
+    // NEW: Helper to check if a date is during an active booking
+    private func isDuringActiveBooking(propertyId: UUID, date: Date) -> Bool {
+        let calendar = Calendar.current
+        let dayStart = calendar.startOfDay(for: date)
+        
+        let propertyBookings = bookings.filter { $0.propertyId == propertyId }
+        
+        for booking in propertyBookings {
+            let bookingStart = calendar.startOfDay(for: booking.startDate)
+            let bookingEnd = calendar.startOfDay(for: booking.endDate)
+            // Check if this day is DURING a booking (day AFTER checkin through day before checkout)
+            if dayStart > bookingStart && dayStart < bookingEnd {
+                return true
+            }
+        }
         return false
     }
     
@@ -543,5 +597,6 @@ struct DayDetailItem: Identifiable {
     let date: Date
     let activities: [PropertyActivity]
 }
+
 
 

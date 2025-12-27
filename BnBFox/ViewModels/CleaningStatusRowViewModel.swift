@@ -60,8 +60,8 @@ final class CleaningStatusRowViewModel: ObservableObject, Identifiable {
                 showToast("Clean and Ready!", "✨")
             case .todo:
                 break // No toast for marking dirty
-            @unknown default:
-                break
+            case .pending:
+                break // No toast for pending
             }
         }
         
