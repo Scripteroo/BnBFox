@@ -100,6 +100,8 @@ struct ContentView: View {
     @StateObject private var calendarViewModel = CalendarViewModel()
     @State private var selectedTab = 0
     @State private var badgeCount = 0
+    @State private var hasCheckedInitialTab = false
+
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -169,6 +171,14 @@ struct ContentView: View {
             await calendarViewModel.loadBookings()
             // Initialize badge count
             badgeCount = CleaningStatusManager.shared.getPendingStatuses().count
+            
+            // If no properties exist, open Properties tab on first launch
+            if !hasCheckedInitialTab {
+                hasCheckedInitialTab = true
+                if PropertyService.shared.getAllProperties().isEmpty {
+                    selectedTab = 2  // Properties tab
+                }
+            }
         }
     }
     

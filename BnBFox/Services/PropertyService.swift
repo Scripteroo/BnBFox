@@ -16,7 +16,7 @@ class PropertyService: ObservableObject {
     
     @Published private var properties: [Property] = []
     
-    private init() {
+  /*  private init() {
         // Clear corrupted data on startup if needed
         clearCorruptedDataIfNeeded()
         loadProperties()
@@ -31,145 +31,23 @@ class PropertyService: ObservableObject {
             userDefaults.removeObject(forKey: propertiesKey)
         }
     }
-    
+   */
     // Default properties for initial setup
+    // Returns empty array - properties should be added by user through admin panel
+    // Default properties for initial setup
+    // Returns empty array - properties should be added by user through admin panel
     private func getDefaultProperties() -> [Property] {
+        return []
+        
+        /* COMMENTED OUT - Hardcoded properties for reference/testing
         return [
             Property(
                 name: "kawama-c2",
                 displayName: "Kawama C-2",
-                shortName: "C-2",
-                colorHex: "FF8C00", // Orange
-                sources: [
-                    CalendarSource(
-                        platform: .vrbo,
-                        url: URL(string: "https://www.vrbo.com/icalendar/94283b4ad57643e0a348d8e8da0ef091.ics?nonTentative")!
-                    ),
-                    CalendarSource(
-                        platform: .airbnb,
-                        url: URL(string: "https://www.airbnb.com/calendar/ical/778254930255723354.ics?s=c0d103adb18b28b018a6c6484a5f04ee")!
-                    )
-                ],
-                ownerName: "Daniel DelPercio",
-                ownerPhone: "+19144860800",
-                ownerEmail: "ddelpercio@gmail.com",
-                streetAddress: "123 Kawama Lane",
-                unit: "C-2",
-                city: "Key West",
-                state: "FL",
-                zipCode: "33040",
-                doorCode: "1157",
-                bikeLocks: "1157",
-                camera: "",
-                thermostat: "",
-                other: "",
-                airbnbListingURL: "https://airbnb.com/h/kawama-c2",
-                vrboListingURL: "https://vrbo.com/3058755",
-                bookingComListingURL: "",
-                notes: ""
-            ),
-            Property(
-                name: "kawama-e5",
-                displayName: "Kawama E-5",
-                shortName: "E-5",
-                colorHex: "FFD700", // Gold/Yellow
-                sources: [
-                    CalendarSource(
-                        platform: .vrbo,
-                        url: URL(string: "https://www.vrbo.com/icalendar/66d4d3b376f4426083c6971263059c26.ics?nonTentative")!
-                    ),
-                    CalendarSource(
-                        platform: .airbnb,
-                        url: URL(string: "https://www.airbnb.com/calendar/ical/634088790463336883.ics?s=aa7722940a08ab86e82b802120481e3d")!
-                    )
-                ],
-                ownerName: "Daniel DelPercio",
-                ownerPhone: "+19144860800",
-                ownerEmail: "ddelpercio@gmail.com",
-                streetAddress: "",
-                unit: "",
-                city: "",
-                state: "",
-                zipCode: "",
-                doorCode: "8578",
-                bikeLocks: "8578",
-                camera: "",
-                thermostat: "",
-                other: "",
-                airbnbListingURL: "https://airbnb.com/h/kawama-e5",
-                vrboListingURL: "https://vrbo.com/2659755",
-                bookingComListingURL: "",
-                notes: ""
-            ),
-            Property(
-                name: "kawama-c5",
-                displayName: "Kawama C-5",
-                shortName: "C-5",
-                colorHex: "007AFF", // Blue
-                sources: [
-                    CalendarSource(
-                        platform: .vrbo,
-                        url: URL(string: "https://www.vrbo.com/icalendar/42211aa1409741bd9ad359d1ccd9f522.ics")!
-                    ),
-                    CalendarSource(
-                        platform: .airbnb,
-                        url: URL(string: "https://www.airbnb.com/calendar/ical/1329041307852345218.ics?s=380d406f0019dfb3fe07b61f94f8f0fa&locale=en")!
-                    )
-                ],
-                ownerName: "",
-                ownerPhone: "",
-                ownerEmail: "",
-                streetAddress: "",
-                unit: "",
-                city: "",
-                state: "",
-                zipCode: "",
-                doorCode: "",
-                bikeLocks: "",
-                camera: "",
-                thermostat: "",
-                other: "",
-                airbnbListingURL: "",
-                vrboListingURL: "",
-                bookingComListingURL: "",
-                notes: ""
+                ... rest of properties ...
             )
         ]
-    }
-    
-    private func loadProperties() {
-        if let data = userDefaults.data(forKey: propertiesKey),
-           let decoded = try? JSONDecoder().decode([PropertyData].self, from: data) {
-            // Convert and validate each property
-            var validProperties: [Property] = []
-            for propertyData in decoded {
-                let property = propertyData.toProperty()
-                // Validate property has valid sources array
-                // If sources is corrupted, this will catch it before it causes a crash
-                if property.sources is [CalendarSource] {
-                    validProperties.append(property)
-                } else {
-                    print("⚠️ Skipping corrupted property: \(property.displayName)")
-                }
-            }
-            properties = validProperties
-            print("📥 Loaded \(properties.count) properties from storage")
-            for (idx, property) in properties.enumerated() {
-                // Avoid calling .count on sources to prevent crashes from corruption
-                var sourceCount = 0
-                for _ in property.sources {
-                    sourceCount += 1
-                }
-                print("   \(idx + 1). \(property.displayName): \(sourceCount) sources")
-                for (srcIdx, source) in property.sources.enumerated() {
-                    print("      \(srcIdx + 1). \(source.platform.displayName): \(source.url.absoluteString)")
-                }
-            }
-        } else {
-            // First launch - use default properties
-            properties = getDefaultProperties()
-            saveProperties()
-        }
+        */
     }
     
     private func saveProperties() {
